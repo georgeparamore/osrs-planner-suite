@@ -265,7 +265,7 @@ function renderStats(data,groups){
         <div class="clan-row-info">
           <a class="clan-row-name" href="https://wiseoldman.net/groups/${grp.id}" target="_blank" rel="noopener">${grp.name||'Unknown Clan'}</a>
           ${grp.verified?'<span class="clan-verified" title="Verified clan">✓</span>':''}
-          <span class="clan-row-meta">${grp.clanChat?`CC: ${grp.clanChat} &middot; `:''}${role} &middot; ${fmtNum(grp.memberCount||0)} members</span>
+          <span class="clan-row-meta">${grp.clanChat?`CC: ${grp.clanChat} &middot; `:''}${role} &middot; ${fmtNum(grp.memberCount||0)} member${grp.memberCount===1?'':'s'}</span>
         </div>
       </div>`;
     });

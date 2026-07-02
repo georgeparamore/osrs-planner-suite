@@ -602,6 +602,14 @@ const HARDCODED_ITEM_IDS = {
   'rake': 5341,
   'digsite pendant': 11194, // untradeable — always charge-suffixed as "Digsite pendant (5)" etc, never has a bare-name GE entry
   'teleport crystal': 6102, // GE-listed only with charge suffixes "(1)" through "(5)" — pinned to one fixed variant, charge state shown doesn't matter
+  // Gardener payment items are called "Basket of X" in-game, but the GE only lists the filled basket
+  // under the fruit's own name with a "(5)" quantity suffix (e.g. "Tomatoes(5)") — there is no
+  // "Basket of tomatoes" GE entry at all, so these would otherwise silently fail to price.
+  'basket of tomatoes': 5968,
+  'basket of apples': 5386,
+  'basket of oranges': 5396,
+  'basket of strawberries': 5406,
+  'basket of bananas': 5416,
 };
 function resolveItemId(name){
   const key = name.toLowerCase();
@@ -628,6 +636,11 @@ const HARDCODED_ITEM_ICONS = {
   'rake': 'Rake.png',
   'digsite pendant': 'Digsite_pendant.png', // wiki's general infobox icon, distinct from the per-charge file variants
   'teleport crystal': 'Teleport_crystal_(1).png', // single fixed icon — user confirmed charge state shown doesn't need to be accurate
+  'basket of tomatoes': 'Tomatoes(5).png',
+  'basket of apples': 'Apples(5).png',
+  'basket of oranges': 'Oranges(5).png',
+  'basket of strawberries': 'Strawberries(5).png',
+  'basket of bananas': 'Bananas(5).png',
 };
 function resolveItemIcon(name){
   const key = name.toLowerCase();
@@ -744,14 +757,14 @@ let pricesLoaded=false;
 
 function priceOf(name){
   if(!name) return 0;
-  const id=nameToId[name.toLowerCase()];
+  const id=resolveItemId(name);
   if(!id||!prices[id]) return 0;
   const p=prices[id];
   return p.high || p.low || 0; // buying estimate uses instant-buy ('high') side
 }
 function sellPriceOf(name){
   if(!name) return 0;
-  const id=nameToId[name.toLowerCase()];
+  const id=resolveItemId(name);
   if(!id||!prices[id]) return 0;
   const p=prices[id];
   return p.low || p.high || 0; // selling estimate uses instant-sell ('low') side

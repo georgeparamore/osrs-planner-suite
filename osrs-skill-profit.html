@@ -610,15 +610,7 @@ async function fetchAvgPrices(step){
       item.inputs.forEach(inp=>needed.add(inp.id));
     }));
 
-    // Batch fetch — Wiki API supports fetching individual item timeseries
-    // We fetch a small recent slice and average it
-    const cutoffStep = step==='1h'?12:step==='6h'?2:1; // how many 5m/6h/24h buckets
-    // Build a map from latest data — use the mapping endpoint's avgHighPrice/avgLowPrice
-    // which the /latest endpoint actually does provide as weighted averages over recent trades
-    // For better averaging we use the 1h timeseries endpoint with a recent window
-    const res=await fetch(`https://prices.runescape.wiki/api/v1/osrs/timeseries?timestep=${apiStep}&id=2&limit=1`,{headers:H});
-    // If that works, fetch each needed item — but that's too many requests
-    // Instead use the /1h, /6h, /24h summary endpoints which give volume-weighted averages
+    // Use the /1h, /6h, /24h summary endpoints which give volume-weighted averages
     const summaryStep = step==='1h'?'1h':step==='6h'?'6h':'24h';
     const summaryRes=await fetch(`https://prices.runescape.wiki/api/v1/osrs/${summaryStep}`,{headers:H});
     if(!summaryRes.ok)throw new Error('avg fetch failed');
