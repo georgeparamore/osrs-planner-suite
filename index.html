@@ -74,21 +74,16 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .activity-cell-value{font-family:'Share Tech Mono',monospace;font-size:16px;}
 .activity-cell-value.dim{color:var(--text-dim);}
 
-.clan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
-.clan-card{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;text-decoration:none;color:var(--text);display:block;transition:all .15s;}
-.clan-card:hover{border-color:var(--gold-dim);transform:translateY(-2px);}
-.clan-banner{width:100%;height:64px;background:linear-gradient(135deg,rgba(200,168,75,.25),rgba(74,126,255,.15));background-size:cover;background-position:center;}
-.clan-body{display:flex;align-items:flex-start;gap:12px;padding:0 14px 14px;margin-top:-26px;}
-.clan-logo{width:52px;height:52px;border-radius:10px;object-fit:cover;border:3px solid var(--surface2);background:var(--surface);flex-shrink:0;}
-.clan-logo-placeholder{width:52px;height:52px;border-radius:10px;border:3px solid var(--surface2);background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:#000;flex-shrink:0;}
-.clan-info{padding-top:30px;min-width:0;flex:1;}
-.clan-name-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.clan-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--gold);}
-.clan-card:hover .clan-name{text-decoration:underline;}
-.clan-verified{color:var(--blue);font-size:13px;}
-.clan-cc-tag{font-size:10px;color:var(--text-dim);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1px 8px;margin-top:4px;display:inline-block;}
-.clan-meta{font-size:11px;color:var(--text-dim);margin-top:6px;}
-.clan-meta strong{color:var(--text);font-weight:600;}
+.clan-list{display:flex;flex-direction:column;gap:2px;}
+.clan-row{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border);}
+.clan-row:last-child{border-bottom:none;}
+.clan-row-icon{width:26px;height:26px;border-radius:6px;object-fit:cover;background:var(--surface2);flex-shrink:0;}
+.clan-row-icon-placeholder{width:26px;height:26px;border-radius:6px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#000;flex-shrink:0;}
+.clan-row-info{min-width:0;flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+.clan-row-name{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--gold);text-decoration:none;}
+.clan-row-name:hover{text-decoration:underline;}
+.clan-verified{color:var(--blue);font-size:12px;}
+.clan-row-meta{font-size:11px;color:var(--text-dim);}
 </style>
 </head>
 <body>
@@ -257,29 +252,22 @@ function renderStats(data,groups){
   if(groups.length===0){
     html+=`<div class="boss-empty">Not currently in any Wise Old Man-tracked clan. (This only shows clans that have registered as a WOM group — it doesn't mean the player isn't in an in-game clan, just that it isn't tracked here.)</div>`;
   } else {
-    html+=`<div class="clan-grid">`;
+    html+=`<div class="clan-list">`;
     groups.forEach(g=>{
       const grp=g.group||{};
       const role=(g.role||'member').split('_').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
       const initial=(grp.name||'?').charAt(0).toUpperCase();
-      const logoHtml=grp.profileImage
-        ? `<img class="clan-logo" src="${grp.profileImage}" alt="" onerror="this.outerHTML='<div class=&quot;clan-logo-placeholder&quot;>${initial}</div>'">`
-        : `<div class="clan-logo-placeholder">${initial}</div>`;
-      const bannerStyle=grp.bannerImage ? ` style="background-image:url('${grp.bannerImage}')"` : '';
-      html+=`<a class="clan-card" href="https://wiseoldman.net/groups/${grp.id}" target="_blank" rel="noopener">
-        <div class="clan-banner"${bannerStyle}></div>
-        <div class="clan-body">
-          ${logoHtml}
-          <div class="clan-info">
-            <div class="clan-name-row">
-              <span class="clan-name">${grp.name||'Unknown Clan'}</span>
-              ${grp.verified?'<span class="clan-verified" title="Verified clan">✓</span>':''}
-            </div>
-            ${grp.clanChat?`<span class="clan-cc-tag">CC: ${grp.clanChat}</span>`:''}
-            <div class="clan-meta"><strong>${role}</strong> &middot; ${fmtNum(grp.memberCount||0)} members</div>
-          </div>
+      const iconHtml=grp.profileImage
+        ? `<img class="clan-row-icon" src="${grp.profileImage}" alt="" onerror="this.outerHTML='<div class=&quot;clan-row-icon-placeholder&quot;>${initial}</div>'">`
+        : `<div class="clan-row-icon-placeholder">${initial}</div>`;
+      html+=`<div class="clan-row">
+        ${iconHtml}
+        <div class="clan-row-info">
+          <a class="clan-row-name" href="https://wiseoldman.net/groups/${grp.id}" target="_blank" rel="noopener">${grp.name||'Unknown Clan'}</a>
+          ${grp.verified?'<span class="clan-verified" title="Verified clan">✓</span>':''}
+          <span class="clan-row-meta">${grp.clanChat?`CC: ${grp.clanChat} &middot; `:''}${role} &middot; ${fmtNum(grp.memberCount||0)} members</span>
         </div>
-      </a>`;
+      </div>`;
     });
     html+=`</div>`;
   }
