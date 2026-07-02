@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farming Training Planner – OSRS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap');
+:root{--bg:#0d0f14;--surface:#141720;--surface2:#1b1f2e;--border:#252a3a;--gold:#c8a84b;--gold-dim:#8a7030;--green:#2ecc71;--red:#e74c3c;--blue:#4a7eff;--purple:#9b6fd6;--text:#dde1ec;--text-dim:#6b7490;}
+[data-theme="light"]{--bg:#f0f2f5;--surface:#ffffff;--surface2:#e8eaf0;--border:#d0d4e0;--gold:#8a6a1a;--gold-dim:#b89030;--green:#1a8a45;--red:#c0392b;--blue:#2255cc;--purple:#7a4fc7;--text:#1a1e2e;--text-dim:#6b7490;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:16px;height:50px;flex-shrink:0;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--gold);letter-spacing:1px;text-decoration:none;}
+.logo span{color:var(--text-dim);font-weight:400;}
+.nav-back{font-size:13px;color:var(--text-dim);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;}
+.nav-back:hover{color:var(--gold);}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.theme-btn{background:none;border:none;cursor:pointer;font-size:17px;color:var(--text-dim);transition:color .2s;}
+.theme-btn:hover{color:var(--gold);}
+
+.main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px);}
+
+.skill-nav{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;}
+.skill-nav-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);padding:0 14px;margin-bottom:6px;}
+.skill-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;cursor:pointer;background:none;border:none;color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;text-align:left;transition:all .15s;border-left:3px solid transparent;}
+.skill-btn:hover{background:var(--surface2);color:var(--text);}
+.skill-btn.active{background:var(--surface2);color:var(--gold);border-left-color:var(--gold);}
+.skill-btn .skill-icon-img{width:22px;height:22px;object-fit:contain;flex-shrink:0;}
+.skill-btn.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.skill-btn .soon-badge{margin-left:auto;font-size:8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.3px;}
+
+.content{flex:1;display:flex;flex-direction:column;overflow-y:auto;min-width:0;}
+
+.input-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 24px;flex-shrink:0;}
+.input-panel-top{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.skill-icon-large{width:32px;height:32px;object-fit:contain;}
+.skill-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;}
+.skill-desc{font-size:12px;color:var(--text-dim);margin-bottom:14px;}
+
+.input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.field-group{display:flex;flex-direction:column;gap:4px;}
+.field-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.field-group input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 11px;outline:none;transition:border-color .2s;width:120px;}
+.field-group input:focus{border-color:var(--gold-dim);}
+.apply-btn{padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
+.apply-btn:hover{opacity:.85;}
+
+.status-card{display:flex;align-items:center;gap:20px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:8px;padding:12px 18px;margin-top:14px;}
+.status-stat{display:flex;flex-direction:column;gap:1px;}
+.status-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.status-stat-value{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--gold);}
+.status-progress-wrap{flex:1;}
+.status-progress-bar{height:8px;background:var(--surface);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.status-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .4s ease;}
+.status-progress-text{font-size:10px;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;}
+
+.or-divider{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;align-self:center;padding:0 4px;}
+.manual-toggle{padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.manual-toggle:hover{border-color:var(--gold-dim);}
+.manual-toggle.active{border-color:var(--gold);color:var(--gold);}
+#womFields{display:none;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap;}
+#womFields.show{display:flex;}
+.fetch-status{font-size:11px;margin-top:8px;display:none;align-items:center;gap:6px;}
+.fetch-status.show{display:flex;}
+.fetch-status.error{color:var(--red);}
+.fetch-status.success{color:var(--green);}
+.fetch-status.loading{color:var(--text-dim);}
+.spinner-sm{display:inline-block;width:11px;height:11px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* PATCH TOGGLES PANEL */
+.patch-panel{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.patch-panel-header{display:flex;align-items:center;gap:10px;justify-content:space-between;cursor:pointer;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:8px;padding:10px 16px;transition:background .15s, border-color .15s;}
+.patch-panel-header:hover{background:var(--surface);border-color:var(--gold);}
+.patch-panel-left{display:flex;align-items:center;gap:10px;}
+.patch-panel-cog{font-size:18px;flex-shrink:0;transition:transform .4s ease;display:inline-block;}
+.patch-panel-header:hover .patch-panel-cog{transform:rotate(90deg);}
+.patch-panel-label{font-size:13px;font-weight:600;letter-spacing:.2px;color:var(--text);}
+.patch-panel-sub{font-size:10px;color:var(--text-dim);text-transform:none;letter-spacing:0;margin-top:1px;}
+.patch-panel-arrow{font-size:13px;color:var(--gold);transition:transform .2s;flex-shrink:0;}
+.patch-panel-arrow.open{transform:rotate(180deg);}
+
+/* RUN OPTIONS BAR — dedicated home for global toggles, separate from Patch Settings and Budget Tier */
+.run-options-bar{padding:14px 24px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.run-options-title{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;}
+.run-options-icon{font-size:15px;}
+.run-options-toggles{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.run-option-toggle{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text);cursor:pointer;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;transition:border-color .15s, background .15s;}
+.run-option-toggle:hover{border-color:var(--gold-dim);background:var(--surface);}
+.run-option-toggle input{cursor:pointer;}
+.run-option-toggle em{color:var(--text-dim);font-style:normal;font-size:10px;}
+.patch-groups{display:none;margin-top:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+.patch-groups.show{display:grid;}
+.patch-group{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.patch-group-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.patch-toggle{display:flex;align-items:flex-start;gap:8px;padding:5px 0;cursor:pointer;font-size:12px;}
+.patch-toggle input{margin-top:2px;accent-color:var(--gold);cursor:pointer;}
+.patch-toggle-label{flex:1;line-height:1.4;}
+.patch-toggle-level{color:var(--text-dim);font-size:10px;}
+.patch-toggle.locked{opacity:.45;}
+.patch-toggle.locked .patch-toggle-label{text-decoration:line-through;}
+
+/* SPEED SELECTOR */
+.speed-panel{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.speed-panel-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
+.speed-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+.speed-tab{flex:1;min-width:180px;display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .15s;}
+.speed-tab:hover{border-color:var(--gold-dim);}
+.speed-tab.active{border-color:var(--accent,var(--gold));background:rgba(200,168,75,.08);}
+.speed-tab-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.speed-tab-dot{width:9px;height:9px;border-radius:50%;}
+.speed-tab-sub{font-size:11px;color:var(--text-dim);}
+
+/* CUSTOM MODE PANEL */
+.custom-panel{padding:18px 24px;border-bottom:1px solid var(--border);background:var(--surface);}
+.custom-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:16px;}
+.custom-group{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.custom-group-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.custom-select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:8px 10px;outline:none;cursor:pointer;}
+.custom-select:focus{border-color:var(--gold-dim);}
+.custom-toggle-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;}
+.custom-toggle-row input{accent-color:var(--purple);cursor:pointer;}
+.custom-runs-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
+.custom-runs-row input[type=number]{width:70px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:14px;padding:6px 10px;text-align:center;}
+.custom-runs-label{font-size:11px;color:var(--text-dim);}
+
+/* PLAN AREA */
+.plan-area{padding:20px 24px;flex:1;}
+.plan-summary{display:flex;gap:20px;flex-wrap:wrap;align-items:stretch;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:20px;}
+.plan-summary-stat{display:flex;flex-direction:column;gap:2px;min-width:110px;justify-content:center;}
+.plan-summary-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);display:flex;align-items:center;gap:4px;}
+.plan-summary-value{font-family:'Share Tech Mono',monospace;font-size:19px;}
+.plan-summary-value.accent{color:var(--gold);}
+.summary-icon{width:14px;height:14px;object-fit:contain;flex-shrink:0;}
+.plan-summary-divider{width:1px;background:var(--border);align-self:stretch;margin:0 2px;}
+.plan-summary-total{display:flex;flex-direction:column;gap:2px;justify-content:center;background:linear-gradient(135deg,rgba(200,168,75,.16),rgba(200,168,75,.04));border:1px solid var(--gold-dim);border-radius:8px;padding:8px 18px;min-width:150px;}
+.plan-summary-total .plan-summary-label{color:var(--gold-dim);}
+.plan-summary-total .plan-summary-value{font-size:24px;font-weight:700;color:var(--gold);}
+
+/* TARGET LEVEL ESTIMATE CARD */
+.target-estimate-card{background:linear-gradient(135deg,rgba(155,111,214,.1),rgba(155,111,214,.02));border:1px solid var(--accent,var(--purple));border-radius:10px;padding:16px 20px;}
+.target-estimate-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--accent,var(--purple));margin-bottom:10px;}
+.target-estimate-done{font-size:13px;color:var(--text-dim);}
+.target-estimate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;}
+.target-estimate-stat{display:flex;flex-direction:column;gap:2px;}
+.target-estimate-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.target-estimate-value{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;}
+.target-estimate-cost .target-estimate-value{font-size:22px;}
+.target-estimate-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin:24px 0 12px;display:flex;align-items:center;gap:8px;color:var(--gold);}
+.section-title:first-child{margin-top:0;}
+.section-sub{font-size:11px;color:var(--text-dim);font-weight:400;margin-left:auto;}
+
+/* PATCH TRACK CARD */
+.track-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+.track-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden;}
+.track-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--accent,var(--gold));}
+.track-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.track-card-icon{width:32px;height:32px;object-fit:contain;flex-shrink:0;}
+.track-card-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;}
+.track-card-level{font-size:11px;color:var(--text-dim);}
+.track-card-patches{margin-left:auto;font-size:11px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:2px 8px;color:var(--text-dim);}
+.track-stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0;}
+.track-stat{display:flex;flex-direction:column;gap:1px;}
+.track-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim);}
+.track-stat-value{font-family:'Share Tech Mono',monospace;font-size:13px;}
+.track-card-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.track-card-empty{color:var(--text-dim);font-size:12px;text-align:center;padding:20px 0;}
+
+/* PROGRESSION TIMELINE */
+.timeline-wrap{margin-top:8px;}
+
+/* ROUTE STEPS (step-by-step teleport guide) */
+.route-toggle-wrap{margin-top:22px;}
+.route-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--purple);border-radius:10px;padding:14px 20px;cursor:pointer;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;transition:background .15s;}
+.route-toggle:hover{background:var(--surface);}
+.route-toggle-arrow{font-size:14px;color:var(--text-dim);transition:transform .2s;}
+.route-toggle-arrow.open{transform:rotate(180deg);}
+.route-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:18px 20px;margin-top:-1px;}
+.route-body.show{display:block;}
+.route-track-section{margin-bottom:14px;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.route-track-section:last-child{margin-bottom:0;}
+.route-track-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--purple);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:6px;background:var(--surface2);cursor:pointer;}
+.route-track-arrow{font-size:12px;color:var(--text-dim);transition:transform .2s;}
+.route-track-toggle.open .route-track-arrow{transform:rotate(180deg);}
+.route-track-body{display:none;padding:6px 14px 10px;}
+.route-track-body.show{display:block;}
+.route-inventory-grid-wrap{margin-bottom:14px;}
+.route-inventory-layout{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;}
+.route-inventory-checklist-wrap{flex:1;min-width:180px;max-width:320px;display:flex;flex-direction:column;gap:8px;}
+.route-inventory-checklist{list-style:none;margin:0;padding:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;}
+.route-inventory-checklist li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.route-inventory-checklist li:last-child{border-bottom:none;}
+.route-inventory-checklist li a{color:var(--text);text-decoration:none;flex:1;}
+.route-inventory-checklist li a:hover{color:var(--blue);text-decoration:underline;}
+.checklist-qty{font-family:'Share Tech Mono',monospace;color:var(--gold);font-weight:600;white-space:nowrap;}
+.checklist-noted-tag{color:var(--text-dim);font-size:10px;font-style:italic;}
+.bank-tag-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:var(--gold);cursor:pointer;transition:background .15s,border-color .15s;}
+.bank-tag-btn:hover{background:var(--surface);border-color:var(--gold);}
+.bank-tag-btn-copied{background:rgba(46,204,113,.12)!important;border-color:var(--green)!important;color:var(--green)!important;}
+.bank-tag-unavailable{font-size:11px;color:var(--text-dim);font-style:italic;padding:8px 12px;text-align:center;}
+.route-inventory-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px;}
+/* Colors pixel-sampled from a real OSRS inventory tab screenshot: #3e3529 fill, #4f4836 bevel border */
+.osrs-inv-panel{display:inline-block;background:#3e3529;border:3px solid #6b5d42;border-radius:4px;padding:8px;box-shadow:inset 0 0 0 1px #2a2319, inset 0 2px 4px rgba(0,0,0,.35), 0 4px 14px rgba(0,0,0,.5);}
+.inv-grid{display:grid;grid-template-columns:repeat(4,34px);grid-auto-rows:34px;gap:0;}
+.inv-slot{background:transparent;border:none;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;text-decoration:none;cursor:pointer;transition:background .1s;}
+.inv-slot:hover{background:rgba(255,255,255,.08);}
+.inv-slot img{width:82%;height:82%;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.8));}
+.inv-slot-fallback{font-size:6.5px;color:#cfc6ab;text-align:center;text-transform:uppercase;align-items:center;justify-content:center;width:100%;height:100%;display:flex;font-family:'Barlow',sans-serif;font-weight:600;line-height:1.1;padding:2px;}
+.inv-slot-empty{background:transparent;}
+.inv-slot-qty{position:absolute;top:1px;left:2px;font-family:Verdana,Arial,sans-serif;font-size:10px;font-weight:700;color:#ffff00;text-shadow:1px 1px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000;line-height:1;pointer-events:none;z-index:1;}
+/* Noted item visual: a tilted parchment/note background sits behind the item icon, matching the
+   in-game look for noted bank items used as protection payments — keeps inventory slots compact. */
+.inv-slot-noted::before{content:'';position:absolute;inset:3px;background:linear-gradient(135deg,#e8d9ad,#d4c389);border:1px solid #8a7440;border-radius:1px;transform:rotate(-3deg);box-shadow:1px 1px 2px rgba(0,0,0,.4);z-index:0;}
+.inv-slot-noted img{position:relative;z-index:1;width:70%;height:70%;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5)) brightness(0.92);}
+.inv-slot-noted .inv-slot-qty{z-index:2;}
+.route-step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.route-step:last-child{border-bottom:none;}
+.route-step-num{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Share Tech Mono',monospace;}
+.route-step-body{flex:1;}
+.route-step-patch{font-weight:600;font-size:13px;}
+.route-step-tp{font-size:12px;color:var(--gold);margin-top:2px;}
+.route-step-tp-note{font-size:10px;color:var(--text-dim);}
+.route-step-carry{font-size:11px;color:var(--blue);margin-top:2px;display:block;text-decoration:none;}
+.route-step-carry:hover{text-decoration:underline;}
+.route-step-carry a, a.route-step-carry{color:var(--blue);}
+.route-step-dir{font-size:11px;color:var(--text-dim);margin-top:3px;line-height:1.4;}
+.route-step-items{font-size:10px;color:var(--text-dim);margin-top:3px;}
+.route-empty-note{font-size:12px;color:var(--text-dim);font-style:italic;}
+.timeline-track{display:flex;align-items:center;gap:0;overflow-x:auto;padding:14px 4px;}
+.timeline-node{display:flex;flex-direction:column;align-items:center;min-width:90px;position:relative;}
+.timeline-node:not(:last-child)::after{content:'';position:absolute;top:15px;left:50%;width:100%;height:2px;background:var(--border);z-index:0;}
+.timeline-node.unlocked:not(:last-child)::after{background:var(--accent,var(--gold));}
+.timeline-dot{width:30px;height:30px;border-radius:50%;background:var(--surface);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;z-index:1;font-size:13px;margin-bottom:6px;}
+.timeline-node.unlocked .timeline-dot{border-color:var(--accent,var(--gold));background:var(--accent,var(--gold));}
+.timeline-node.current .timeline-dot{box-shadow:0 0 0 3px rgba(200,168,75,.3);}
+.timeline-label{font-size:10px;text-align:center;color:var(--text-dim);font-weight:600;}
+.timeline-node.unlocked .timeline-label{color:var(--text);}
+.timeline-sublabel{font-size:9px;color:var(--text-dim);}
+
+/* SHOPPING LIST DROPDOWN */
+.shopping-list-wrap{margin-top:22px;}
+.shopping-list-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:10px;padding:14px 20px;cursor:pointer;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;transition:background .15s;}
+.shopping-list-toggle:hover{background:var(--surface);}
+.shopping-toggle-arrow{font-size:14px;color:var(--text-dim);transition:transform .2s;}
+.shopping-toggle-arrow.open{transform:rotate(180deg);}
+.shopping-list-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:16px 20px;margin-top:-1px;}
+.shopping-list-body.show{display:block;}
+.shopping-table{width:100%;border-collapse:collapse;font-size:13px;}
+.shopping-table th{text-align:left;padding:6px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);border-bottom:2px solid var(--border);}
+.shopping-table td{padding:9px 10px;border-bottom:1px solid var(--border);}
+.shopping-table td.mono{font-family:'Share Tech Mono',monospace;text-align:right;}
+.shopping-table th:nth-child(3),.shopping-table th:nth-child(4),.shopping-table th:nth-child(5){text-align:right;}
+.shopping-table tfoot td{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;padding-top:12px;border-top:2px solid var(--gold-dim);border-bottom:none;color:var(--gold);}
+.shopping-table tfoot td:last-child{text-align:right;font-family:'Share Tech Mono',monospace;}
+.shopping-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:12px;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="osrs-ge-tracker.html">GE<span>Tracker</span></a>
+  <span style="color:var(--border);">|</span>
+  <a class="nav-back" href="osrs-skill-profit.html">⚗️ Skill Profits</a>
+  <span style="color:var(--border);">|</span>
+  <a class="nav-back" href="osrs-training-planner.html">🗺️ Training Planner</a>
+  <div class="header-right">
+    <button class="theme-btn" id="themeBtn">🌙</button>
+  </div>
+</header>
+
+<div class="main">
+  <nav class="skill-nav">
+    <div class="skill-nav-title">Skills</div>
+    <button class="skill-btn" data-skill="construction" onclick="location.href='osrs-training-planner.html'">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="">
+      Construction
+    </button>
+    <button class="skill-btn active" data-skill="farming">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="">
+      Farming
+    </button>
+    <button class="skill-btn" data-skill="herblore" onclick="location.href='osrs-herblore-planner.html'">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">
+      Herblore
+    </button>
+    <button class="skill-btn" data-skill="prayer" onclick="location.href='osrs-prayer-planner.html'">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">
+      Prayer
+    </button>
+    <button class="skill-btn disabled" data-skill="smithing">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">
+      Smithing <span class="soon-badge">Soon</span>
+    </button>
+  </nav>
+
+  <div class="content">
+    <div class="input-panel">
+      <div class="input-panel-top">
+        <img class="skill-icon-large" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="">
+        <div class="skill-title">Farming Training Planner</div>
+      </div>
+      <div class="skill-desc">Toggle the patches you have access to, set your level, pick a budget tier, and see exactly what to plant on your next run across every patch type.</div>
+      <div id="priceStatus" style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">⏳ Loading live Grand Exchange prices…</div>
+
+      <div class="input-row">
+        <div class="field-group">
+          <span class="field-label">OSRS Username</span>
+          <input type="text" id="womUsername" placeholder="e.g. Zezima" autocomplete="off">
+        </div>
+        <button class="apply-btn" id="womFetchBtn">Fetch Stats</button>
+        <div class="field-group">
+          <span class="field-label">Target Level</span>
+          <input type="number" id="targetLevel" min="2" max="99" value="99">
+        </div>
+        <div class="or-divider">or</div>
+        <button class="manual-toggle" id="womToggle">Enter Manually</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">Pulls your live Farming level/XP from Wise Old Man.</div>
+
+      <div id="womFields">
+        <div class="field-group">
+          <span class="field-label">Current Level</span>
+          <input type="number" id="manualLevel" min="1" max="99" value="15">
+        </div>
+        <div class="field-group">
+          <span class="field-label">Current XP (optional)</span>
+          <input type="number" id="manualXp" min="0" placeholder="auto from level">
+        </div>
+        <button class="apply-btn" id="applyBtn">Update Plan</button>
+      </div>
+
+      <div class="fetch-status" id="womStatus"></div>
+
+      <div class="status-card" id="statusCard">
+        <div class="status-stat">
+          <div class="status-stat-label">Current</div>
+          <div class="status-stat-value" id="statusLevel">15</div>
+        </div>
+        <div class="status-progress-wrap">
+          <div class="status-progress-bar"><div class="status-progress-fill" id="statusProgressFill" style="width:0%"></div></div>
+          <div class="status-progress-text">
+            <span id="statusXpText">0 XP</span>
+            <span id="statusTargetText">Target: Level 99</span>
+          </div>
+        </div>
+        <div class="status-stat">
+          <div class="status-stat-label">XP Remaining</div>
+          <div class="status-stat-value" id="statusXpRemaining">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="patch-panel">
+      <div class="patch-panel-header" id="patchPanelHeader">
+        <div class="patch-panel-left">
+          <span class="patch-panel-cog">⚙️</span>
+          <div>
+            <div class="patch-panel-label">Patch Settings</div>
+            <div class="patch-panel-sub">Configure which patches you've unlocked</div>
+          </div>
+        </div>
+        <span class="patch-panel-arrow" id="patchPanelArrow">▾</span>
+      </div>
+      <div class="patch-groups" id="patchGroups"></div>
+    </div>
+
+    <div class="run-options-bar">
+      <div class="run-options-title">
+        <span class="run-options-icon">🎛️</span>
+        <span>Run Options</span>
+      </div>
+      <div class="run-options-toggles">
+        <label class="run-option-toggle">
+          <input type="checkbox" id="globalPaymentsToggle" checked style="accent-color:var(--gold);">
+          <span>💰 Pay for protection</span>
+        </label>
+        <label class="run-option-toggle">
+          <input type="checkbox" id="globalHerbToggle" checked style="accent-color:var(--purple);">
+          <span>🌿 Include herb runs</span>
+        </label>
+        <label class="run-option-toggle">
+          <input type="checkbox" id="globalTabsToggle" checked style="accent-color:var(--blue);">
+          <span>📜 Use tele tabs <em>(off = runes)</em></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="speed-panel">
+      <div class="speed-panel-label">
+        <span>Budget Tier</span>
+      </div>
+      <div class="speed-tabs">
+        <div class="speed-tab active" data-speed="expensive" style="--accent:#e74c3c;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#e74c3c;"></span>Expensive</div>
+          <div class="speed-tab-sub">Magic trees + Dragonfruit + Mahogany — fastest XP, highest seed cost</div>
+        </div>
+        <div class="speed-tab" data-speed="balanced" style="--accent:#c8a84b;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#c8a84b;"></span>Balanced</div>
+          <div class="speed-tab-sub">Yew trees + Papaya + Mahogany — the classic mid-game stepping stone</div>
+        </div>
+        <div class="speed-tab" data-speed="cheap" style="--accent:#2ecc71;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#2ecc71;"></span>Cheap</div>
+          <div class="speed-tab-sub">Willow/Maple + Pineapple/Papaya + Teak — lowest cost per XP</div>
+        </div>
+        <div class="speed-tab" data-speed="custom" style="--accent:#9b6fd6;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#9b6fd6;"></span>Custom</div>
+          <div class="speed-tab-sub">Pick your own trees, herbs, and runs per day</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="custom-panel" id="customPanel" style="display:none;"></div>
+
+    <div class="plan-area" id="planArea"></div>
+  </div>
+</div>
+<script>
+// ── EXACT OSRS XP TABLE (identical formula/verification as Construction planner) ──
+const XP_TABLE = [0,83,174,276,388,512,650,801,969,1154,1358,1584,1833,2107,2411,2746,3115,3523,3973,4470,5018,5624,6291,7028,7842,8740,9730,10824,12031,13363,14833,16456,18247,20224,22406,24815,27473,30408,33648,37224,41171,45529,50339,55649,61512,67983,75127,83014,91721,101333,111945,123660,136594,150872,166636,184040,203254,224466,247886,273742,302288,333804,368599,407015,449428,496254,547953,605032,668051,737627,814445,899257,992895,1096278,1210421,1336443,1475581,1629200,1798808,1986068,2192818,2421087,2673114,2951373,3258594,3597792,3972294,4385776,4842295,5346332,5902831,6517253,7195629,7944614,8771558,9684577,10692629,11805606,13034431];
+function xpForLevel(level){level=Math.max(1,Math.min(99,level));return XP_TABLE[level-1];}
+function levelForXp(xp){for(let lvl=99;lvl>=1;lvl--){if(xp>=XP_TABLE[lvl-1])return lvl;}return 1;}
+
+// ── VERIFIED FARMING DATABASE ──────────────────────────────
+// All XP, levels, growth times traced to OSRS Wiki Farming training page and individual tree articles.
+
+// Growth times in minutes, XP values exact per Wiki.
+
+const REGULAR_TREES = [
+  // seedName field actually holds the SAPLING name now — saplings are what's planted in the tree patch,
+  // not the raw seed. All verified against the Wiki: Oak/Willow/Maple/Yew/Magic sapling are real GE items.
+  {level:15, name:'Oak',    plantXp:14,   checkXp:467.3,  growMin:200, payItem:'Basket of tomatoes', payQty:1, seedName:'Oak sapling'},
+  {level:30, name:'Willow', plantXp:25,   checkXp:1456.5, growMin:240, payItem:'Basket of apples',    payQty:1, seedName:'Willow sapling'},
+  {level:45, name:'Maple',  plantXp:45,   checkXp:3403.4, growMin:320, payItem:'Basket of oranges',   payQty:1, seedName:'Maple sapling'},
+  {level:60, name:'Yew',    plantXp:81,   checkXp:7069.9, growMin:365, payItem:'Cactus spine',        payQty:10,seedName:'Yew sapling'},
+  {level:75, name:'Magic',  plantXp:145.5,checkXp:13768.3,growMin:480, payItem:'Coconut',             payQty:25,seedName:'Magic sapling'},
+];
+// Wiki: "One patch in the Farming Guild requires 65 Farming to access" — adds a 6th regular tree patch at 65.
+
+const FRUIT_TREES = [
+  {level:27, name:'Apple',      plantXp:22,   checkXp:1199.5,  growMin:960, payItem:'Sweetcorn',            payQty:9, seedName:'Apple sapling'},
+  {level:33, name:'Banana',     plantXp:28,   checkXp:1750.5,  growMin:960, payItem:'Basket of apples',     payQty:4, seedName:'Banana sapling'},
+  {level:39, name:'Orange',     plantXp:35,   checkXp:2470.2,  growMin:960, payItem:'Basket of strawberries',payQty:3, seedName:'Orange sapling'},
+  {level:42, name:'Curry',      plantXp:40,   checkXp:2906.9,  growMin:960, payItem:'Basket of bananas',    payQty:5, seedName:'Curry sapling'},
+  {level:51, name:'Pineapple',  plantXp:57,   checkXp:4605.7,  growMin:960, payItem:'Watermelon',           payQty:10,seedName:'Pineapple sapling'},
+  {level:57, name:'Papaya',     plantXp:72,   checkXp:6146.6,  growMin:960, payItem:'Pineapple',            payQty:10,seedName:'Papaya sapling'},
+  {level:68, name:'Palm',       plantXp:110.5,checkXp:10150,   growMin:960, payItem:'Papaya fruit',         payQty:15,seedName:'Palm sapling'},
+  {level:81, name:'Dragonfruit',plantXp:140,  checkXp:17335,   growMin:960, payItem:'Coconut',              payQty:15,seedName:'Dragonfruit sapling'},
+];
+// Wiki: "One patch in the Farming Guild requires 85 Farming to access" — adds a 6th/7th fruit tree patch at 85.
+
+const HARDWOOD_TREES = [
+  {level:35, name:'Teak',     plantXp:35, checkXp:7290,  growMin:4476, payItem:'Limpwurt root',  payQty:15, seedName:'Teak sapling'}, // 74.6 hours
+  {level:55, name:'Mahogany', plantXp:63, checkXp:15720, growMin:5120, payItem:'Yanillian hops',  payQty:25, seedName:'Mahogany sapling'}, // 85.3 hours
+];
+// Requires Bone Voyage quest for 3 of the 5 hardwood patches (Fossil Island).
+// 1 more patch from Ribbiting Tale of a Lily Pad Labour Dispute (Varlamore).
+// 1 more from Anglers' Retreat requiring Sailing 51 (and Construction 50 recommended).
+
+const SPECIAL_TREES = [
+  {level:72, name:'Calquat',   plantXp:163, checkXp:12096, growMin:1350, payItem:'Poison ivy berries', payQty:8, seedName:'Calquat tree seed', note:'Tai Bwo Wannai Trio quest required for teleport scroll access'},
+  {level:85, name:'Celastrus', plantXp:120.5,checkXp:5849, growMin:800,  payItem:'Potato cactus',      payQty:8, seedName:'Celastrus seed', note:'Farming Guild only, valuable bark harvest — consider chopping manually instead of paying'},
+  {level:85, name:'Redwood',   plantXp:230, checkXp:30364, growMin:6840,payItem:'Dragonfruit',         payQty:15,seedName:'Redwood tree seed', note:'Farming Guild only, ~4.75 day growth — among the best XP/seed in the game'},
+];
+
+// Patch counts and unlock requirements — used to drive the toggle UI
+// ── ROUTE WAYPOINTS ────────────────────────────────────────
+// Step-by-step teleport + run directions verified against the OSRS Wiki "Farming runs" page.
+// Each waypoint includes the patch name, best teleport method, and on-foot directions from that teleport.
+// Each waypoint can have:
+//   tabItem: exact GE item name for the teleport tablet (null if no tablet exists for this teleport)
+//   runeItems: array of {name, qty} for the rune-cast version of the same teleport (null if item-only, no spell exists)
+//   itemOnly: exact GE item name for teleports that are neither tab nor rune (Ectophial, Digsite pendant, etc.) — always carried regardless of toggle
+const REGULAR_TREE_ROUTE = [
+  {patch:'Lumbridge',        teleport:'Lumbridge Teleport', tabItem:'Lumbridge teleport', runeItems:[{name:'Law rune',qty:1},{name:'Air rune',qty:3},{name:'Earth rune',qty:1}], directions:'Run west through Lumbridge Castle, then north out the back wall to the tree patch.'},
+  {patch:'Varrock',          teleport:'Varrock Teleport', tabItem:'Varrock teleport', runeItems:[{name:'Law rune',qty:1},{name:'Air rune',qty:3},{name:'Fire rune',qty:1}], directions:'Run north into the palace courtyard to the tree patch.'},
+  {patch:'Falador Park',     teleport:'Falador Teleport', tabItem:'Falador teleport', runeItems:[{name:'Law rune',qty:1},{name:'Air rune',qty:3},{name:'Water rune',qty:1}], directions:'Falador Teleport drops you a short run east of the park, near the patch.'},
+  {patch:'Taverley',         teleport:'Teleport to House', tabItem:'Teleport to house', runeItems:[{name:'Law rune',qty:1},{name:'Earth rune',qty:1},{name:'Air rune',qty:1}], directions:'From your house portal in Taverley, run south to the tree patch (requires your house set to Taverley).'},
+  {patch:'Gnome Stronghold', teleport:'Spirit tree', tabItem:null, runeItems:null, itemOnly:null, directions:'Take the spirit tree network (free, no item needed) to the Gnome Stronghold, then run south-west to the tree patch.'},
+  {patch:'Farming Guild',    teleport:'Skills necklace', teleport2:'(requires 65 Farming)', tabItem:null, runeItems:null, itemOnly:'Skills necklace', directions:'Teleport drops you right in the western wing near the tree patch.'},
+];
+
+const FRUIT_TREE_ROUTE = [
+  {patch:'Gnome Stronghold', teleport:'Spirit tree', tabItem:null, runeItems:null, itemOnly:null, directions:'Run north-east from the regular tree patch, then east at the spirit tree to reach the fruit tree patch.'},
+  {patch:'Tree Gnome Village', teleport:'Spirit tree (from Gnome Stronghold)', tabItem:null, runeItems:null, itemOnly:null, directions:'Run west, squeeze through the Loose Railing, follow Elkoy through the maze, then south-west to the fruit tree patch.'},
+  {patch:'Catherby',         teleport:'Catherby Teleport', tabItem:'Catherby teleport', runeItems:[{name:'Law rune',qty:2},{name:'Water rune',qty:5}], directions:'Run east from the teleport point to the fruit tree patch on the beach.'},
+  {patch:'Brimhaven',        teleport:'Teleport to House', tabItem:'Teleport to house', runeItems:[{name:'Law rune',qty:1},{name:'Earth rune',qty:1},{name:'Air rune',qty:1}], directions:'Run north from the house portal to the fruit tree patch (requires your house set to Brimhaven).'},
+  {patch:'Lletya',           teleport:'Teleport crystal', tabItem:null, runeItems:null, itemOnly:'Teleport crystal', directions:"Requires starting Mourning's End Part I. Run south-east from the teleport point to the patch."},
+  {patch:'Farming Guild',    teleport:'Skills necklace', teleport2:'(requires 85 Farming)', tabItem:null, runeItems:null, itemOnly:'Skills necklace', directions:'Run a short distance north from the tree patch wing to reach the fruit tree and celastrus patches.'},
+];
+
+const HARDWOOD_ROUTE = [
+  {patch:'Fossil Island Hardwood Patches (×3)', teleport:'Digsite pendant', tabItem:null, runeItems:null, itemOnly:'Digsite pendant', directions:'Teleport to the Digsite, take the barge to Fossil Island, use the Mushroom Mushtree network to Mushroom Meadow, then run south-east to the 3 hardwood patches — they sit side by side.'},
+  {patch:"Anglers' Retreat", teleport:'Sailing transport', teleport2:'(requires Sailing 51)', tabItem:null, runeItems:null, itemOnly:null, directions:'Sail to Anglers\' Retreat and head to the hardwood patch there.'},
+  {patch:'Varlamore Hardwood Patch', teleport:'Quetzal Transport System', teleport2:"(requires Twilight's Promise)", tabItem:null, runeItems:null, itemOnly:'Quetzal whistle', directions:'Travel via Quetzal to the nearest landing site and run to the patch.'},
+];
+
+// Combined Fruit Tree + Hardwood route — geographically chained per the Wiki's own example:
+// Brimhaven fruit tree → (south to) Calquat → Digsite pendant to Fossil Island hardwood → Lletya fruit tree.
+// This avoids doubling back, since Brimhaven and Fossil Island sit on the same travel path.
+const COMBINED_FRUIT_HARDWOOD_ROUTE = [
+  {patch:'Gnome Stronghold (fruit)', teleport:'Spirit tree', tabItem:null, runeItems:null, itemOnly:null, directions:'Run north-east from the regular tree patch, then east at the spirit tree to reach the fruit tree patch.'},
+  {patch:'Tree Gnome Village (fruit)', teleport:'Spirit tree (from Gnome Stronghold)', tabItem:null, runeItems:null, itemOnly:null, directions:'Run west, squeeze through the Loose Railing, follow Elkoy through the maze, then south-west to the fruit tree patch.'},
+  {patch:'Catherby (fruit)',  teleport:'Catherby Teleport', tabItem:'Catherby teleport', runeItems:[{name:'Law rune',qty:2},{name:'Water rune',qty:5}], directions:'Run east from the teleport point to the fruit tree patch on the beach.'},
+  {patch:'Brimhaven (fruit)', teleport:'Teleport to House', tabItem:'Teleport to house', runeItems:[{name:'Law rune',qty:1},{name:'Earth rune',qty:1},{name:'Air rune',qty:1}], directions:'Run north from the house portal to the fruit tree patch.'},
+  {patch:'Calquat (Tai Bwo Wannai)', teleport:'Tai Bwo Wannai teleport scroll', teleport2:'(requires Tai Bwo Wannai Trio, 72 Farming)', tabItem:null, runeItems:null, itemOnly:'Tai Bwo Wannai teleport', directions:'From the Brimhaven fruit tree patch, run south towards Tai Bwo Wannai to reach the calquat patch.'},
+  {patch:'Fossil Island Hardwood (×3)', teleport:'Digsite pendant', tabItem:null, runeItems:null, itemOnly:'Digsite pendant', directions:'Teleport to the Digsite, take the barge to Fossil Island, then run to the three hardwood patches to the north-west.'},
+  {patch:'Lletya (fruit)',    teleport:'Teleport crystal', tabItem:null, runeItems:null, itemOnly:'Teleport crystal', directions:"Requires starting Mourning's End Part I. Teleport drops you in central Lletya — run south-east to the fruit tree patch."},
+  {patch:'Farming Guild (fruit + celastrus)', teleport:'Skills necklace', teleport2:'(requires 85 Farming)', tabItem:null, runeItems:null, itemOnly:'Skills necklace', directions:'Run north from the tree patch wing to reach the fruit tree and celastrus patches.'},
+];
+
+const HERB_ROUTE = [
+  {patch:'Catherby',         teleport:'Catherby Teleport', tabItem:'Catherby teleport', runeItems:[{name:'Law rune',qty:2},{name:'Water rune',qty:5}], directions:'Run north from the teleport point to the herb patch.'},
+  {patch:'Ardougne',         teleport:'Ardougne Teleport', tabItem:'Ardougne teleport', runeItems:[{name:'Law rune',qty:2},{name:'Water rune',qty:2}], directions:'Teleports you to East Ardougne — run south-east to the patch.'},
+  {patch:'Port Phasmatys (Morytania)', teleport:'Ectophial', tabItem:null, runeItems:null, itemOnly:'Ectophial', directions:"Requires Priest in Peril and Ghosts Ahoy. Empty the ectophial, then run west to the patch."},
+  {patch:'Troll Stronghold', teleport:'Stony basalt', teleport2:"(requires Making Friends with My Arm)", tabItem:null, runeItems:null, itemOnly:'Stony basalt', directions:'Teleports you next to the shortcut leading up to the disease-free patch.'},
+  {patch:'Falador',          teleport:"Explorer's ring", tabItem:null, runeItems:null, itemOnly:"Explorer's ring 4", directions:"Teleports you near the patch south of Falador."},
+  {patch:'Hosidius',         teleport:"Xeric's talisman", tabItem:null, runeItems:null, itemOnly:"Xeric's talisman", directions:'Run south from the teleport point to the disease-free Hosidius patch.'},
+  {patch:'Weiss',            teleport:'Icy basalt', teleport2:'(requires Making Friends with My Arm)', tabItem:null, runeItems:null, itemOnly:'Icy basalt', directions:'Teleports you directly next to the disease-free Weiss patch.'},
+  {patch:'Farming Guild',    teleport:'Skills necklace', teleport2:'(requires 65 Farming)', tabItem:null, runeItems:null, itemOnly:'Skills necklace', directions:'Teleport drops you right at the patch.'},
+  {patch:'Civitas illa Fortis (Varlamore)', teleport:'Quetzal whistle', tabItem:null, runeItems:null, itemOnly:'Quetzal whistle', directions:'Run north from the Hunter Guild landing site to the disease-free patch (requires 16,000 Colosseum glory for disease-free status).'},
+  {patch:'Harmony Island',   teleport:'Harmony Island Teleport', teleport2:'(requires Elite Morytania Diary for disease-free)', tabItem:'Harmony Island teleport', runeItems:[{name:'Law rune',qty:1}], directions:'Teleport drops you right next to the patch.'},
+];
+
+const PATCH_UNLOCKS = {
+  regularTree: {
+    base: 5, // Lumbridge, Varrock, Falador, Taverley, Gnome Stronghold
+    extra: [{count:1, level:65, label:'Farming Guild tree patch (65 Farming)'}],
+  },
+  fruitTree: {
+    base: 5, // Gnome Stronghold, Catherby, Tree Gnome Village, Brimhaven, Lletya
+    extra: [
+      {count:1, level:27, quest:"Mourning's End Part I (started)", label:'Lletya fruit tree patch'},
+      {count:1, level:85, label:'Farming Guild fruit tree patch (85 Farming)'},
+    ],
+  },
+  hardwood: {
+    base: 0,
+    extra: [
+      {count:3, level:35, quest:'Bone Voyage', label:'Fossil Island hardwood patches (×3)'},
+      {count:1, level:35, quest:'The Ribbiting Tale of a Lily Pad Labour Dispute', label:'Varlamore hardwood patch'},
+      {count:1, level:35, quest:'Sailing 51', label:"Anglers' Retreat hardwood patch (Sailing 51, Construction 50 recommended)"},
+    ],
+  },
+  herb: {
+    base: 3, // Falador, Ardougne, Catherby (always available from level 9)
+    extra: [
+      {count:1, level:9,  quest:'None — always available', label:'West of Port Phasmatys (Morytania)'},
+      {count:1, level:9,  quest:'50% Hosidius favor',       label:'Hosidius herb patch (disease-free w/ Easy Kourend & Kebos Diary)'},
+      {count:1, level:9,  quest:"My Arm's Big Adventure",   label:'Troll Stronghold herb patch (disease-free)'},
+      {count:1, level:9,  quest:'Making Friends with My Arm', label:'Weiss herb patch (disease-free)'},
+      {count:1, level:9,  quest:'Elite Morytania Diary',    label:'Harmony Island herb patch (disease-free)'},
+      {count:1, level:65, quest:'60% Hosidius favor',       label:'Farming Guild herb patch (65 Farming)'},
+      {count:1, level:9,  quest:'16,000 Colosseum glory',   label:'Civitas illa Fortis herb patch (disease-free)'},
+    ],
+  },
+};
+
+
+// ── HERB DATA ──────────────────────────────────────────────
+// xpPerHerb verified per Wiki; growth time fixed at 80 minutes for all herb tiers.
+// seedName/grimyName used for live GE price resolution (seed cost vs grimy herb sell price).
+const HERBS = [
+  {level:9,  name:'Guam',        xpPerHerb:12.5,  seedName:'Guam seed',        grimyName:'Grimy guam leaf'},
+  {level:14, name:'Marrentill',  xpPerHerb:15,    seedName:'Marrentill seed',  grimyName:'Grimy marrentill'},
+  {level:19, name:'Tarromin',    xpPerHerb:18,    seedName:'Tarromin seed',    grimyName:'Grimy tarromin'},
+  {level:26, name:'Harralander', xpPerHerb:24,    seedName:'Harralander seed', grimyName:'Grimy harralander'},
+  {level:32, name:'Ranarr weed', xpPerHerb:30.5,  seedName:'Ranarr seed',      grimyName:'Grimy ranarr weed'},
+  {level:38, name:'Toadflax',    xpPerHerb:38.5,  seedName:'Toadflax seed',    grimyName:'Grimy toadflax'},
+  {level:44, name:'Irit weed',   xpPerHerb:48.5,  seedName:'Irit seed',        grimyName:'Grimy irit leaf'},
+  {level:50, name:'Avantoe',     xpPerHerb:61.5,  seedName:'Avantoe seed',     grimyName:'Grimy avantoe'},
+  {level:56, name:'Kwuarm',      xpPerHerb:78,    seedName:'Kwuarm seed',      grimyName:'Grimy kwuarm'},
+  {level:62, name:'Snapdragon',  xpPerHerb:98.5,  seedName:'Snapdragon seed',  grimyName:'Grimy snapdragon'},
+  {level:67, name:'Cadantine',   xpPerHerb:120,   seedName:'Cadantine seed',   grimyName:'Grimy cadantine'},
+  {level:73, name:'Lantadyme',   xpPerHerb:151.5, seedName:'Lantadyme seed',   grimyName:'Grimy lantadyme'},
+  {level:79, name:'Dwarf weed',  xpPerHerb:194.5, seedName:'Dwarf weed seed',  grimyName:'Grimy dwarf weed'},
+  {level:85, name:'Torstol',     xpPerHerb:224.5, seedName:'Torstol seed',     grimyName:'Grimy torstol'},
+];
+const HERB_GROW_MIN = 80;
+const HERB_YIELD_PER_PATCH = 8.7; // average with ultracompost + magic secateurs, per Wiki/community sources
+
+// ── STATE ─────────────────────────────────────────────────
+let playerLevel=15, playerXp=xpForLevel(15), targetLevelVal=99;
+let currentSpeed='expensive';
+let isDark=true;
+// Patch unlock state — keyed by category, each holding a count of EXTRA patches the player has unlocked (booleans per item)
+let unlockedExtras={regularTree:{}, fruitTree:{}, hardwood:{}, herb:{}};
+let herbsEnabledGlobal = true; // controls herb runs across ALL tiers (Expensive/Balanced/Cheap), not just Custom
+
+// Hardcoded fallback IDs for items that are NEVER in the GE price mapping (Coins is the in-game currency
+// itself, not a tradeable commodity) or where we want a guaranteed-correct icon regardless of API state.
+// These IDs are long-stable, verified against the Wiki's own item ID references.
+const HARDCODED_ITEM_IDS = {
+  'coins': 995,
+  'spade': 952,
+  'rake': 5341,
+  'digsite pendant': 11194, // untradeable — always charge-suffixed as "Digsite pendant (5)" etc, never has a bare-name GE entry
+  'teleport crystal': 6102, // GE-listed only with charge suffixes "(1)" through "(5)" — pinned to one fixed variant, charge state shown doesn't matter
+};
+function resolveItemId(name){
+  const key = name.toLowerCase();
+  if(HARDCODED_ITEM_IDS[key]) return HARDCODED_ITEM_IDS[key];
+  if(nameToId[key]) return nameToId[key];
+  // Many teleport tablets are listed on the GE under "X (tablet)" rather than the plain spell name
+  // (e.g. the actual item is "Lumbridge teleport (tablet)", not "Lumbridge teleport") — retry with
+  // that suffix before giving up, so we're not dependent on getting every single name pre-verified.
+  const tabletKey = `${key} (tablet)`;
+  if(nameToId[tabletKey]) return nameToId[tabletKey];
+  return undefined;
+}
+
+// Icon resolution uses the WIKI's own image filenames (returned directly by the mapping API's `icon`
+// field), hosted at oldschool.runescape.wiki/images/ — NOT the official Jagex sprite endpoint, which
+// is a separate, less reliable image host for our purposes. Hardcoded fallbacks cover items (like
+// Coins) that never appear in the GE mapping since they're not a tradeable commodity, plus items like
+// Digsite pendant and Teleport crystal that are always charge-suffixed (e.g. "Teleport crystal (5)")
+// and so never have a bare-name entry to look up.
+const HARDCODED_ITEM_ICONS = {
+  // NOTE: 'coins' intentionally omitted here — its icon is resolved dynamically by coinIconFor()
+  // based on the actual quantity needed, since coin sprites vary by denomination on the wiki.
+  'spade': 'Spade.png',
+  'rake': 'Rake.png',
+  'digsite pendant': 'Digsite_pendant.png', // wiki's general infobox icon, distinct from the per-charge file variants
+  'teleport crystal': 'Teleport_crystal_(1).png', // single fixed icon — user confirmed charge state shown doesn't need to be accurate
+};
+function resolveItemIcon(name){
+  const key = name.toLowerCase();
+  if(HARDCODED_ITEM_ICONS[key]) return HARDCODED_ITEM_ICONS[key];
+  if(nameToIcon[key]) return nameToIcon[key];
+  // Same "(tablet)" fallback as resolveItemId — most teleport tablets are GE-listed with this suffix.
+  const tabletKey = `${key} (tablet)`;
+  if(nameToIcon[tabletKey]) return nameToIcon[tabletKey];
+  return null;
+}
+// Coins use denomination-specific sprite files on the wiki (Coins_5.png, Coins_25.png, Coins_100.png,
+// Coins_250.png, Coins_1000.png, Coins_10000.png) rather than one fixed icon — pick the closest
+// breakpoint below or equal to the actual quantity, matching the wiki's own coins.less thresholds.
+function coinIconFor(qty){
+  if(qty>=10000) return 'Coins_10000.png';
+  if(qty>=1000) return 'Coins_1000.png';
+  if(qty>=250) return 'Coins_250.png';
+  if(qty>=100) return 'Coins_100.png';
+  if(qty>=25) return 'Coins_25.png';
+  if(qty>=5) return 'Coins_5.png';
+  return `Coins_${qty}.png`;
+}
+function iconUrl(name){
+  const filename = resolveItemIcon(name);
+  if(!filename) return '';
+  return `https://oldschool.runescape.wiki/images/${encodeURIComponent(filename.replace(/ /g,'_'))}`;
+}
+let usePaymentsGlobal = true; // true = pay gardener for protection (faster, costs more); false = ultracompost only (cheaper, risk of disease)
+let useTabsGlobal = true; // true = show teleport tablets in inventory; false = show the equivalent runes instead
+
+// ── RUNELITE BANK TAG EXPORT ──────────────────────────────
+// Format confirmed from RuneLite's own Bank Tags plugin clipboard export: "tagname,1,itemid1,itemid2,..."
+// Paste this string into RuneLite (right-click an item → Edit-tags, or use the tag tab import) to
+// recreate the exact item list as a searchable bank tag. Each inventory grid gets its own unique tag.
+let bankTagCounter = 0;
+let bankTagData = {}; // tagId -> export string, populated as each inventory grid renders
+
+function copyBankTag(tagId, type, btn){
+  const tagData = bankTagData[tagId];
+  if(!tagData) return;
+  const tagString = type==='layout' ? tagData.layout : tagData.plain;
+  if(!tagString) return;
+
+  function showCopiedFeedback(){
+    if(!btn) return;
+    const original = btn.innerHTML;
+    btn.innerHTML = '✓ Copied!';
+    btn.classList.add('bank-tag-btn-copied');
+    setTimeout(()=>{
+      btn.innerHTML = original;
+      btn.classList.remove('bank-tag-btn-copied');
+    }, 1500);
+  }
+
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(tagString).then(showCopiedFeedback).catch(()=>{
+      fallbackCopy(tagString, showCopiedFeedback);
+    });
+  } else {
+    fallbackCopy(tagString, showCopiedFeedback);
+  }
+}
+
+// Fallback for browsers/contexts where the async Clipboard API isn't available (e.g. non-HTTPS, older browsers)
+function fallbackCopy(text, onSuccess){
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  try{
+    document.execCommand('copy');
+    onSuccess();
+  }catch(e){
+    console.warn('Clipboard copy failed:', e);
+  }
+  document.body.removeChild(textarea);
+}
+
+// Delegated click handler — works for buttons rendered at any point, including after re-renders
+document.addEventListener('click', e=>{
+  const btn = e.target.closest('.bank-tag-btn');
+  if(btn) copyBankTag(btn.dataset.bankTagId, btn.dataset.bankTagType || 'plain', btn);
+});
+// Ultracompost is the standard no-payment alternative: ~10gp/dose-equivalent risk reduction, used at 1 per patch when payments are off.
+const ULTRACOMPOST_NAME = 'Ultracompost';
+
+// ── CUSTOM MODE STATE ─────────────────────────────────────
+let customState={
+  regularTreeName: null,  // null = auto-pick highest unlocked
+  fruitTreeName: null,
+  hardwoodName: null,
+  herbName: null,
+  herbsEnabled: true,
+  treeRunsPerDay: 2,
+  fruitRunsPerDay: 1, // always fixed at 1 — fruit trees take ~16hrs to grow, no UI control for this
+  herbRunsPerDay: 3,
+};
+
+// ── LIVE GE PRICING ───────────────────────────────────────
+// Same pattern as the GE Tracker and Skill Profit Calculator: resolve every item by exact name
+// against the live mapping API rather than trusting hardcoded IDs, then fetch latest prices.
+const WIKI_MAPPING='https://prices.runescape.wiki/api/v1/osrs/mapping';
+const WIKI_LATEST='https://prices.runescape.wiki/api/v1/osrs/latest';
+// NOTE: We intentionally do NOT set a custom User-Agent header here. Browsers cannot reliably set this
+// header on cross-origin fetch() calls — doing so triggers a CORS preflight that the target API may not
+// allow, causing the entire request to fail silently. This was confirmed as the root cause of icons
+// (tablets, coins, everything) never resolving — loadPrices() was failing on every single page load.
+let nameToId={};
+let nameToIcon={}; // item name (lowercase) -> exact wiki image filename, e.g. "Varrock teleport.png"
+let prices={};
+let pricesLoaded=false;
+
+function priceOf(name){
+  if(!name) return 0;
+  const id=nameToId[name.toLowerCase()];
+  if(!id||!prices[id]) return 0;
+  const p=prices[id];
+  return p.high || p.low || 0; // buying estimate uses instant-buy ('high') side
+}
+function sellPriceOf(name){
+  if(!name) return 0;
+  const id=nameToId[name.toLowerCase()];
+  if(!id||!prices[id]) return 0;
+  const p=prices[id];
+  return p.low || p.high || 0; // selling estimate uses instant-sell ('low') side
+}
+
+async function loadPrices(){
+  try{
+    const[mapRes,priceRes]=await Promise.all([
+      fetch(WIKI_MAPPING),
+      fetch(WIKI_LATEST)
+    ]);
+    const mapData=await mapRes.json(), priceData=await priceRes.json();
+    mapData.forEach(i=>{ nameToId[i.name.toLowerCase()]=String(i.id); if(i.icon) nameToIcon[i.name.toLowerCase()]=i.icon; });
+    Object.entries(priceData.data).forEach(([id,p])=>{ prices[id]=p; });
+    pricesLoaded=true;
+    const statusEl=document.getElementById('priceStatus');
+    if(statusEl){statusEl.textContent='✓ Live prices loaded';statusEl.style.color='var(--green)';}
+    generatePlan();
+    if(typeof renderCustomMode==='function') renderCustomMode();
+  }catch(e){
+    console.warn('Price fetch failed, using fallback estimates:', e);
+    const statusEl=document.getElementById('priceStatus');
+    if(statusEl){statusEl.textContent='⚠ Live prices unavailable — using rough estimates';statusEl.style.color='var(--red)';}
+  }
+}
+
+// ── THEME ─────────────────────────────────────────────────
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+});
+
+// ── WISE OLD MAN LOOKUP ───────────────────────────────────
+// Public OSRS stats API with proper CORS support (unlike the official Jagex hiscores).
+// Docs: https://docs.wiseoldman.net/api
+const WOM_API='https://api.wiseoldman.net/v2';
+const WOM_USERNAME_KEY='osrs_wom_username';
+
+async function fetchWomPlayer(username){
+  const url=`${WOM_API}/players/${encodeURIComponent(username)}`;
+  const res=await fetch(url);
+  if(res.status===404){
+    const trackRes=await fetch(url,{method:'POST'});
+    if(!trackRes.ok) throw new Error(`Player "${username}" not found`);
+    return trackRes.json();
+  }
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+
+function womSkill(data,skillKey){
+  const skill=data?.latestSnapshot?.data?.skills?.[skillKey];
+  if(!skill||skill.experience==null||skill.experience<0) return null;
+  return {level:skill.level,xp:skill.experience};
+}
+
+const womToggle=document.getElementById('womToggle');
+const womFields=document.getElementById('womFields');
+womToggle.addEventListener('click',()=>{
+  womFields.classList.toggle('show');
+  womToggle.classList.toggle('active');
+});
+
+const womUsernameInput=document.getElementById('womUsername');
+const womFetchBtn=document.getElementById('womFetchBtn');
+const womStatus=document.getElementById('womStatus');
+
+const savedWomUsername=localStorage.getItem(WOM_USERNAME_KEY);
+if(savedWomUsername) womUsernameInput.value=savedWomUsername;
+
+function setWomStatus(msg,type){
+  womStatus.textContent=msg;
+  womStatus.className='fetch-status show '+type;
+}
+
+async function doWomLookup(){
+  const username=womUsernameInput.value.trim();
+  if(!username){setWomStatus('Enter a username first','error');return;}
+  womFetchBtn.disabled=true;
+  womStatus.innerHTML='<span class="spinner-sm"></span> Looking up stats on Wise Old Man…';
+  womStatus.className='fetch-status show loading';
+  try{
+    const data=await fetchWomPlayer(username);
+    const skillData=womSkill(data,'farming');
+    if(!skillData){
+      throw new Error('No Farming data for this player (may be unranked)');
+    }
+    document.getElementById('manualLevel').value=skillData.level;
+    document.getElementById('manualXp').value=skillData.xp;
+    localStorage.setItem(WOM_USERNAME_KEY,username);
+    setWomStatus(`✓ Loaded ${data.displayName}'s stats — Level ${skillData.level} Farming (${skillData.xp.toLocaleString()} XP)`,'success');
+    document.getElementById('applyBtn').click();
+  }catch(e){
+    console.error(e);
+    setWomStatus(`⚠ ${e.message||'Lookup failed'}`,'error');
+  }finally{
+    womFetchBtn.disabled=false;
+  }
+}
+womFetchBtn.addEventListener('click',doWomLookup);
+womUsernameInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); doWomLookup(); } });
+
+// ── APPLY LEVEL/TARGET ────────────────────────────────────
+document.getElementById('applyBtn').addEventListener('click',()=>{
+  const lvl=parseInt(document.getElementById('manualLevel').value)||1;
+  const xpInput=document.getElementById('manualXp').value;
+  const tgt=parseInt(document.getElementById('targetLevel').value)||99;
+  playerLevel=Math.max(1,Math.min(99,lvl));
+  playerXp=xpInput?parseInt(xpInput):xpForLevel(playerLevel);
+  targetLevelVal=Math.max(playerLevel+1,Math.min(99,tgt));
+  updateStatusCard();
+  renderPatchToggles();
+  generatePlan();
+});
+
+function updateStatusCard(){
+  const curLevelDisplay=levelForXp(playerXp);
+  document.getElementById('statusLevel').textContent=curLevelDisplay;
+  const targetXp=xpForLevel(targetLevelVal);
+  const startXpForLevel=xpForLevel(curLevelDisplay);
+  const pct=targetLevelVal<=curLevelDisplay?100:Math.max(0,Math.min(100,(playerXp-startXpForLevel)/((targetXp-startXpForLevel)||1)*100));
+  document.getElementById('statusProgressFill').style.width=pct+'%';
+  document.getElementById('statusXpText').textContent=playerXp.toLocaleString()+' XP';
+  document.getElementById('statusTargetText').textContent='Target: Level '+targetLevelVal;
+  document.getElementById('statusXpRemaining').textContent=Math.max(0,targetXp-playerXp).toLocaleString();
+}
+
+// ── SPEED TABS ────────────────────────────────────────────
+document.querySelectorAll('.speed-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.speed-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentSpeed=tab.dataset.speed;
+    const customPanel=document.getElementById('customPanel');
+    if(currentSpeed==='custom'){
+      customPanel.style.display='block';
+      renderCustomMode();
+    } else {
+      customPanel.style.display='none';
+      generatePlan();
+    }
+  });
+});
+
+// Global herb toggle — applies to Expensive/Balanced/Cheap tiers AND keeps Custom mode's own toggle in sync
+document.getElementById('globalHerbToggle').addEventListener('change', e=>{
+  herbsEnabledGlobal = e.target.checked;
+  customState.herbsEnabled = e.target.checked; // keep Custom mode's toggle consistent with the global one
+  if(currentSpeed==='custom'){
+    renderCustomMode();
+  } else {
+    generatePlan();
+  }
+});
+
+// Global payments toggle — when off, costs switch from "pay gardener" to "ultracompost only", affecting
+// both the inventory mockup contents and every cost calculation across all tiers and Custom mode.
+document.getElementById('globalPaymentsToggle').addEventListener('change', e=>{
+  usePaymentsGlobal = e.target.checked;
+  if(currentSpeed==='custom'){
+    renderCustomMode();
+  } else {
+    generatePlan();
+  }
+});
+
+// Global tabs vs runes toggle — swaps every teleport item in the inventory mockup and route steps
+// between the tablet version and its rune-cost equivalent. Purely visual/informational, doesn't affect cost totals.
+document.getElementById('globalTabsToggle').addEventListener('change', e=>{
+  useTabsGlobal = e.target.checked;
+  if(currentSpeed==='custom'){
+    renderCustomMode();
+  } else {
+    generatePlan();
+  }
+});
+
+// ── PATCH TOGGLE PANEL ────────────────────────────────────
+document.getElementById('patchPanelHeader').addEventListener('click',()=>{
+  document.getElementById('patchGroups').classList.toggle('show');
+  document.getElementById('patchPanelArrow').classList.toggle('open');
+});
+
+function renderPatchToggles(){
+  const wrap=document.getElementById('patchGroups');
+  const curLevel=levelForXp(playerXp);
+  const groupMeta={
+    regularTree:{title:'🌳 Regular Tree Patches', icon:'🌳'},
+    fruitTree:{title:'🍎 Fruit Tree Patches', icon:'🍎'},
+    hardwood:{title:'🪵 Hardwood Patches', icon:'🪵'},
+    herb:{title:'🌿 Herb Patches', icon:'🌿'},
+  };
+  let html='';
+  Object.entries(PATCH_UNLOCKS).forEach(([catKey, cat])=>{
+    const meta=groupMeta[catKey];
+    html+=`<div class="patch-group">
+      <div class="patch-group-title">${meta.title} <span style="font-weight:400;color:var(--text-dim);font-size:11px;">(${cat.base} base patch${cat.base===1?'':'es'})</span></div>`;
+    cat.extra.forEach((item,i)=>{
+      const id=`patch_${catKey}_${i}`;
+      const levelOk = curLevel >= item.level;
+      const checked = unlockedExtras[catKey][i] !== undefined ? unlockedExtras[catKey][i] : levelOk;
+      unlockedExtras[catKey][i]=checked;
+      const lockedCls = !levelOk ? 'locked' : '';
+      html+=`<label class="patch-toggle ${lockedCls}" for="${id}">
+        <input type="checkbox" id="${id}" data-cat="${catKey}" data-idx="${i}" ${checked?'checked':''} ${!levelOk?'disabled':''}>
+        <span class="patch-toggle-label">${item.label}${item.quest&&item.quest!=='None — always available'?` <span class="patch-toggle-level">— ${item.quest}</span>`:''}
+          ${!levelOk?`<span class="patch-toggle-level"> (needs Lvl ${item.level})</span>`:''}
+        </span>
+      </label>`;
+    });
+    html+=`</div>`;
+  });
+  wrap.innerHTML=html;
+
+  wrap.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change',()=>{
+      unlockedExtras[cb.dataset.cat][cb.dataset.idx]=cb.checked;
+      generatePlan();
+    });
+  });
+}
+
+function countUnlockedPatches(catKey){
+  const cat=PATCH_UNLOCKS[catKey];
+  let total=cat.base;
+  cat.extra.forEach((item,i)=>{
+    if(unlockedExtras[catKey][i]) total+=item.count;
+  });
+  return total;
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function fmt(n){
+  if(!n&&n!==0)return'—';
+  if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';
+  if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';
+  return Math.round(n).toLocaleString();
+}
+function fmtGp(n){
+  const abs=Math.abs(n);
+  let s;
+  if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';
+  else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';
+  else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';
+  else s=Math.round(abs).toLocaleString();
+  return (n<0?'-':'')+s+' gp';
+}
+function fmtTime(min){
+  if(min<60) return Math.round(min)+'m';
+  const hrs=min/60;
+  if(hrs<24) return hrs.toFixed(1)+'h';
+  return (hrs/24).toFixed(1)+'d';
+}
+
+// Pick the best tier from a tree array for current level + speed preference.
+// "expensive" picks the highest-level (fastest XP) tier available.
+// "cheap" picks a budget-conscious tier — for fruit trees this means skipping to Pineapple/Papaya rather than Dragonfruit.
+// Explicit tier preferences per speed setting, based on established community consensus
+// (Theoatrix/CalcOSRS guides): Expensive always takes the fastest-XP tier; Balanced uses the
+// classic "stepping stone" trees (Maple/Yew rather than jumping straight to Magic); Cheap
+// favours the most budget-friendly options at each level bracket.
+const REGULAR_TREE_PREFERENCE = {
+  expensive: ['Oak','Willow','Maple','Yew','Magic'],          // always the fastest unlocked
+  balanced:  ['Oak','Willow','Maple','Yew','Yew'],             // Yew caps the balanced track — Magic reserved for Expensive
+  cheap:     ['Oak','Willow','Willow','Maple','Maple'],        // stay on Willow/Maple longer to save cost
+};
+const FRUIT_TREE_PREFERENCE = {
+  expensive: ['Apple','Banana','Orange','Curry','Pineapple','Papaya','Palm','Dragonfruit'],
+  balanced:  ['Apple','Banana','Orange','Curry','Pineapple','Papaya','Papaya','Papaya'],   // Papaya caps balanced — cheaper than Palm/Dragonfruit
+  cheap:     ['Apple','Banana','Banana','Pineapple','Pineapple','Papaya','Papaya','Papaya'], // Pineapple/Papaya are the established budget picks
+};
+const HARDWOOD_PREFERENCE = {
+  expensive: ['Teak','Mahogany'],
+  balanced:  ['Teak','Mahogany'],
+  cheap:     ['Teak','Teak'], // Teak's lower cost/xp than Mahogany makes it the budget pick even once Mahogany unlocks
+};
+
+function pickTierByPreference(trees, level, speed, preferenceMap){
+  const available = trees.filter(t => t.level <= level);
+  if(!available.length) return null;
+  const preference = preferenceMap[speed] || preferenceMap.expensive;
+  // Walk the preference list in order, taking the LAST entry whose tree is unlocked at this level —
+  // this naturally caps out at the intended tier for that speed (e.g. Balanced stays on Yew even once Magic unlocks).
+  let chosen = available[0];
+  for(let i=0;i<preference.length;i++){
+    const name = preference[i];
+    const tier = available.find(t => t.name===name);
+    if(tier && trees.find(t=>t.name===name)?.level <= level) chosen = tier;
+  }
+  return chosen;
+}
+
+function pickTier(trees, level, speed){
+  if(trees===REGULAR_TREES) return pickTierByPreference(trees, level, speed, REGULAR_TREE_PREFERENCE);
+  if(trees===FRUIT_TREES) return pickTierByPreference(trees, level, speed, FRUIT_TREE_PREFERENCE);
+  if(trees===HARDWOOD_TREES) return pickTierByPreference(trees, level, speed, HARDWOOD_PREFERENCE);
+  const available = trees.filter(t => t.level <= level);
+  return available.length ? available[available.length-1] : null;
+}
+
+function pickHerbTier(level){
+  const available = HERBS.filter(h => h.level <= level);
+  return available.length ? available[available.length-1] : null;
+}
+
+// ── GENERATE PLAN ─────────────────────────────────────────
+// ── CUSTOM MODE ───────────────────────────────────────────
+function renderCustomMode(){
+  const curLevel = levelForXp(playerXp);
+  const panel = document.getElementById('customPanel');
+
+  const regularOptions = REGULAR_TREES.filter(t=>t.level<=curLevel);
+  const fruitOptions = FRUIT_TREES.filter(t=>t.level<=curLevel);
+  const hardwoodOptions = HARDWOOD_TREES.filter(t=>t.level<=curLevel);
+  const herbOptions = HERBS.filter(h=>h.level<=curLevel);
+
+  // Default selections to the highest unlocked tier the first time this renders
+  if(customState.regularTreeName===null && regularOptions.length) customState.regularTreeName = regularOptions[regularOptions.length-1].name;
+  if(customState.fruitTreeName===null && fruitOptions.length) customState.fruitTreeName = fruitOptions[fruitOptions.length-1].name;
+  if(customState.hardwoodName===null && hardwoodOptions.length) customState.hardwoodName = hardwoodOptions[hardwoodOptions.length-1].name;
+  if(customState.herbName===null && herbOptions.length) customState.herbName = herbOptions[herbOptions.length-1].name;
+
+  const opt = (arr, sel) => arr.map(t=>`<option value="${t.name}" ${t.name===sel?'selected':''}>${t.name} (Lvl ${t.level})</option>`).join('');
+
+  panel.innerHTML = `
+    <div class="custom-grid">
+      <div class="custom-group">
+        <div class="custom-group-title">🌳 Regular Tree</div>
+        <select class="custom-select" id="customRegularSelect">
+          <option value="">— None —</option>
+          ${opt(regularOptions, customState.regularTreeName)}
+        </select>
+        <div class="custom-runs-row">
+          <input type="number" id="customTreeRuns" min="0" max="6" step="1" value="${customState.treeRunsPerDay}">
+          <span class="custom-runs-label">runs/day</span>
+        </div>
+        ${customState.regularTreeName ? `<div class="custom-runs-label" style="margin-top:6px;">⏱ Grow time: ${fmtTime(REGULAR_TREES.find(t=>t.name===customState.regularTreeName).growMin)}</div>` : ''}
+      </div>
+
+      <div class="custom-group">
+        <div class="custom-group-title">🍎 Fruit Tree</div>
+        <select class="custom-select" id="customFruitSelect">
+          <option value="">— None —</option>
+          ${opt(fruitOptions, customState.fruitTreeName)}
+        </select>
+        <div class="custom-runs-row">
+          <span class="custom-runs-label">Fixed at 1 run/day — fruit trees take ${customState.fruitTreeName ? fmtTime(FRUIT_TREES.find(t=>t.name===customState.fruitTreeName).growMin) : '16h'} to grow, too slow for multiple daily runs</span>
+        </div>
+      </div>
+
+      <div class="custom-group">
+        <div class="custom-group-title">🪵 Hardwood Tree</div>
+        <select class="custom-select" id="customHardwoodSelect">
+          <option value="">— None —</option>
+          ${opt(hardwoodOptions, customState.hardwoodName)}
+        </select>
+        <div class="custom-runs-row">
+          <span class="custom-runs-label">${customState.hardwoodName ? `Grows in ${(HARDWOOD_TREES.find(t=>t.name===customState.hardwoodName).growMin/60/24).toFixed(1)} days — checked whenever you pass by, not a "daily run"` : 'Select a hardwood tree above'}</span>
+        </div>
+      </div>
+
+      <div class="custom-group">
+        <div class="custom-group-title">🌿 Herb Patches</div>
+        <div class="custom-toggle-row">
+          <input type="checkbox" id="customHerbsEnabled" ${customState.herbsEnabled?'checked':''}>
+          <label for="customHerbsEnabled">Include herb runs in this plan</label>
+        </div>
+        <select class="custom-select" id="customHerbSelect" style="margin-top:10px;" ${!customState.herbsEnabled?'disabled':''}>
+          <option value="">— None —</option>
+          ${opt(herbOptions, customState.herbName)}
+        </select>
+        <div class="custom-runs-row">
+          <input type="number" id="customHerbRuns" min="0" max="6" step="1" value="${customState.herbRunsPerDay}" ${!customState.herbsEnabled?'disabled':''}>
+          <span class="custom-runs-label">runs/day (herbs take 80min to grow — up to ~6 runs/day possible)</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Wire up listeners
+  document.getElementById('customRegularSelect').addEventListener('change', e=>{ customState.regularTreeName = e.target.value || null; generatePlan(); });
+  document.getElementById('customFruitSelect').addEventListener('change', e=>{ customState.fruitTreeName = e.target.value || null; generatePlan(); });
+  document.getElementById('customHardwoodSelect').addEventListener('change', e=>{ customState.hardwoodName = e.target.value || null; renderCustomMode(); generatePlan(); });
+  document.getElementById('customHerbSelect').addEventListener('change', e=>{ customState.herbName = e.target.value || null; generatePlan(); });
+  document.getElementById('customHerbsEnabled').addEventListener('change', e=>{
+    customState.herbsEnabled = e.target.checked;
+    herbsEnabledGlobal = e.target.checked; // keep the global toggle in sync
+    const globalToggle=document.getElementById('globalHerbToggle');
+    if(globalToggle) globalToggle.checked = e.target.checked;
+    renderCustomMode();
+    generatePlan();
+  });
+  document.getElementById('customTreeRuns').addEventListener('input', e=>{ customState.treeRunsPerDay = parseInt(e.target.value)||0; generatePlan(); });
+  document.getElementById('customHerbRuns').addEventListener('input', e=>{ customState.herbRunsPerDay = parseInt(e.target.value)||0; generatePlan(); });
+
+  generatePlan();
+}
+
+// ── ROUTE GUIDE RENDERING ─────────────────────────────────
+// Builds a step-by-step teleport + run guide for whichever tracks are active in the current plan.
+// Filters each route's waypoints down to however many patches the player has actually unlocked,
+// since e.g. only having 3 of 6 regular tree patches means only the first 3 stops apply.
+function buildRouteSteps(routeData, patchCount){
+  return routeData.slice(0, Math.max(0, patchCount));
+}
+
+// Builds a direct OSRS Wiki URL for any item name — used to make every item in the route guide clickable.
+function wikiLink(name){
+  return `https://oldschool.runescape.wiki/w/${encodeURIComponent(name.replace(/ /g,'_'))}`;
+}
+
+function renderRouteStepHtml(step, index){
+  // Decide what to actually show for this step's teleport item based on the global tabs/runes toggle.
+  let carryHtml = '';
+  if(step.itemOnly){
+    carryHtml = `<a href="${wikiLink(step.itemOnly)}" target="_blank" rel="noopener" class="route-step-carry">🎒 ${step.itemOnly}</a>`;
+  } else if(useTabsGlobal && step.tabItem){
+    carryHtml = `<a href="${wikiLink(step.tabItem)}" target="_blank" rel="noopener" class="route-step-carry">🎒 ${step.tabItem}</a>`;
+  } else if(!useTabsGlobal && step.runeItems && step.runeItems.length){
+    const runeText = step.runeItems.map(r=>`${r.qty}× <a href="${wikiLink(r.name)}" target="_blank" rel="noopener">${r.name}</a>`).join(', ');
+    carryHtml = `<div class="route-step-carry">🎒 ${runeText}</div>`;
+  } else if(step.tabItem){
+    // Fallback to tab if no rune option exists for this particular teleport
+    carryHtml = `<a href="${wikiLink(step.tabItem)}" target="_blank" rel="noopener" class="route-step-carry">🎒 ${step.tabItem}</a>`;
+  }
+
+  return `<div class="route-step">
+    <div class="route-step-num">${index+1}</div>
+    <div class="route-step-body">
+      <div class="route-step-patch">${step.patch}</div>
+      <div class="route-step-tp">🔮 ${step.teleport}${step.teleport2?` <span class="route-step-tp-note">${step.teleport2}</span>`:''}</div>
+      ${carryHtml}
+      <div class="route-step-dir">${step.directions}</div>
+    </div>
+  </div>`;
+}
+
+function renderRouteSection(activeTracks, picks){
+  // activeTracks: {regularTree:bool, fruitTree:bool, hardwood:bool, herb:bool}
+  // picks: {regularTier, fruitTier, hardwoodTier, herbTier} — the actual tree/herb objects in use, for item lists
+  const regularPatches = countUnlockedPatches('regularTree');
+  const fruitPatches = countUnlockedPatches('fruitTree');
+  const hardwoodPatches = countUnlockedPatches('hardwood');
+  const herbPatches = countUnlockedPatches('herb');
+
+  let bodyHtml = '';
+  let anyTrack = false;
+  let sectionIdx = 0;
+
+  // Formats a stack quantity the way OSRS does: plain number under 100k, "123K" style abbreviation
+  // from 100k up to 10M, and "12M" beyond that. Below 100k items always show the exact number.
+  function fmtStackQty(n){
+    if(n>=10000000) return Math.floor(n/1000000)+'M';
+    if(n>=100000) return Math.floor(n/1000)+'K';
+    return n.toLocaleString();
+  }
+
+  // Renders a visual OSRS-style inventory grid (4 wide, always 28 slots like the real game) with item
+  // icons resolved live against the item mapping API. Every icon links to its OSRS Wiki page.
+  // Coins cover the gardener's "clear patch" fee, verified per the Wiki: 200 coins per regular tree,
+  // fruit tree, or hardwood patch cleared; Redwood is a special case at 2,000 coins (paid to Alexandra).
+  const CLEAR_FEE_PER_PATCH = 200;
+  const CLEAR_FEE_REDWOOD = 2000;
+  function buildInventoryGrid(steps, tierOrTiers, patchCount){
+    const seen = new Map(); // name -> accumulated quantity (for stackable items like coins/runes/payments)
+    const order = []; // ordered list of unique slot keys to render — unstacked items get one key per unit
+    const notedNames = new Set(); // payment items render with the noted parchment overlay — saplings/teleports/tools never can be noted
+    const tiers = Array.isArray(tierOrTiers) ? tierOrTiers : (tierOrTiers ? [tierOrTiers] : []);
+    const count = patchCount || 1;
+    let clearingCoins = 0;
+
+    function addSlot(name, qty, noted){
+      if(!name) return;
+      if(!seen.has(name)){ seen.set(name, 0); order.push(name); }
+      seen.set(name, seen.get(name) + qty);
+      if(noted) notedNames.add(name);
+    }
+    // Saplings are unstackable in OSRS — each one physically takes its own inventory slot, so a run
+    // needing 5 saplings shows 5 separate slot entries rather than one slot with a "×5" quantity badge.
+    function addUnstackedSlots(name, qty){
+      if(!name || qty<=0) return;
+      for(let i=0;i<qty;i++){
+        const key = `${name}#${i}`; // unique key per unit so each renders as its own slot
+        seen.set(key, 1);
+        order.push(key);
+      }
+    }
+
+    // Materials: one sapling per patch being planted, each taking its own unstacked inventory slot
+    // (saplings can't be noted or stacked — they're individual physical items), and payment item ×
+    // its quantity × patch count, carried NOTED to save inventory space (per Wiki: "This payment can
+    // be noted" — confirmed for every tree-protection item). Gated by the payments toggle UNLESS the
+    // tier marks it as always-required (herbs always need ultracompost).
+    tiers.forEach(tier=>{
+      const seedName = tier.seedName || (tier.name ? tier.name+' seed' : null);
+      addUnstackedSlots(seedName, count);
+      if((usePaymentsGlobal !== false || tier.alwaysRequired) && tier.payItem){
+        addSlot(tier.payItem, tier.payQty * count, true);
+      }
+      // Tally the gardener's clearing fee for this tier's patches — Redwood costs 2,000/patch, everything else 200/patch.
+      const feePerPatch = (tier.name === 'Redwood') ? CLEAR_FEE_REDWOOD : CLEAR_FEE_PER_PATCH;
+      clearingCoins += feePerPatch * count;
+    });
+    // Teleport items, respecting the tabs-vs-runes toggle, deduped and summed across all stops
+    steps.forEach(s=>{
+      if(s.itemOnly){
+        addSlot(s.itemOnly, 1, false);
+      } else if(useTabsGlobal && s.tabItem){
+        addSlot(s.tabItem, 1, false);
+      } else if(!useTabsGlobal && s.runeItems && s.runeItems.length){
+        s.runeItems.forEach(r=>addSlot(r.name, r.qty, false));
+      } else if(s.tabItem){
+        addSlot(s.tabItem, 1, false); // fallback if no rune option exists for this teleport
+      }
+    });
+    // Base tools — always exactly 1 each
+    ['Spade','Rake'].forEach(t=>addSlot(t, 1, false));
+    // Coins — scaled to the actual gardener clearing fees for every patch in this run (minimum 200
+    // even if no tier was matched, e.g. a herb-only run still needs walking-around money)
+    addSlot('Coins', clearingCoins || CLEAR_FEE_PER_PATCH, false);
+
+    const slots = order.map(slotKey=>{
+      const name = slotKey.includes('#') ? slotKey.split('#')[0] : slotKey; // strip unstacked-slot index suffix for display/lookup
+      const isUnstacked = slotKey.includes('#');
+      const qty = seen.get(slotKey);
+      const isNoted = notedNames.has(slotKey);
+      const iconSrc = name.toLowerCase()==='coins'
+        ? `https://oldschool.runescape.wiki/images/${coinIconFor(qty)}`
+        : iconUrl(name);
+      // Unstacked items (saplings) never show a quantity badge since each slot already represents exactly one unit.
+      const qtyHtml = (!isUnstacked && qty>1) ? `<span class="inv-slot-qty">${fmtStackQty(qty)}</span>` : '';
+      const inner = `${qtyHtml}
+        ${iconSrc ? `<img src="${iconSrc}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+        <span class="inv-slot-fallback" style="${iconSrc?'display:none;':'display:flex;'}">${name.slice(0,3)}</span>`;
+      const slotCls = isNoted ? 'inv-slot inv-slot-noted' : 'inv-slot';
+      const label = isNoted ? `${name} (noted)` : name;
+      return `<a href="${wikiLink(name)}" target="_blank" rel="noopener" class="${slotCls}" title="${label}${(!isUnstacked && qty>1)?' ×'+qty:''}">${inner}</a>`;
+    }).join('');
+
+    // Always pad to a full 28-slot inventory (4×7), matching the real OSRS inventory tab exactly,
+    // even when fewer items are needed — this is the actual visual the player will see in-game.
+    const totalSlots = 28;
+    const padding = Array(Math.max(0,totalSlots-order.length)).fill('<div class="inv-slot inv-slot-empty"></div>').join('');
+
+    // Build a deduplicated checklist (collapses the per-unit unstacked sapling keys back into one
+    // line each) showing every item name and its real total quantity needed for this run.
+    const checklistTotals = new Map(); // base name -> {qty, noted}
+    order.forEach(slotKey=>{
+      const baseName = slotKey.includes('#') ? slotKey.split('#')[0] : slotKey;
+      const qty = seen.get(slotKey);
+      const isNoted = notedNames.has(slotKey);
+      if(!checklistTotals.has(baseName)) checklistTotals.set(baseName, {qty:0, noted:isNoted});
+      checklistTotals.get(baseName).qty += qty;
+    });
+    const checklistHtml = Array.from(checklistTotals.entries()).map(([name, info])=>{
+      const displayQty = name.toLowerCase()==='coins' ? fmtStackQty(info.qty) : info.qty.toLocaleString();
+      return `<li><a href="${wikiLink(name)}" target="_blank" rel="noopener">${name}${info.noted?' <span class="checklist-noted-tag">(noted)</span>':''}</a><span class="checklist-qty">×${displayQty}</span></li>`;
+    }).join('');
+
+    // Build the RuneLite Bank Tags export string with layout positions.
+    // Verified format from a real working example: "banktags,1,tagname,iconItemId,layout,0,itemId,slot,itemId,slot,..."
+    // The icon item is the first resolved item in the list (the first sapling or most important item).
+    // Slot indexes follow a 4-wide grid, matching the exact 4-column layout used by the bank.
+    // Items whose IDs can't be resolved are skipped individually — the rest of the tag still exports correctly,
+    // so a few missing items don't block the whole export the way the previous version did.
+    const bankTagId = `farmrun${++bankTagCounter}`;
+    const bankTagSlots = [];
+    const unresolvedForTag = [];
+    let slotIndex = 0;
+    checklistTotals.forEach((info, name)=>{
+      const id = resolveItemId(name);
+      if(id){
+        bankTagSlots.push({id, slot:slotIndex});
+      } else {
+        unresolvedForTag.push(name);
+      }
+      slotIndex++;
+    });
+    const iconId = bankTagSlots.length ? bankTagSlots[0].id : 995;
+
+    // Plain bank tag format (confirmed from RuneLite 1.4.22 release notes and real export examples):
+    // "tagname,iconItemId,itemId1,itemId2,..." — no "banktags,1" prefix. Use "Import tag tab".
+    const plainTagString = bankTagSlots.length
+      ? `${bankTagId},${iconId},${bankTagSlots.map(s=>s.id).join(',')}`
+      : null;
+
+    // Layout bank tag format (confirmed from bank-tag-custom-layouts plugin real export example):
+    // "banktaglayoutsplugin:tagname,itemId:slotIndex,itemId:slotIndex,..."
+    // Requires the "Bank Tag Layouts" plugin from RuneLite plugin hub. Use "Import tag tab with layout".
+    const layoutTagString = bankTagSlots.length
+      ? `banktaglayoutsplugin:${bankTagId},${bankTagSlots.map(({id,slot})=>`${id}:${slot}`).join(',')}`
+      : null;
+
+    bankTagData[bankTagId] = {plain: plainTagString, layout: layoutTagString};
+
+    const unresolvedNote = unresolvedForTag.length ? ` (${unresolvedForTag.length} item${unresolvedForTag.length>1?'s':''} skipped)` : '';
+
+    return `<div class="route-inventory-grid-wrap">
+      <div class="route-inventory-title">🎒 Inventory Setup${usePaymentsGlobal===false?' <span style="color:var(--text-dim);font-weight:400;">(no protection payments — ultracompost only)</span>':''}${useTabsGlobal?'':' <span style="color:var(--text-dim);font-weight:400;">(runes instead of tablets)</span>'}</div>
+      <div class="route-inventory-layout">
+        <div class="osrs-inv-panel"><div class="inv-grid">${slots}${padding}</div></div>
+        <div class="route-inventory-checklist-wrap">
+          <ul class="route-inventory-checklist">${checklistHtml}</ul>
+          ${plainTagString
+            ? `<div style="display:flex;flex-direction:column;gap:6px;">
+                <button class="bank-tag-btn" data-bank-tag-id="${bankTagId}" data-bank-tag-type="plain" title='Right-click a tag tab in RuneLite → "Import tag tab", then paste. Works with the built-in Bank Tags plugin.'>📋 Copy — "Import tag tab"${unresolvedNote}</button>
+                <button class="bank-tag-btn" data-bank-tag-id="${bankTagId}" data-bank-tag-type="layout" style="border-color:var(--purple);color:var(--purple);" title='Right-click a tag tab in RuneLite → "Import tag tab with layout", then paste. Requires the Bank Tag Layouts plugin from Plugin Hub.'>📋 Copy — "Import tag tab with layout"${unresolvedNote}</button>
+                ${unresolvedNote ? `<div style="font-size:10px;color:var(--text-dim);font-style:italic;">${unresolvedForTag.join(', ')} couldn't be resolved</div>` : ''}
+              </div>`
+            : `<div class="bank-tag-unavailable">⚠ No items could be resolved — prices may still be loading, try again in a moment</div>`}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function section(key, title, steps, tier, patchCount){
+    anyTrack = true;
+    sectionIdx++;
+    const bodyId = `routeSec${sectionIdx}`;
+    return `<div class="route-track-section">
+      <div class="route-track-title route-track-toggle" data-target="${bodyId}">
+        <span>${title} (${steps.length} stop${steps.length===1?'':'s'})</span>
+        <span class="route-track-arrow">▾</span>
+      </div>
+      <div class="route-track-body" id="${bodyId}">
+        ${buildInventoryGrid(steps, tier, patchCount)}
+        ${steps.map(renderRouteStepHtml).join('')}
+      </div>
+    </div>`;
+  }
+
+  if(activeTracks.regularTree && regularPatches>0){
+    const steps = buildRouteSteps(REGULAR_TREE_ROUTE, regularPatches);
+    bodyHtml += section('regularTree', '🌳 Regular Tree Run', steps, picks?.regularTier, regularPatches);
+  }
+
+  // Combine Fruit Tree + Hardwood into one geographically-chained route when both are active,
+  // since Brimhaven and Fossil Island sit on the same travel path (per Wiki's own example route).
+  if(activeTracks.fruitTree && activeTracks.hardwood && fruitPatches>0 && hardwoodPatches>0){
+    const steps = buildRouteSteps(COMBINED_FRUIT_HARDWOOD_ROUTE, COMBINED_FRUIT_HARDWOOD_ROUTE.length);
+    anyTrack = true;
+    sectionIdx++;
+    const bodyId = `routeSec${sectionIdx}`;
+    // Fruit and hardwood tiers may need different patch counts, so we build the grid in two combined passes:
+    // pass fruitPatches as the count basis and merge in hardwood quantities separately.
+    bodyHtml += `<div class="route-track-section">
+      <div class="route-track-title route-track-toggle" data-target="${bodyId}">
+        <span>🍎🪵 Combined Fruit Tree + Hardwood Run (${steps.length} stops)</span>
+        <span class="route-track-arrow">▾</span>
+      </div>
+      <div class="route-track-body" id="${bodyId}">
+        ${buildInventoryGrid(steps, [picks?.fruitTier, picks?.hardwoodTier].filter(Boolean), Math.max(fruitPatches, hardwoodPatches))}
+        ${steps.map(renderRouteStepHtml).join('')}
+      </div>
+    </div>`;
+  } else {
+    if(activeTracks.fruitTree && fruitPatches>0){
+      const steps = buildRouteSteps(FRUIT_TREE_ROUTE, fruitPatches);
+      bodyHtml += section('fruitTree', '🍎 Fruit Tree Run', steps, picks?.fruitTier, fruitPatches);
+    }
+    if(activeTracks.hardwood && hardwoodPatches>0){
+      const steps = buildRouteSteps(HARDWOOD_ROUTE, Math.min(hardwoodPatches, HARDWOOD_ROUTE.length));
+      bodyHtml += section('hardwood', '🪵 Hardwood Run', steps, picks?.hardwoodTier, hardwoodPatches);
+    }
+  }
+
+  if(activeTracks.herb && herbPatches>0){
+    const steps = buildRouteSteps(HERB_ROUTE, herbPatches);
+    bodyHtml += section('herb', '🌿 Herb Run', steps, picks?.herbTier ? {seedName:picks.herbTier.seedName, payItem:ULTRACOMPOST_NAME, payQty:1, alwaysRequired:true} : null, herbPatches);
+  }
+
+  if(!anyTrack){
+    bodyHtml = `<div class="route-empty-note">No active tracks to route — unlock some patches or pick a tree/herb above.</div>`;
+  }
+
+  return `<div class="route-toggle-wrap">
+    <button class="route-toggle" id="routeToggle">
+      <span>🗺️ Step-by-Step Run Guide</span>
+      <span class="route-toggle-arrow" id="routeArrow">▾</span>
+    </button>
+    <div class="route-body" id="routeBody">${bodyHtml}</div>
+  </div>`;
+}
+
+// ── TARGET LEVEL COST/TIME ESTIMATE ───────────────────────
+// Projects the current daily XP and net daily cost forward to the player's chosen target level,
+// using the EXACT OSRS XP table (same one powering the rest of the planner) for the XP-remaining
+// calculation — no approximation. Shows total estimated cost, days needed, and finish-by date.
+function renderTargetLevelEstimate(curLevel, dailyXp, dailyCost, dailyHerbProfit, accent){
+  if(curLevel >= targetLevelVal){
+    return `<div class="target-estimate-card" style="--accent:${accent};margin-top:14px;">
+      <div class="target-estimate-title">🎯 Target Level ${targetLevelVal}</div>
+      <div class="target-estimate-done">🎉 Already reached! No further training needed for this target.</div>
+    </div>`;
+  }
+  if(dailyXp<=0){
+    return `<div class="target-estimate-card" style="--accent:${accent};margin-top:14px;">
+      <div class="target-estimate-title">🎯 Target Level ${targetLevelVal}</div>
+      <div class="target-estimate-done">Select a method above to see an estimate for reaching this level.</div>
+    </div>`;
+  }
+
+  const xpRemaining = Math.max(0, xpForLevel(targetLevelVal) - playerXp);
+  const daysNeeded = xpRemaining / dailyXp;
+  const netDailyCost = dailyCost - dailyHerbProfit; // positive = net spend per day, negative = net profit per day
+  const totalCost = netDailyCost * daysNeeded;
+
+  const finishDate = new Date();
+  finishDate.setDate(finishDate.getDate() + Math.ceil(daysNeeded));
+  const finishDateStr = finishDate.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+
+  const costLabel = totalCost>=0 ? 'Est. Total Cost' : 'Est. Total Profit';
+  const costColor = totalCost>=0 ? '#e74c3c' : '#2ecc71';
+
+  return `<div class="target-estimate-card" style="--accent:${accent};margin-top:14px;">
+    <div class="target-estimate-title">🎯 Reaching Level ${targetLevelVal}</div>
+    <div class="target-estimate-grid">
+      <div class="target-estimate-stat"><div class="target-estimate-label">XP Remaining</div><div class="target-estimate-value">${fmt(xpRemaining)}</div></div>
+      <div class="target-estimate-stat"><div class="target-estimate-label">Est. Time</div><div class="target-estimate-value">${daysNeeded<1?Math.ceil(daysNeeded*24)+' hrs':daysNeeded.toFixed(1)+' days'}</div></div>
+      <div class="target-estimate-stat"><div class="target-estimate-label">Finish By</div><div class="target-estimate-value">${finishDateStr}</div></div>
+      <div class="target-estimate-stat target-estimate-cost"><div class="target-estimate-label">${costLabel}</div><div class="target-estimate-value" style="color:${costColor};">${fmtGp(Math.abs(totalCost))}</div></div>
+    </div>
+    <div class="target-estimate-note">Based on your current method selections and daily run assumptions — actual cost will vary with live GE prices and how consistently you complete runs.</div>
+  </div>`;
+}
+
+function wireRouteToggle(){
+  const toggleBtn=document.getElementById('routeToggle');
+  if(toggleBtn){
+    toggleBtn.addEventListener('click',()=>{
+      document.getElementById('routeBody').classList.toggle('show');
+      document.getElementById('routeArrow').classList.toggle('open');
+    });
+  }
+  const timelineBtn=document.getElementById('timelineToggle');
+  if(timelineBtn){
+    timelineBtn.addEventListener('click',()=>{
+      document.getElementById('timelineBody').classList.toggle('show');
+      document.getElementById('timelineArrow').classList.toggle('open');
+    });
+  }
+  // Per-section collapse toggles within the route guide — default collapsed to keep page short
+  document.querySelectorAll('.route-track-toggle').forEach(t=>{
+    t.addEventListener('click',()=>{
+      const target=document.getElementById(t.dataset.target);
+      target.classList.toggle('show');
+      t.classList.toggle('open');
+    });
+  });
+}
+
+// ── CUSTOM PLAN GENERATION ────────────────────────────────
+function generateCustomPlan(){
+  const planArea = document.getElementById('planArea');
+  const curLevel = levelForXp(playerXp);
+  const accent = '#9b6fd6';
+
+  const regularPatches = countUnlockedPatches('regularTree');
+  const fruitPatches = countUnlockedPatches('fruitTree');
+  const hardwoodPatches = countUnlockedPatches('hardwood');
+  const herbPatches = countUnlockedPatches('herb');
+
+  const regularTier = customState.regularTreeName ? REGULAR_TREES.find(t=>t.name===customState.regularTreeName) : null;
+  const fruitTier = customState.fruitTreeName ? FRUIT_TREES.find(t=>t.name===customState.fruitTreeName) : null;
+  const hardwoodTier = customState.hardwoodName ? HARDWOOD_TREES.find(t=>t.name===customState.hardwoodName) : null;
+  const herbTier = (customState.herbsEnabled && customState.herbName) ? HERBS.find(h=>h.name===customState.herbName) : null;
+
+  let html = `<div class="section-title">🛠️ Your Custom Plan <span class="section-sub">Level ${curLevel} — fully configured by you</span></div>`;
+  html += `<div class="track-grid">`;
+
+  let dailyXp = 0, dailyCost = 0, dailyHerbProfit = 0;
+  const priceNote = pricesLoaded ? '' : ' (estimate — live prices still loading)';
+
+  // When payments are toggled off, swap the gardener payment for a single ultracompost dose per patch instead.
+  // This is the standard no-payment alternative — cheaper but the tree has a chance to die from disease.
+  function protectionCost(tier){
+    if(usePaymentsGlobal) return priceOf(tier.payItem) * tier.payQty;
+    return priceOf(ULTRACOMPOST_NAME);
+  }
+  function protectionLabel(tier){
+    if(usePaymentsGlobal) return `${tier.payQty}× ${tier.payItem}`;
+    return `1× Ultracompost (no protection payment)`;
+  }
+
+  // Regular tree
+  if(regularTier && regularPatches>0){
+    const xpPerTree = regularTier.plantXp + regularTier.checkXp;
+    const seedCost = priceOf(regularTier.seedName);
+    const payCost = protectionCost(regularTier);
+    const costPerTree = seedCost + payCost;
+    const treesPerDay = regularPatches * customState.treeRunsPerDay;
+    const runDailyXp = xpPerTree * treesPerDay;
+    const runDailyCost = costPerTree * treesPerDay;
+    dailyXp += runDailyXp; dailyCost += runDailyCost;
+    html += `<div class="track-card" style="--accent:${accent};">
+      <div class="track-card-header">
+        <div>
+          <div class="track-card-name">${regularTier.name} Trees</div>
+          <div class="track-card-level">${regularPatches} patches × ${customState.treeRunsPerDay}/day</div>
+        </div>
+      </div>
+      <div class="track-stat-row">
+        <div class="track-stat"><div class="track-stat-label">XP/tree</div><div class="track-stat-value">${fmt(xpPerTree)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Cost/tree${priceNote}</div><div class="track-stat-value">${fmtGp(costPerTree)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Daily XP</div><div class="track-stat-value" style="color:var(--gold);">${fmt(runDailyXp)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Daily cost</div><div class="track-stat-value" style="color:var(--red);">${fmtGp(runDailyCost)}</div></div>
+      </div>
+      <div class="track-card-note">Seed ${fmtGp(seedCost)} + ${protectionLabel(regularTier)} (${fmtGp(payCost)})</div>
+    </div>`;
+  }
+
+  // Fruit tree
+  if(fruitTier && fruitPatches>0){
+    const xpPerTree = fruitTier.plantXp + fruitTier.checkXp;
+    const seedCost = priceOf(fruitTier.seedName);
+    const payCost = protectionCost(fruitTier);
+    const costPerTree = seedCost + payCost;
+    const treesPerDay = fruitPatches * customState.fruitRunsPerDay;
+    const runDailyXp = xpPerTree * treesPerDay;
+    const runDailyCost = costPerTree * treesPerDay;
+    dailyXp += runDailyXp; dailyCost += runDailyCost;
+    html += `<div class="track-card" style="--accent:${accent};">
+      <div class="track-card-header">
+        <div>
+          <div class="track-card-name">${fruitTier.name} Trees</div>
+          <div class="track-card-level">${fruitPatches} patches × ${customState.fruitRunsPerDay}/day</div>
+        </div>
+      </div>
+      <div class="track-stat-row">
+        <div class="track-stat"><div class="track-stat-label">XP/tree</div><div class="track-stat-value">${fmt(xpPerTree)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Cost/tree${priceNote}</div><div class="track-stat-value">${fmtGp(costPerTree)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Daily XP</div><div class="track-stat-value" style="color:var(--gold);">${fmt(runDailyXp)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Daily cost</div><div class="track-stat-value" style="color:var(--red);">${fmtGp(runDailyCost)}</div></div>
+      </div>
+      <div class="track-card-note">Seed ${fmtGp(seedCost)} + ${protectionLabel(fruitTier)} (${fmtGp(payCost)})</div>
+    </div>`;
+  }
+
+  // Hardwood tree (shown per-cycle, not daily, since growth is multi-day)
+  if(hardwoodTier && hardwoodPatches>0){
+    const xpPerTree = hardwoodTier.plantXp + hardwoodTier.checkXp;
+    const seedCost = priceOf(hardwoodTier.seedName);
+    const payCost = protectionCost(hardwoodTier);
+    const costPerTree = seedCost + payCost;
+    const cycleDays = hardwoodTier.growMin/60/24;
+    const cycleXp = xpPerTree * hardwoodPatches;
+    const cycleCost = costPerTree * hardwoodPatches;
+    const xpPerDayEquiv = cycleXp / cycleDays;
+    const costPerDayEquiv = cycleCost / cycleDays;
+    dailyXp += xpPerDayEquiv; dailyCost += costPerDayEquiv;
+    html += `<div class="track-card" style="--accent:${accent};">
+      <div class="track-card-header">
+        <div>
+          <div class="track-card-name">${hardwoodTier.name} Trees</div>
+          <div class="track-card-level">${hardwoodPatches} patches, every ${cycleDays.toFixed(1)} days</div>
+        </div>
+      </div>
+      <div class="track-stat-row">
+        <div class="track-stat"><div class="track-stat-label">XP/tree</div><div class="track-stat-value">${fmt(xpPerTree)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Cost/tree${priceNote}</div><div class="track-stat-value">${fmtGp(costPerTree)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">XP per cycle</div><div class="track-stat-value" style="color:var(--gold);">${fmt(cycleXp)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Cost per cycle</div><div class="track-stat-value" style="color:var(--red);">${fmtGp(cycleCost)}</div></div>
+      </div>
+      <div class="track-card-note">Averages to ${fmt(xpPerDayEquiv)} xp/day and ${fmtGp(costPerDayEquiv)}/day — included in your daily total below.</div>
+    </div>`;
+  }
+
+  // Herb (with profit estimate) — ultracompost is always required for herbs, regardless of the payments toggle,
+  // since herb patches have no gardener-protection option at all in the real game.
+  if(herbTier && herbPatches>0){
+    const seedCost = priceOf(herbTier.seedName);
+    const ultraCost = priceOf(ULTRACOMPOST_NAME);
+    const herbSellPrice = sellPriceOf(herbTier.grimyName);
+    const xpPerPatch = herbTier.xpPerHerb * HERB_YIELD_PER_PATCH;
+    const revenuePerPatch = herbSellPrice * HERB_YIELD_PER_PATCH;
+    const costPerPatch = seedCost + ultraCost; // 1 seed + 1 ultracompost per patch — standard herb patch planting
+    const profitPerPatch = revenuePerPatch - costPerPatch;
+    const runsPerDay = customState.herbRunsPerDay;
+    const dailyHerbXp = xpPerPatch * herbPatches * runsPerDay;
+    const dailyProfit = profitPerPatch * herbPatches * runsPerDay;
+    dailyXp += dailyHerbXp;
+    dailyHerbProfit = dailyProfit;
+    const profitCls = dailyProfit>=0 ? 'var(--green)' : 'var(--red)';
+    html += `<div class="track-card" style="--accent:${accent};">
+      <div class="track-card-header">
+        <div>
+          <div class="track-card-name">${herbTier.name}</div>
+          <div class="track-card-level">${herbPatches} patches × ${runsPerDay}/day</div>
+        </div>
+      </div>
+      <div class="track-stat-row">
+        <div class="track-stat"><div class="track-stat-label">XP/patch</div><div class="track-stat-value">${fmt(xpPerPatch)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Seed + ultracompost${priceNote}</div><div class="track-stat-value">${fmtGp(costPerPatch)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Daily XP</div><div class="track-stat-value" style="color:var(--gold);">${fmt(dailyHerbXp)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Daily profit</div><div class="track-stat-value" style="color:${profitCls};">${fmtGp(dailyProfit)}</div></div>
+      </div>
+      <div class="track-card-note">~${HERB_YIELD_PER_PATCH} herbs/patch at ${fmtGp(herbSellPrice)} each (grimy, instant-sell estimate) — assumes ultracompost + magic secateurs.</div>
+    </div>`;
+  } else if(customState.herbsEnabled===false){
+    html += `<div class="track-card" style="--accent:${accent};"><div class="track-card-empty">Herb runs disabled — toggle them on above to include in your plan.</div></div>`;
+  }
+
+  html += `</div>`;
+
+  // ── DAILY SUMMARY ──
+  const totalCostCls = dailyCost>=0 ? '#e74c3c' : '#2ecc71';
+  const netDaily = dailyHerbProfit - dailyCost;
+  html += `<div class="plan-summary" style="margin-top:24px;">
+    <div class="plan-summary-stat"><div class="plan-summary-label">Current Level</div><div class="plan-summary-value accent">${curLevel}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">Daily XP</div><div class="plan-summary-value">${fmt(dailyXp)}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">Tree Costs/Day</div><div class="plan-summary-value" style="color:${totalCostCls};">${fmtGp(dailyCost)}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">Herb Profit/Day</div><div class="plan-summary-value" style="color:${dailyHerbProfit>=0?'#2ecc71':'#e74c3c'};">${fmtGp(dailyHerbProfit)}</div></div>
+    <div class="plan-summary-divider"></div>
+    <div class="plan-summary-total"><div class="plan-summary-label">Net Daily ${netDaily>=0?'Profit':'Cost'}</div><div class="plan-summary-value" style="color:${netDaily>=0?'#2ecc71':'#e74c3c'};">${fmtGp(Math.abs(netDaily))}</div></div>
+  </div>`;
+
+  html += renderTargetLevelEstimate(curLevel, dailyXp, dailyCost, dailyHerbProfit, accent);
+
+  if(!pricesLoaded){
+    html += `<div style="font-size:11px;color:var(--text-dim);font-style:italic;margin-top:8px;">⏳ Live Grand Exchange prices are still loading — costs above will update automatically once ready.</div>`;
+  }
+
+  html += renderRouteSection({
+    regularTree: !!regularTier,
+    fruitTree: !!fruitTier,
+    hardwood: !!hardwoodTier,
+    herb: !!herbTier,
+  }, {regularTier, fruitTier, hardwoodTier, herbTier});
+
+  planArea.innerHTML = html;
+  wireRouteToggle();
+}
+
+function generatePlan(){
+  if(currentSpeed==='custom'){
+    generateCustomPlan();
+    return;
+  }
+
+  const planArea = document.getElementById('planArea');
+  const curLevel = levelForXp(playerXp);
+  const accentMap = {expensive:'#e74c3c', balanced:'#c8a84b', cheap:'#2ecc71'};
+  const accent = accentMap[currentSpeed];
+
+  const regularPatches = countUnlockedPatches('regularTree');
+  const fruitPatches = countUnlockedPatches('fruitTree');
+  const hardwoodPatches = countUnlockedPatches('hardwood');
+  const herbPatches = countUnlockedPatches('herb');
+
+  // Pick tiers based on speed setting — preference logic lives inside pickTier now
+  const regularTier = pickTier(REGULAR_TREES, curLevel, currentSpeed);
+  const fruitTier = pickTier(FRUIT_TREES, curLevel, currentSpeed);
+  const hardwoodTier = pickTier(HARDWOOD_TREES, curLevel, currentSpeed);
+  const herbTier = herbsEnabledGlobal ? pickHerbTier(curLevel) : null;
+
+  let totalXpPerRun = 0;
+  let totalCostPerRun = 0; // sum of seed + protection costs across all active tree/hardwood tiers
+  let totalHerbProfitPerRun = 0; // herb runs typically profit rather than cost, tracked separately
+
+  let html = '';
+
+  // ── TODAY'S RUN cards ──
+  html += `<div class="section-title">🌱 What To Plant Right Now <span class="section-sub">Based on Level ${curLevel} and your unlocked patches</span></div>`;
+  html += `<div class="track-grid">`;
+
+  // Regular tree card
+  if(regularTier && regularPatches>0){
+    const runXp = (regularTier.plantXp + regularTier.checkXp) * regularPatches;
+    totalXpPerRun += runXp;
+    const regularPayCost = usePaymentsGlobal ? priceOf(regularTier.payItem)*regularTier.payQty : priceOf(ULTRACOMPOST_NAME);
+    totalCostPerRun += (priceOf(regularTier.seedName) + regularPayCost) * regularPatches;
+    html += `<div class="track-card" style="--accent:${accent};">
+      <div class="track-card-header">
+        <img class="track-card-icon" src="https://oldschool.runescape.wiki/images/${regularTier.name}_sapling.png" onerror="this.style.display='none'" alt="">
+        <div>
+          <div class="track-card-name">${regularTier.name} Trees</div>
+          <div class="track-card-level">Requires Lvl ${regularTier.level}</div>
+        </div>
+        <div class="track-card-patches">${regularPatches} patch${regularPatches===1?'':'es'}</div>
+      </div>
+      <div class="track-stat-row">
+        <div class="track-stat"><div class="track-stat-label">XP per tree</div><div class="track-stat-value">${fmt(regularTier.plantXp+regularTier.checkXp)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">XP this run</div><div class="track-stat-value" style="color:var(--gold);">${fmt(runXp)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Grow time</div><div class="track-stat-value">${fmtTime(regularTier.growMin)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Protection</div><div class="track-stat-value">${usePaymentsGlobal?`${regularTier.payQty}× ${regularTier.payItem}`:'Ultracompost'}</div></div>
+      </div>
+      <div class="track-card-note">${usePaymentsGlobal?`Pay the gardener with ${regularTier.payQty} ${regularTier.payItem.toLowerCase()}${regularTier.payQty>1?'s':''} per tree to guarantee survival.`:'Using ultracompost instead of gardener payment — cheaper, but the tree has a chance to die from disease.'}</div>
+    </div>`;
+  } else {
+    html += `<div class="track-card" style="--accent:${accent};"><div class="track-card-empty">No regular tree patches unlocked at this level yet.</div></div>`;
+  }
+
+  // Fruit tree card
+  if(fruitTier && fruitPatches>0){
+    const runXp = (fruitTier.plantXp + fruitTier.checkXp) * fruitPatches;
+    totalXpPerRun += runXp;
+    const fruitPayCost = usePaymentsGlobal ? priceOf(fruitTier.payItem)*fruitTier.payQty : priceOf(ULTRACOMPOST_NAME);
+    totalCostPerRun += (priceOf(fruitTier.seedName) + fruitPayCost) * fruitPatches;
+    html += `<div class="track-card" style="--accent:${accent};">
+      <div class="track-card-header">
+        <img class="track-card-icon" src="https://oldschool.runescape.wiki/images/${fruitTier.name}_sapling.png" onerror="this.style.display='none'" alt="">
+        <div>
+          <div class="track-card-name">${fruitTier.name} Trees</div>
+          <div class="track-card-level">Requires Lvl ${fruitTier.level}</div>
+        </div>
+        <div class="track-card-patches">${fruitPatches} patch${fruitPatches===1?'':'es'}</div>
+      </div>
+      <div class="track-stat-row">
+        <div class="track-stat"><div class="track-stat-label">XP per tree</div><div class="track-stat-value">${fmt(fruitTier.plantXp+fruitTier.checkXp)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">XP this run</div><div class="track-stat-value" style="color:var(--gold);">${fmt(runXp)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Grow time</div><div class="track-stat-value">${fmtTime(fruitTier.growMin)} (~once/day)</div></div>
+        <div class="track-stat"><div class="track-stat-label">Protection</div><div class="track-stat-value">${usePaymentsGlobal?`${fruitTier.payQty}× ${fruitTier.payItem}`:'Ultracompost'}</div></div>
+      </div>
+      <div class="track-card-note">Fruit trees take ~16hrs — best done once per day alongside your tree run.</div>
+    </div>`;
+  } else {
+    html += `<div class="track-card" style="--accent:${accent};"><div class="track-card-empty">No fruit tree patches unlocked at this level yet.</div></div>`;
+  }
+
+  // Hardwood card
+  if(hardwoodTier && hardwoodPatches>0){
+    const runXp = (hardwoodTier.plantXp + hardwoodTier.checkXp) * hardwoodPatches;
+    totalXpPerRun += runXp; // note: only earned every multi-day cycle, shown separately below
+    const hwPayCost = usePaymentsGlobal ? priceOf(hardwoodTier.payItem)*hardwoodTier.payQty : priceOf(ULTRACOMPOST_NAME);
+    const hwCycleCost = (priceOf(hardwoodTier.seedName) + hwPayCost) * hardwoodPatches;
+    const hwCycleDays = hardwoodTier.growMin/60/24;
+    totalCostPerRun += hwCycleCost / hwCycleDays; // normalized to a daily-equivalent cost since this grows over multiple days
+    html += `<div class="track-card" style="--accent:${accent};">
+      <div class="track-card-header">
+        <img class="track-card-icon" src="https://oldschool.runescape.wiki/images/${hardwoodTier.name}_sapling.png" onerror="this.style.display='none'" alt="">
+        <div>
+          <div class="track-card-name">${hardwoodTier.name} Trees</div>
+          <div class="track-card-level">Requires Lvl ${hardwoodTier.level}</div>
+        </div>
+        <div class="track-card-patches">${hardwoodPatches} patch${hardwoodPatches===1?'':'es'}</div>
+      </div>
+      <div class="track-stat-row">
+        <div class="track-stat"><div class="track-stat-label">XP per tree</div><div class="track-stat-value">${fmt(hardwoodTier.plantXp+hardwoodTier.checkXp)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">XP per cycle</div><div class="track-stat-value" style="color:var(--gold);">${fmt(runXp)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Grow time</div><div class="track-stat-value">${fmtTime(hardwoodTier.growMin)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Protection</div><div class="track-stat-value">${usePaymentsGlobal?`${hardwoodTier.payQty}× ${hardwoodTier.payItem}`:'Ultracompost'}</div></div>
+      </div>
+      <div class="track-card-note">Hardwood trees take ${(hardwoodTier.growMin/60/24).toFixed(1)} days to grow — check every few days, not part of your daily total below.</div>
+    </div>`;
+  } else {
+    html += `<div class="track-card" style="--accent:${accent};"><div class="track-card-empty">No hardwood patches unlocked — requires Bone Voyage quest (Fossil Island) at minimum.</div></div>`;
+  }
+
+  // Herb card
+  if(herbTier && herbPatches>0){
+    const xpPerPatch = herbTier.xpPerHerb * HERB_YIELD_PER_PATCH;
+    const runXp = xpPerPatch * herbPatches;
+    totalXpPerRun += runXp;
+    const herbSeedCost = priceOf(herbTier.seedName);
+    const herbUltraCost = priceOf(ULTRACOMPOST_NAME);
+    const herbRevenue = sellPriceOf(herbTier.grimyName) * HERB_YIELD_PER_PATCH;
+    totalHerbProfitPerRun += (herbRevenue - herbSeedCost - herbUltraCost) * herbPatches;
+    html += `<div class="track-card" style="--accent:${accent};">
+      <div class="track-card-header">
+        <img class="track-card-icon" src="https://oldschool.runescape.wiki/images/${herbTier.name.replace(' ','_')}_seed.png" onerror="this.style.display='none'" alt="">
+        <div>
+          <div class="track-card-name">${herbTier.name}</div>
+          <div class="track-card-level">Requires Lvl ${herbTier.level}</div>
+        </div>
+        <div class="track-card-patches">${herbPatches} patch${herbPatches===1?'':'es'}</div>
+      </div>
+      <div class="track-stat-row">
+        <div class="track-stat"><div class="track-stat-label">XP per herb</div><div class="track-stat-value">${herbTier.xpPerHerb}</div></div>
+        <div class="track-stat"><div class="track-stat-label">XP this run</div><div class="track-stat-value" style="color:var(--gold);">${fmt(runXp)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Grow time</div><div class="track-stat-value">${fmtTime(HERB_GROW_MIN)}</div></div>
+        <div class="track-stat"><div class="track-stat-label">Avg yield/patch</div><div class="track-stat-value">~${HERB_YIELD_PER_PATCH} herbs</div></div>
+      </div>
+      <div class="track-card-note">Use ultracompost + magic secateurs for best yield. Herb runs are also a strong source of GP to fund tree runs.</div>
+    </div>`;
+  } else if(!herbsEnabledGlobal){
+    html += `<div class="track-card" style="--accent:${accent};"><div class="track-card-empty">Herb runs are turned off — check "Include herb runs" above to add them back.</div></div>`;
+  } else {
+    html += `<div class="track-card" style="--accent:${accent};"><div class="track-card-empty">No herb patches unlocked yet — available from level 9.</div></div>`;
+  }
+
+  html += `</div>`;
+
+  // ── DAILY/WEEKLY XP SUMMARY ──
+  const tierDailyXp = totalXpPerRun*1.3; // assumes ~1.3 runs/day on average across tree+herb cadences
+  const tierDailyCost = totalCostPerRun*1.3;
+  const tierDailyHerbProfit = totalHerbProfitPerRun*1.3;
+  const tierNetDaily = tierDailyHerbProfit - tierDailyCost;
+  html += `<div class="plan-summary" style="margin-top:24px;">
+    <div class="plan-summary-stat"><div class="plan-summary-label">Current Level</div><div class="plan-summary-value accent">${curLevel}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">Tree+Herb XP/Run</div><div class="plan-summary-value">${fmt(totalXpPerRun)}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">Runs/Day</div><div class="plan-summary-value">~1-2</div></div>
+    <div class="plan-summary-divider"></div>
+    <div class="plan-summary-total"><div class="plan-summary-label">Est. Daily XP</div><div class="plan-summary-value">${fmt(tierDailyXp)}</div></div>
+  </div>`;
+
+  html += renderTargetLevelEstimate(curLevel, tierDailyXp, tierDailyCost, tierDailyHerbProfit, accent);
+
+  // ── PROGRESSION TIMELINE per track — collapsed by default to keep the page short ──
+  html += `<div class="route-toggle-wrap" style="margin-top:18px;">
+    <button class="route-toggle" id="timelineToggle" style="border-color:var(--gold-dim);">
+      <span>📈 Level Progression Tracks</span>
+      <span class="route-toggle-arrow" id="timelineArrow">▾</span>
+    </button>
+    <div class="route-body" id="timelineBody">
+      ${renderTimeline('🌳 Regular Tree Progression', REGULAR_TREES, curLevel, accent)}
+      ${renderTimeline('🍎 Fruit Tree Progression', FRUIT_TREES, curLevel, accent)}
+      ${renderTimeline('🪵 Hardwood Progression', HARDWOOD_TREES, curLevel, accent)}
+    </div>
+  </div>`;
+
+  html += renderRouteSection({
+    regularTree: !!regularTier,
+    fruitTree: !!fruitTier,
+    hardwood: !!hardwoodTier,
+    herb: !!herbTier,
+  }, {regularTier, fruitTier, hardwoodTier, herbTier});
+
+  planArea.innerHTML = html;
+  wireRouteToggle();
+}
+
+function renderTimeline(title, tiers, curLevel, accent){
+  let html = `<div class="section-title">${title}</div><div class="timeline-wrap"><div class="timeline-track" style="--accent:${accent};">`;
+  tiers.forEach(t=>{
+    const unlocked = curLevel >= t.level;
+    const isCurrent = unlocked && (tiers.indexOf(t)===tiers.length-1 || curLevel < tiers[tiers.indexOf(t)+1]?.level);
+    html += `<div class="timeline-node ${unlocked?'unlocked':''} ${isCurrent?'current':''}">
+      <div class="timeline-dot">${unlocked?'✓':'🔒'}</div>
+      <div class="timeline-label">${t.name}</div>
+      <div class="timeline-sublabel">Lvl ${t.level}</div>
+    </div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+// Initial render
+updateStatusCard();
+renderPatchToggles();
+generatePlan();
+loadPrices(); // kicks off live GE price fetch, re-renders plan + custom mode when done
+</script>
+</body>
+</html>

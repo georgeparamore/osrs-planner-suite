@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construction Training Planner – OSRS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap');
+:root{--bg:#0d0f14;--surface:#141720;--surface2:#1b1f2e;--border:#252a3a;--gold:#c8a84b;--gold-dim:#8a7030;--green:#2ecc71;--red:#e74c3c;--blue:#4a7eff;--text:#dde1ec;--text-dim:#6b7490;}
+[data-theme="light"]{--bg:#f0f2f5;--surface:#ffffff;--surface2:#e8eaf0;--border:#d0d4e0;--gold:#8a6a1a;--gold-dim:#b89030;--green:#1a8a45;--red:#c0392b;--blue:#2255cc;--text:#1a1e2e;--text-dim:#6b7490;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:16px;height:50px;flex-shrink:0;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--gold);letter-spacing:1px;text-decoration:none;}
+.logo span{color:var(--text-dim);font-weight:400;}
+.nav-back{font-size:13px;color:var(--text-dim);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;}
+.nav-back:hover{color:var(--gold);}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.theme-btn{background:none;border:none;cursor:pointer;font-size:17px;color:var(--text-dim);transition:color .2s;}
+.theme-btn:hover{color:var(--gold);}
+
+.main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px);}
+
+/* SKILL NAV (left rail, mirrors the GE skill profit page) */
+.skill-nav{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;}
+.skill-nav-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);padding:0 14px;margin-bottom:6px;}
+.skill-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;cursor:pointer;background:none;border:none;color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;text-align:left;transition:all .15s;border-left:3px solid transparent;}
+.skill-btn:hover{background:var(--surface2);color:var(--text);}
+.skill-btn.active{background:var(--surface2);color:var(--gold);border-left-color:var(--gold);}
+.skill-btn .skill-icon-img{width:22px;height:22px;object-fit:contain;flex-shrink:0;}
+.skill-btn.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.skill-btn .soon-badge{margin-left:auto;font-size:8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.3px;}
+
+/* CONTENT */
+.content{flex:1;display:flex;flex-direction:column;overflow-y:auto;min-width:0;}
+
+/* INPUT PANEL */
+.input-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 24px;flex-shrink:0;}
+.input-panel-top{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.skill-icon-large{width:32px;height:32px;object-fit:contain;}
+.skill-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;}
+.skill-desc{font-size:12px;color:var(--text-dim);margin-bottom:14px;}
+
+.input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.field-group{display:flex;flex-direction:column;gap:4px;}
+.field-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.field-group input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 11px;outline:none;transition:border-color .2s;}
+.field-group input:focus{border-color:var(--gold-dim);}
+.field-group input::placeholder{color:var(--text-dim);}
+#usernameInput{width:200px;}
+.fetch-btn{padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
+.fetch-btn:hover{opacity:.85;}
+.fetch-btn:disabled{opacity:.5;cursor:wait;}
+.or-divider{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;align-self:center;padding:0 4px;}
+.manual-toggle{padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.manual-toggle:hover{border-color:var(--gold-dim);}
+.manual-toggle.active{border-color:var(--gold);color:var(--gold);}
+
+#manualFields{display:none;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap;}
+#manualFields.show{display:flex;}
+
+.fetch-status{font-size:11px;margin-top:8px;display:none;align-items:center;gap:6px;}
+.fetch-status.show{display:flex;}
+.fetch-status.error{color:var(--red);}
+.fetch-status.success{color:var(--green);}
+.fetch-status.loading{color:var(--text-dim);}
+.spinner-sm{display:inline-block;width:11px;height:11px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* CURRENT STATUS CARD */
+.status-card{display:none;align-items:center;gap:20px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:8px;padding:12px 18px;margin-top:14px;}
+.status-card.show{display:flex;}
+.status-stat{display:flex;flex-direction:column;gap:1px;}
+.status-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.status-stat-value{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--gold);}
+.status-progress-wrap{flex:1;}
+.status-progress-bar{height:8px;background:var(--surface);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.status-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .4s ease;}
+.status-progress-text{font-size:10px;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;}
+
+/* SPEED SELECTOR */
+.speed-panel{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.speed-panel-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
+.speed-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+.speed-tab{flex:1;min-width:180px;display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .15s;}
+.speed-tab:hover{border-color:var(--gold-dim);}
+.speed-tab.active{border-color:var(--accent,var(--gold));background:rgba(200,168,75,.08);}
+.speed-tab-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.speed-tab-dot{width:9px;height:9px;border-radius:50%;}
+.speed-tab-sub{font-size:11px;color:var(--text-dim);}
+
+/* ROUTE / PLAN AREA */
+.plan-area{padding:20px 24px;flex:1;}
+.plan-summary{display:flex;gap:20px;flex-wrap:wrap;align-items:stretch;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:20px;}
+.plan-summary-stat{display:flex;flex-direction:column;gap:2px;min-width:110px;justify-content:center;}
+.plan-summary-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);display:flex;align-items:center;gap:4px;}
+.summary-icon{width:14px;height:14px;object-fit:contain;flex-shrink:0;}
+.summary-icon-npc{width:16px;height:16px;border-radius:50%;object-fit:cover;object-position:top;}
+.plan-summary-value{font-family:'Share Tech Mono',monospace;font-size:19px;}
+.plan-summary-value.accent{color:var(--gold);}
+
+/* Total Cost callout — the headline number, set apart from the supporting stats */
+.plan-summary-divider{width:1px;background:var(--border);align-self:stretch;margin:0 2px;}
+.plan-summary-total{display:flex;flex-direction:column;gap:2px;justify-content:center;background:linear-gradient(135deg,rgba(200,168,75,.16),rgba(200,168,75,.04));border:1px solid var(--gold-dim);border-radius:8px;padding:8px 18px;min-width:150px;}
+.plan-summary-total .plan-summary-label{color:var(--gold-dim);}
+.plan-summary-total .plan-summary-value{font-size:24px;font-weight:700;color:var(--gold);}
+
+/* ROUTE LINE (transit-map styled step list) */
+.route-line{position:relative;padding-left:34px;}
+.route-line::before{content:'';position:absolute;left:11px;top:8px;bottom:8px;width:3px;background:linear-gradient(var(--border),var(--border));border-radius:2px;}
+.route-stop{position:relative;margin-bottom:18px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;transition:border-color .15s;}
+.route-stop:hover{border-color:var(--gold-dim);}
+.route-stop::before{content:'';position:absolute;left:-28px;top:18px;width:14px;height:14px;border-radius:50%;background:var(--accent,var(--gold));border:3px solid var(--surface);box-shadow:0 0 0 2px var(--accent,var(--gold));}
+.route-stop-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+.route-stop-levels{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;color:var(--accent,var(--gold));white-space:nowrap;}
+.route-stop-name{font-size:15px;font-weight:600;flex:1;min-width:140px;}
+.route-stop-item-icon{width:28px;height:28px;object-fit:contain;flex-shrink:0;}
+.route-stop-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.route-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.route-badge.xp{background:rgba(200,168,75,.15);color:var(--gold);}
+.route-badge.cost{background:rgba(231,76,60,.13);color:var(--red);}
+.route-badge.cost.profit{background:rgba(46,204,113,.13);color:var(--green);}
+.route-badge.time{background:rgba(74,126,255,.13);color:var(--blue);}
+.route-stop-detail{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.route-stat{display:flex;flex-direction:column;gap:1px;}
+.route-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim);}
+.route-stat-value{font-family:'Share Tech Mono',monospace;font-size:13px;}
+.route-stop-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:8px;}
+
+.route-finish{position:relative;background:linear-gradient(135deg,rgba(200,168,75,.12),rgba(200,168,75,.02));border:1px solid var(--gold-dim);border-radius:10px;padding:16px 20px;text-align:center;margin-top:4px;}
+
+/* SHOPPING LIST DROPDOWN */
+.shopping-list-wrap{margin-top:22px;margin-left:34px;}
+.shopping-list-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:10px;padding:14px 20px;cursor:pointer;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;transition:background .15s;}
+.shopping-list-toggle:hover{background:var(--surface);}
+.shopping-toggle-arrow{font-size:14px;color:var(--text-dim);transition:transform .2s;}
+.shopping-toggle-arrow.open{transform:rotate(180deg);}
+.shopping-list-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:16px 20px;margin-top:-1px;}
+.shopping-list-body.show{display:block;}
+.shopping-table{width:100%;border-collapse:collapse;font-size:13px;}
+.shopping-table th{text-align:left;padding:6px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);border-bottom:2px solid var(--border);}
+.shopping-table td{padding:9px 10px;border-bottom:1px solid var(--border);}
+.shopping-table td.mono{font-family:'Share Tech Mono',monospace;text-align:right;}
+.shopping-table th:nth-child(3),.shopping-table th:nth-child(4),.shopping-table th:nth-child(5){text-align:right;}
+.shopping-icon{width:22px;height:22px;object-fit:contain;display:block;}
+.shopping-row-butler{background:rgba(231,76,60,.05);}
+.shopping-table tfoot td{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;padding-top:12px;border-top:2px solid var(--gold-dim);border-bottom:none;color:var(--gold);}
+.shopping-table tfoot td:last-child{text-align:right;font-family:'Share Tech Mono',monospace;}
+.shopping-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:12px;}
+.route-finish::before{content:'';position:absolute;left:-28px;top:50%;transform:translateY(-50%);width:16px;height:16px;border-radius:50%;background:var(--gold);border:3px solid var(--surface);box-shadow:0 0 0 2px var(--gold);}
+.route-finish-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--gold);}
+.route-finish-sub{font-size:12px;color:var(--text-dim);margin-top:3px;}
+
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:60px 20px;color:var(--text-dim);text-align:center;}
+.empty-state svg{opacity:.18;}
+.empty-state-title{font-size:15px;font-weight:600;color:var(--text);}
+.empty-state-sub{font-size:12px;max-width:320px;line-height:1.6;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="osrs-ge-tracker.html">GE<span>Tracker</span></a>
+  <span style="color:var(--border);">|</span>
+  <a class="nav-back" href="osrs-skill-profit.html">⚗️ Skill Profits</a>
+  <span style="color:var(--border);">|</span>
+  <span style="font-size:13px;color:var(--gold);">🗺️ Training Planner</span>
+  <div class="header-right">
+    <button class="theme-btn" id="themeBtn">🌙</button>
+  </div>
+</header>
+
+<div class="main">
+  <nav class="skill-nav">
+    <div class="skill-nav-title">Skills</div>
+    <button class="skill-btn active" data-skill="construction">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="">
+      Construction
+    </button>
+    <button class="skill-btn" data-skill="farming" onclick="location.href='osrs-farming-planner.html'">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="">
+      Farming
+    </button>
+    <button class="skill-btn" data-skill="herblore" onclick="location.href='osrs-herblore-planner.html'">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">
+      Herblore
+    </button>
+    <button class="skill-btn" data-skill="prayer" onclick="location.href='osrs-prayer-planner.html'">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">
+      Prayer
+    </button>
+    <button class="skill-btn disabled" data-skill="smithing">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">
+      Smithing <span class="soon-badge">Soon</span>
+    </button>
+    <button class="skill-btn disabled" data-skill="fletching">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">
+      Fletching <span class="soon-badge">Soon</span>
+    </button>
+    <button class="skill-btn disabled" data-skill="cooking">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">
+      Cooking <span class="soon-badge">Soon</span>
+    </button>
+    <button class="skill-btn disabled" data-skill="crafting">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">
+      Crafting <span class="soon-badge">Soon</span>
+    </button>
+  </nav>
+
+  <div class="content">
+    <div class="input-panel">
+      <div class="input-panel-top">
+        <img class="skill-icon-large" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="">
+        <div class="skill-title">Construction Training Planner</div>
+      </div>
+      <div class="skill-desc">Enter your username or set a starting level manually, then pick a training speed to generate your route to 99.</div>
+
+      <div class="input-row">
+        <div class="field-group">
+          <span class="field-label">OSRS Username</span>
+          <input type="text" id="usernameInput" placeholder="e.g. Zezima" autocomplete="off">
+        </div>
+        <button class="fetch-btn" id="fetchBtn">Fetch Stats</button>
+        <div class="field-group">
+          <span class="field-label">Target Level</span>
+          <input type="number" id="targetLevel" min="2" max="99" value="99">
+        </div>
+        <div class="or-divider">or</div>
+        <button class="manual-toggle" id="manualToggle">Enter Manually</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:6px;max-width:520px;">Pulls your live stats from Wise Old Man. If you're not tracked yet, it'll register you automatically on first lookup.</div>
+
+      <div id="manualFields">
+        <div class="field-group">
+          <span class="field-label">Current Level</span>
+          <input type="number" id="manualLevel" min="1" max="99" value="1">
+        </div>
+        <div class="field-group">
+          <span class="field-label">Current XP (optional, for precision)</span>
+          <input type="number" id="manualXp" min="0" placeholder="auto from level">
+        </div>
+        <button class="fetch-btn" id="applyManualBtn">Set Level</button>
+      </div>
+
+      <div class="fetch-status" id="fetchStatus"></div>
+
+      <div class="status-card" id="statusCard">
+        <div class="status-stat">
+          <div class="status-stat-label">Current</div>
+          <div class="status-stat-value" id="statusLevel">1</div>
+        </div>
+        <div class="status-progress-wrap">
+          <div class="status-progress-bar"><div class="status-progress-fill" id="statusProgressFill" style="width:0%"></div></div>
+          <div class="status-progress-text">
+            <span id="statusXpText">0 XP</span>
+            <span id="statusTargetText">Target: Level 99</span>
+          </div>
+        </div>
+        <div class="status-stat">
+          <div class="status-stat-label">XP Remaining</div>
+          <div class="status-stat-value" id="statusXpRemaining">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="speed-panel">
+      <div class="speed-panel-label">Training Speed</div>
+      <div class="speed-tabs">
+        <div class="speed-tab active" data-speed="fastest" style="--accent:#e74c3c;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#e74c3c;"></span>Fastest</div>
+          <div class="speed-tab-sub">Maximum XP/hr — usually the most expensive route</div>
+        </div>
+        <div class="speed-tab" data-speed="balanced" style="--accent:#c8a84b;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#c8a84b;"></span>Balanced</div>
+          <div class="speed-tab-sub">Good XP/hr at moderate cost</div>
+        </div>
+        <div class="speed-tab" data-speed="cheapest" style="--accent:#2ecc71;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#2ecc71;"></span>Cheapest</div>
+          <div class="speed-tab-sub">Lowest cost per XP — usually the slowest route</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="plan-area" id="planArea">
+      <div class="empty-state">
+        <svg width="56" height="56" viewBox="0 0 64 64" fill="none">
+          <path d="M8 52L24 16L32 32L40 12L56 52" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="24" cy="16" r="4" fill="currentColor"/>
+          <circle cx="32" cy="32" r="4" fill="currentColor"/>
+          <circle cx="40" cy="12" r="4" fill="currentColor"/>
+        </svg>
+        <div class="empty-state-title">Set your starting level to generate a route</div>
+        <div class="empty-state-sub">Fetch your stats from the Hiscores, or enter your level manually above, then pick a training speed.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// ── EXACT OSRS XP TABLE ──────────────────────────────────
+// Precomputed using the official formula: xp(L) = floor( (1/4) * sum_{n=1}^{L-1} floor(n + 300*2^(n/7)) )
+// Verified against Wiki checkpoints: L2=83, L3=174, L92=6517253, L99=13034431 — exact match, zero approximation.
+const XP_TABLE = [0,83,174,276,388,512,650,801,969,1154,1358,1584,1833,2107,2411,2746,3115,3523,3973,4470,5018,5624,6291,7028,7842,8740,9730,10824,12031,13363,14833,16456,18247,20224,22406,24815,27473,30408,33648,37224,41171,45529,50339,55649,61512,67983,75127,83014,91721,101333,111945,123660,136594,150872,166636,184040,203254,224466,247886,273742,302288,333804,368599,407015,449428,496254,547953,605032,668051,737627,814445,899257,992895,1096278,1210421,1336443,1475581,1629200,1798808,1986068,2192818,2421087,2673114,2951373,3258594,3597792,3972294,4385776,4842295,5346332,5902831,6517253,7195629,7944614,8771558,9684577,10692629,11805606,13034431];
+
+function xpForLevel(level){
+  level=Math.max(1,Math.min(99,level));
+  return XP_TABLE[level-1];
+}
+function levelForXp(xp){
+  for(let lvl=99;lvl>=1;lvl--){
+    if(xp>=XP_TABLE[lvl-1])return lvl;
+  }
+  return 1;
+}
+function xpToNextLevel(currentXp){
+  const lvl=levelForXp(currentXp);
+  if(lvl>=99)return 0;
+  return XP_TABLE[lvl]-currentXp;
+}
+
+// ── WISE OLD MAN LOOKUP ───────────────────────────────────
+// Wise Old Man is a public OSRS stats tracker with a proper CORS-friendly REST API,
+// so no proxy hacks are needed (unlike the official Jagex hiscores). Docs: https://docs.wiseoldman.net/api
+// Skill keys match WOM's snake_case metric names, which line up with OSRS skill names directly.
+const WOM_API='https://api.wiseoldman.net/v2';
+const WOM_USERNAME_KEY='osrs_wom_username';
+
+async function fetchWomPlayer(username){
+  const url=`${WOM_API}/players/${encodeURIComponent(username)}`;
+  const res=await fetch(url);
+  if(res.status===404){
+    // Not tracked by WOM yet — ask it to track/update them, which returns full details on success.
+    const trackRes=await fetch(url,{method:'POST'});
+    if(!trackRes.ok) throw new Error(`Player "${username}" not found`);
+    return trackRes.json();
+  }
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+
+function womSkill(data,skillKey){
+  const skill=data?.latestSnapshot?.data?.skills?.[skillKey];
+  if(!skill||skill.experience==null||skill.experience<0) return null;
+  return {level:skill.level,xp:skill.experience};
+}
+
+// ── STATE ─────────────────────────────────────────────────
+let currentSkillKey='construction';
+let playerLevel=1, playerXp=0, targetLevelVal=99;
+let currentSpeed='fastest';
+let isDark=true;
+
+// ── THEME ─────────────────────────────────────────────────
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+});
+
+// ── MANUAL TOGGLE ─────────────────────────────────────────
+const manualFields=document.getElementById('manualFields');
+const manualToggle=document.getElementById('manualToggle');
+manualToggle.addEventListener('click',()=>{
+  manualFields.classList.toggle('show');
+  manualToggle.classList.toggle('active');
+});
+
+// ── WOM FETCH UI ──────────────────────────────────────────
+const fetchBtn=document.getElementById('fetchBtn');
+const fetchStatus=document.getElementById('fetchStatus');
+const usernameInput=document.getElementById('usernameInput');
+
+const savedWomUsername=localStorage.getItem(WOM_USERNAME_KEY);
+if(savedWomUsername) usernameInput.value=savedWomUsername;
+
+function setFetchStatus(msg,type){
+  fetchStatus.textContent=msg;
+  fetchStatus.className='fetch-status show '+type;
+}
+
+usernameInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ e.preventDefault(); fetchBtn.click(); }
+});
+
+fetchBtn.addEventListener('click',async()=>{
+  const username=usernameInput.value.trim();
+  if(!username){setFetchStatus('Enter a username first','error');return;}
+  fetchBtn.disabled=true;
+  fetchStatus.innerHTML='<span class="spinner-sm"></span> Looking up stats on Wise Old Man…';
+  fetchStatus.className='fetch-status show loading';
+  try{
+    const data=await fetchWomPlayer(username);
+    const skillData=womSkill(data,currentSkillKey);
+    if(!skillData){
+      throw new Error('No data for this skill (player may be unranked)');
+    }
+    playerLevel=skillData.level;
+    playerXp=skillData.xp;
+    localStorage.setItem(WOM_USERNAME_KEY,username);
+    setFetchStatus(`✓ Loaded ${data.displayName}'s stats — Level ${playerLevel} (${playerXp.toLocaleString()} XP)`,'success');
+    updateStatusCard();
+    generatePlan();
+  }catch(e){
+    console.error(e);
+    setFetchStatus(`⚠ ${e.message||'Lookup failed'} — try "Enter Manually" instead.`,'error');
+  }finally{
+    fetchBtn.disabled=false;
+  }
+});
+
+// ── MANUAL APPLY ──────────────────────────────────────────
+document.getElementById('applyManualBtn').addEventListener('click',()=>{
+  const lvl=parseInt(document.getElementById('manualLevel').value)||1;
+  const xpInput=document.getElementById('manualXp').value;
+  const tgt=parseInt(document.getElementById('targetLevel').value)||99;
+  playerLevel=Math.max(1,Math.min(99,lvl));
+  playerXp=xpInput?parseInt(xpInput):xpForLevel(playerLevel);
+  targetLevelVal=Math.max(playerLevel+1,Math.min(99,tgt));
+  setFetchStatus(`✓ Set to Level ${playerLevel} (${playerXp.toLocaleString()} XP)`,'success');
+  updateStatusCard();
+  generatePlan();
+});
+
+// ── STATUS CARD ───────────────────────────────────────────
+function updateStatusCard(){
+  const card=document.getElementById('statusCard');
+  card.classList.add('show');
+  const curLevelDisplay=levelForXp(playerXp);
+  document.getElementById('statusLevel').textContent=curLevelDisplay;
+  const targetXp=xpForLevel(targetLevelVal);
+  const startXpForLevel=xpForLevel(curLevelDisplay);
+  const nextLevelXp=curLevelDisplay<99?xpForLevel(curLevelDisplay+1):targetXp;
+  const pct=targetLevelVal<=curLevelDisplay?100:Math.max(0,Math.min(100,(playerXp-startXpForLevel)/((targetXp-startXpForLevel)||1)*100));
+  document.getElementById('statusProgressFill').style.width=pct+'%';
+  document.getElementById('statusXpText').textContent=playerXp.toLocaleString()+' XP';
+  document.getElementById('statusTargetText').textContent='Target: Level '+targetLevelVal;
+  const remaining=Math.max(0,targetXp-playerXp);
+  document.getElementById('statusXpRemaining').textContent=remaining.toLocaleString();
+}
+
+// ── SPEED TABS ────────────────────────────────────────────
+document.querySelectorAll('.speed-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.speed-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentSpeed=tab.dataset.speed;
+    generatePlan();
+  });
+});
+
+// ── CONSTRUCTION TRAINING METHODS DATABASE ───────────────
+// All XP/hr, level requirements, and plank costs verified against OSRS Wiki "Construction training" page.
+// Each method covers a level RANGE — the planner picks the best-fitting method(s) per speed tier.
+//
+// cost: gp per XP (negative = costs money, this is true for virtually all Construction methods
+//       since furniture has no resale value)
+// xpHr: realistic experience per hour for that method
+// icon: item id used to fetch the OSRS Wiki sprite
+
+// ── DEMON BUTLER COST MODEL ───────────────────────────────
+// Verified: Demon butler charges 10,000 gp every 8 trips = 1,250 gp/trip, carries 26 items/trip.
+// Cost per item delivered = 1250 / 26 ≈ 48.08 gp/item (matches commonly cited "48 coins per item").
+const BUTLER_GP_PER_TRIP = 1250;
+const BUTLER_ITEMS_PER_TRIP = 26;
+const BUTLER_GP_PER_ITEM = BUTLER_GP_PER_TRIP / BUTLER_ITEMS_PER_TRIP;
+
+const PLANK_IDS = {
+  'Plank':          {id:960,  name:'Plank'},
+  'Oak plank':      {id:8778, name:'Oak plank'},
+  'Teak plank':     {id:8780, name:'Teak plank'},
+  'Mahogany plank': {id:8782, name:'Mahogany plank'},
+};
+
+const CONSTRUCTION_METHODS = {
+  fastest: [
+    // Mahogany tables are the fastest viable method from 52, Gnome benches overtake at 77
+    {name:'Crude wooden chair', minLevel:1,  maxLevel:4,  xpHr:60000,   xpPerAction:58,  costPerXp:8.0,  itemId:8980,  plank:'Plank',          planksPerAction:2, note:'Builds fast, cheap entry into Construction'},
+    {name:'Wooden bookcase',    minLevel:4,  maxLevel:9,  xpHr:75000,   xpPerAction:115, costPerXp:8.0,  itemId:8985,  plank:'Plank',          planksPerAction:4, note:'Still using regular planks'},
+    {name:'Wooden larder',      minLevel:9,  maxLevel:15, xpHr:85000,   xpPerAction:228, costPerXp:8.0,  itemId:8990,  plank:'Plank',          planksPerAction:8, note:'Last regular-plank method before switching to oak'},
+    {name:'Oak dining table',   minLevel:22, maxLevel:31, xpHr:250000,  xpPerAction:240, costPerXp:8.23, itemId:8550,  plank:'Oak plank',      planksPerAction:4, note:'Oak planks unlock — big XP/hr jump'},
+    {name:'Carved oak table',   minLevel:31, maxLevel:52, xpHr:300000,  xpPerAction:360, costPerXp:8.23, itemId:8552,  plank:'Oak plank',      planksPerAction:6, note:'Best oak-plank method before mahogany unlocks'},
+    {name:'Mahogany table',     minLevel:52, maxLevel:77, xpHr:900000,  xpPerAction:840, costPerXp:14.88,itemId:8956,  plank:'Mahogany plank', planksPerAction:6, note:'Fastest viable method until Gnome benches unlock — needs a Demon Butler'},
+    {name:'Gnome bench',        minLevel:77, maxLevel:99, xpHr:1100000, xpPerAction:840, costPerXp:14.88,itemId:13393, plank:'Mahogany plank', planksPerAction:6, note:'Fastest Construction training method in the game — Superior Garden, Demon Butler required'},
+  ],
+  balanced: [
+    {name:'Crude wooden chair', minLevel:1,  maxLevel:4,  xpHr:50000,  xpPerAction:58,  costPerXp:8.0, itemId:8980, plank:'Plank',          planksPerAction:2, note:'Cheap and simple starting method'},
+    {name:'Wooden bookcase',    minLevel:4,  maxLevel:9,  xpHr:60000,  xpPerAction:115, costPerXp:8.0, itemId:8985, plank:'Plank',          planksPerAction:4, note:'Regular planks, low cost'},
+    {name:'Wooden larder',      minLevel:9,  maxLevel:15, xpHr:70000,  xpPerAction:228, costPerXp:8.0, itemId:8990, plank:'Plank',          planksPerAction:8, note:'Last regular-plank step'},
+    {name:'Repair bench',       minLevel:15, maxLevel:16, xpHr:80000,  xpPerAction:120, costPerXp:8.23,itemId:13620,plank:'Oak plank',      planksPerAction:2, note:'Quick early oak step'},
+    {name:'Crafting table 1',   minLevel:16, maxLevel:22, xpHr:90000,  xpPerAction:240, costPerXp:8.23,itemId:13282,plank:'Oak plank',      planksPerAction:4, note:'Oak planks, moderate XP'},
+    {name:'Oak dining table',   minLevel:22, maxLevel:33, xpHr:150000, xpPerAction:240, costPerXp:8.23,itemId:8550, plank:'Oak plank',      planksPerAction:4, note:'Reliable mid-tier oak method'},
+    {name:'Oak larder',         minLevel:33, maxLevel:66, xpHr:480000, xpPerAction:480, costPerXp:8.23,itemId:8988, plank:'Oak plank',      planksPerAction:8, note:'Classic budget-to-mid training method, can run to 74 if preferred'},
+    {name:'Teak garden bench',  minLevel:66, maxLevel:99, xpHr:600000, xpPerAction:540, costPerXp:9.5, itemId:13674,plank:'Teak plank',     planksPerAction:6, note:'Strong mid-cost option all the way to 99, similar speed to Oak Dungeon Doors'},
+  ],
+  cheapest: [
+    {name:'Crude wooden chair', minLevel:1,  maxLevel:4,  xpHr:40000,  xpPerAction:58,  costPerXp:8.0,  itemId:8980, plank:'Plank',          planksPerAction:2, note:'Cheapest possible early levels'},
+    {name:'Wooden bookcase',    minLevel:4,  maxLevel:9,  xpHr:45000,  xpPerAction:115, costPerXp:8.0,  itemId:8985, plank:'Plank',          planksPerAction:4, note:'Regular planks stay cheap'},
+    {name:'Wooden larder',      minLevel:9,  maxLevel:15, xpHr:50000,  xpPerAction:228, costPerXp:8.0,  itemId:8990, plank:'Plank',          planksPerAction:8, note:'Last regular-plank method'},
+    {name:'Repair bench',       minLevel:15, maxLevel:16, xpHr:60000,  xpPerAction:120, costPerXp:8.23, itemId:13620,plank:'Oak plank',      planksPerAction:2, note:'Brief oak transition'},
+    {name:'Crafting table 1',   minLevel:16, maxLevel:22, xpHr:65000,  xpPerAction:240, costPerXp:8.23, itemId:13282,plank:'Oak plank',      planksPerAction:4, note:'Cheapest oak option at this level'},
+    {name:'Oak dining table',   minLevel:22, maxLevel:33, xpHr:100000, xpPerAction:240, costPerXp:8.23, itemId:8550, plank:'Oak plank',      planksPerAction:4, note:'Most budget-friendly oak method'},
+    {name:'Oak larder',         minLevel:33, maxLevel:74, xpHr:300000, xpPerAction:480, costPerXp:8.23, itemId:8988, plank:'Oak plank',      planksPerAction:8, note:'Cheapest path through the mid-game — same planks all the way to 74'},
+    {name:'Oak dungeon door',   minLevel:74, maxLevel:99, xpHr:400000, xpPerAction:600, costPerXp:7.7,  itemId:13615,plank:'Oak plank',      planksPerAction:10,note:'Cheapest way to finish — oak planks remain the lowest-cost option to 99'},
+  ],
+};
+
+// ── ROUTE GENERATION ──────────────────────────────────────
+// Builds an ordered list of "stops" covering [startLevel, endLevel] using the chosen speed tier's methods.
+function buildRoute(startLevel, endLevel, speed){
+  const methods = CONSTRUCTION_METHODS[speed];
+  const stops = [];
+  let lvl = startLevel;
+
+  while(lvl < endLevel){
+    // Find the best-fitting method whose range covers the current level
+    const candidates = methods.filter(m => m.minLevel <= lvl && m.maxLevel > lvl);
+    if(!candidates.length){
+      // No method covers this level — skip ahead to the next available method's minLevel
+      const next = methods.filter(m => m.minLevel > lvl).sort((a,b)=>a.minLevel-b.minLevel)[0];
+      if(!next) break;
+      lvl = next.minLevel;
+      continue;
+    }
+    // Prefer the method with the highest maxLevel (covers more ground in one stop)
+    const method = candidates.sort((a,b)=>b.maxLevel-a.maxLevel)[0];
+    const stopEnd = Math.min(method.maxLevel, endLevel);
+
+    const xpStart = xpForLevel(lvl);
+    const xpEnd = xpForLevel(stopEnd);
+    const xpNeeded = xpEnd - xpStart;
+    const hoursNeeded = xpNeeded / method.xpHr;
+    const totalCost = xpNeeded * method.costPerXp;
+
+    // Materials: actions needed = xpNeeded / xpPerAction, planks needed = actions * planksPerAction
+    const actionsNeeded = xpNeeded / method.xpPerAction;
+    const planksNeeded = Math.ceil(actionsNeeded * method.planksPerAction);
+    // Butler trips needed = planks / items-per-trip (26), rounded up
+    const butlerTrips = Math.ceil(planksNeeded / BUTLER_ITEMS_PER_TRIP);
+    const butlerCost = Math.round(butlerTrips * BUTLER_GP_PER_TRIP);
+
+    stops.push({
+      ...method,
+      levelStart: lvl,
+      levelEnd: stopEnd,
+      xpNeeded,
+      hoursNeeded,
+      totalCost,
+      actionsNeeded: Math.ceil(actionsNeeded),
+      planksNeeded,
+      butlerTrips,
+      butlerCost,
+      totalWithButler: totalCost + butlerCost, // both are positive costs, sum gives total spend for this stop
+    });
+
+    lvl = stopEnd;
+  }
+
+  return stops;
+}
+
+// ── RENDER PLAN ───────────────────────────────────────────
+function generatePlan(){
+  const planArea = document.getElementById('planArea');
+  const curLevel = levelForXp(playerXp);
+
+  if(curLevel >= targetLevelVal){
+    planArea.innerHTML = `<div class="empty-state">
+      <div class="empty-state-title">🎉 You've already reached Level ${targetLevelVal}!</div>
+      <div class="empty-state-sub">Set a different target level to plan further training.</div>
+    </div>`;
+    return;
+  }
+
+  const stops = buildRoute(curLevel, targetLevelVal, currentSpeed);
+  const accentMap = {fastest:'#e74c3c', balanced:'#c8a84b', cheapest:'#2ecc71'};
+  const accent = accentMap[currentSpeed];
+
+  if(!stops.length){
+    planArea.innerHTML = `<div class="empty-state">
+      <div class="empty-state-title">No route available</div>
+      <div class="empty-state-sub">Could not build a route for this level range.</div>
+    </div>`;
+    return;
+  }
+
+  const totalXp = stops.reduce((s,x)=>s+x.xpNeeded,0);
+  const totalHours = stops.reduce((s,x)=>s+x.hoursNeeded,0);
+  const totalCost = stops.reduce((s,x)=>s+x.totalCost,0);
+  const totalButlerCost = stops.reduce((s,x)=>s+x.butlerCost,0);
+
+  const fmtHours = h => {
+    if(h<1) return Math.round(h*60)+' min';
+    if(h<48) return h.toFixed(1)+' hrs';
+    return (h/24).toFixed(1)+' days';
+  };
+  const fmtGp = n => {
+    const abs=Math.abs(n);
+    let s;
+    if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';
+    else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';
+    else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';
+    else s=Math.round(abs).toLocaleString();
+    return (n<0?'-':'')+s+' gp';
+  };
+
+  let html = `<div class="plan-summary">
+    <div class="plan-summary-stat"><div class="plan-summary-label">Route</div><div class="plan-summary-value accent">Lvl ${curLevel} → ${targetLevelVal}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">Total XP</div><div class="plan-summary-value">${totalXp.toLocaleString()}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">Est. Time</div><div class="plan-summary-value">${fmtHours(totalHours)}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label"><img class="summary-icon" src="https://secure.runescape.com/m=itemdb_oldschool/obj_sprite.gif?id=${PLANK_IDS[stops[0].plank]?.id||960}" alt="">Plank Cost</div><div class="plan-summary-value" style="color:#e74c3c;">${fmtGp(totalCost)}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label"><img class="summary-icon summary-icon-npc" src="https://oldschool.runescape.wiki/images/Demon_butler_chathead.png" alt="">Butler Fees</div><div class="plan-summary-value" style="color:#e74c3c;">${fmtGp(totalButlerCost)}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">Steps</div><div class="plan-summary-value">${stops.length}</div></div>
+    <div class="plan-summary-divider"></div>
+    <div class="plan-summary-total"><div class="plan-summary-label"><img class="summary-icon" src="https://secure.runescape.com/m=itemdb_oldschool/obj_sprite.gif?id=995" alt="">Total Cost to ${targetLevelVal}</div><div class="plan-summary-value">${fmtGp(totalCost + totalButlerCost)}</div></div>
+  </div>`;
+
+  html += `<div class="route-line" style="--accent:${accent};">`;
+  stops.forEach(stop=>{
+    const costCls = 'cost'; // Construction methods always cost money — no profit case exists for furniture
+    html += `<div class="route-stop" style="--accent:${accent};">
+      <div class="route-stop-header">
+        <img class="route-stop-item-icon" src="https://secure.runescape.com/m=itemdb_oldschool/obj_sprite.gif?id=${stop.itemId}" onerror="this.style.display='none'" alt="">
+        <div class="route-stop-levels">${stop.levelStart} → ${stop.levelEnd}</div>
+        <div class="route-stop-name">${stop.name}</div>
+        <div class="route-stop-badges">
+          <span class="route-badge xp">${fmt(stop.xpHr)} xp/hr</span>
+          <span class="route-badge time">${fmtHours(stop.hoursNeeded)}</span>
+          <span class="route-badge ${costCls}">${fmtGp(stop.totalCost)}</span>
+        </div>
+      </div>
+      <div class="route-stop-detail">
+        <div class="route-stat"><div class="route-stat-label">XP Needed</div><div class="route-stat-value">${stop.xpNeeded.toLocaleString()}</div></div>
+        <div class="route-stat"><div class="route-stat-label">Cost / XP</div><div class="route-stat-value">${stop.costPerXp.toFixed(2)} gp</div></div>
+        <div class="route-stat"><div class="route-stat-label">Items Built</div><div class="route-stat-value">${fmt(stop.actionsNeeded)}</div></div>
+        <div class="route-stat"><div class="route-stat-label">${stop.plank}s Needed</div><div class="route-stat-value">${fmt(stop.planksNeeded)}</div></div>
+        <div class="route-stat"><div class="route-stat-label">Butler Trips</div><div class="route-stat-value">${fmt(stop.butlerTrips)}</div></div>
+        <div class="route-stat"><div class="route-stat-label">Est. Butler Fees</div><div class="route-stat-value" style="color:var(--red);">${fmtGp(stop.butlerCost)}</div></div>
+      </div>
+      <div class="route-stop-note">💡 ${stop.note}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<div class="route-finish" style="margin-left:34px;">
+    <div class="route-finish-title">🏁 Level ${targetLevelVal} reached</div>
+    <div class="route-finish-sub">${totalXp.toLocaleString()} XP · ${fmtHours(totalHours)} · ${fmtGp(totalCost + totalButlerCost)} total cost</div>
+  </div>`;
+
+  // ── MASTER SHOPPING LIST ──────────────────────────────────
+  // Aggregate all plank types needed across every stop in the route, plus total butler fees.
+  const plankTotals = {};
+  stops.forEach(stop=>{
+    if(!plankTotals[stop.plank]) plankTotals[stop.plank] = {count:0, costPerXp:stop.costPerXp, itemId:PLANK_IDS[stop.plank]?.id};
+    plankTotals[stop.plank].count += stop.planksNeeded;
+  });
+  const plankCostGuess = {'Plank':470,'Oak plank':494,'Teak plank':1200,'Mahogany plank':2083}; // approximate GE prices, gp each — for shopping list estimate only
+
+  let shoppingHtml = `<div class="shopping-list-wrap">
+    <button class="shopping-list-toggle" id="shoppingToggle">
+      <span>🛒 Full Materials Shopping List</span>
+      <span class="shopping-toggle-arrow" id="shoppingArrow">▾</span>
+    </button>
+    <div class="shopping-list-body" id="shoppingBody">
+      <table class="shopping-table">
+        <thead><tr><th></th><th>Material</th><th>Quantity</th><th>Est. Unit Price</th><th>Est. Total Cost</th></tr></thead>
+        <tbody>`;
+  let grandTotal = 0;
+  Object.entries(plankTotals).forEach(([plankName, data])=>{
+    const unitPrice = plankCostGuess[plankName] || 0;
+    const lineTotal = unitPrice * data.count;
+    grandTotal += lineTotal;
+    shoppingHtml += `<tr>
+      <td><img class="shopping-icon" src="https://secure.runescape.com/m=itemdb_oldschool/obj_sprite.gif?id=${data.itemId}" onerror="this.style.display='none'" alt=""></td>
+      <td>${plankName}</td>
+      <td class="mono">${data.count.toLocaleString()}</td>
+      <td class="mono">${unitPrice.toLocaleString()} gp</td>
+      <td class="mono">${lineTotal.toLocaleString()} gp</td>
+    </tr>`;
+  });
+  grandTotal += totalButlerCost;
+  shoppingHtml += `<tr class="shopping-row-butler">
+      <td><img class="shopping-icon" style="border-radius:50%;object-fit:cover;object-position:top;" src="https://oldschool.runescape.wiki/images/Demon_butler_chathead.png" onerror="this.style.display='none'" alt=""></td>
+      <td>Demon Butler fees (${stops.reduce((s,x)=>s+x.butlerTrips,0).toLocaleString()} trips)</td>
+      <td class="mono">—</td>
+      <td class="mono">${BUTLER_GP_PER_TRIP.toLocaleString()} gp/trip</td>
+      <td class="mono">${totalButlerCost.toLocaleString()} gp</td>
+    </tr>`;
+  shoppingHtml += `</tbody>
+        <tfoot><tr><td colspan="4"><img class="summary-icon" src="https://secure.runescape.com/m=itemdb_oldschool/obj_sprite.gif?id=995" alt="" style="vertical-align:middle;margin-right:5px;">Grand Total</td><td class="mono">${grandTotal.toLocaleString()} gp</td></tr></tfoot>
+      </table>
+      <p class="shopping-note">Plank prices are rough estimates — check live Grand Exchange prices before buying in bulk, as they fluctuate daily.</p>
+    </div>
+  </div>`;
+
+  planArea.innerHTML = html + shoppingHtml;
+
+  document.getElementById('shoppingToggle').addEventListener('click',()=>{
+    document.getElementById('shoppingBody').classList.toggle('show');
+    document.getElementById('shoppingArrow').classList.toggle('open');
+  });
+}
+
+function fmt(n){
+  if(!n&&n!==0)return'—';
+  if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';
+  if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';
+  return Math.round(n).toLocaleString();
+}
+
+// Initial render
+updateStatusCard();
+generatePlan();
+</script>
+</body>
+</html>

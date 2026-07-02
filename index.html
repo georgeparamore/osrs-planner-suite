@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSRS Tool Suite</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap');
+:root{--bg:#0d0f14;--surface:#141720;--surface2:#1b1f2e;--border:#252a3a;--gold:#c8a84b;--gold-dim:#8a7030;--green:#2ecc71;--red:#e74c3c;--blue:#4a7eff;--purple:#9b6fd6;--text:#dde1ec;--text-dim:#6b7490;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:48px 20px;}
+.header{text-align:center;margin-bottom:40px;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:700;color:var(--gold);letter-spacing:1px;}
+.logo span{color:var(--text-dim);font-weight:400;}
+.subtitle{font-size:14px;color:var(--text-dim);margin-top:8px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;max-width:900px;width:100%;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;text-decoration:none;color:var(--text);display:flex;flex-direction:column;gap:8px;transition:all .15s;}
+.card:hover{border-color:var(--gold-dim);background:var(--surface2);transform:translateY(-2px);}
+.card-top{display:flex;align-items:center;gap:12px;}
+.card-icon{width:32px;height:32px;object-fit:contain;flex-shrink:0;}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;}
+.card-desc{font-size:12px;color:var(--text-dim);line-height:1.5;}
+.footer{margin-top:48px;font-size:11px;color:var(--text-dim);text-align:center;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">OSRS<span> Tool Suite</span></div>
+  <div class="subtitle">Live Grand Exchange prices &middot; Wise Old Man stat lookup &middot; exact XP/cost math</div>
+</div>
+<div class="grid">
+  <a class="card" href="osrs-ge-tracker.html">
+    <div class="card-top">
+      <img class="card-icon" src="https://oldschool.runescape.wiki/images/Grand_Exchange_logo.png" alt="" onerror="this.style.display='none'">
+      <div class="card-title">GE Tracker</div>
+    </div>
+    <div class="card-desc">Personal Grand Exchange watchlist with live prices, margins, and volume.</div>
+  </a>
+  <a class="card" href="osrs-skill-profit.html">
+    <div class="card-top">
+      <img class="card-icon" src="https://oldschool.runescape.wiki/images/Coins_10000.png" alt="" onerror="this.style.display='none'">
+      <div class="card-title">Skill Profit Calculator</div>
+    </div>
+    <div class="card-desc">Profit/loss per XP across skilling methods, filterable and sortable by GP/XP.</div>
+  </a>
+  <a class="card" href="osrs-training-planner.html">
+    <div class="card-top">
+      <img class="card-icon" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="" onerror="this.style.display='none'">
+      <div class="card-title">Construction Planner</div>
+    </div>
+    <div class="card-desc">Speed-tiered training route to 99 Construction with live cost estimates.</div>
+  </a>
+  <a class="card" href="osrs-farming-planner.html">
+    <div class="card-top">
+      <img class="card-icon" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="" onerror="this.style.display='none'">
+      <div class="card-title">Farming Planner</div>
+    </div>
+    <div class="card-desc">Patch-by-patch run planner with inventory mockups and bank tag export.</div>
+  </a>
+  <a class="card" href="osrs-herblore-planner.html">
+    <div class="card-top">
+      <img class="card-icon" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="" onerror="this.style.display='none'">
+      <div class="card-title">Herblore Planner</div>
+    </div>
+    <div class="card-desc">Named training routes plus a full Mastering Mixology mode.</div>
+  </a>
+  <a class="card" href="osrs-prayer-planner.html">
+    <div class="card-top">
+      <img class="card-icon" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="" onerror="this.style.display='none'">
+      <div class="card-title">Prayer Planner</div>
+    </div>
+    <div class="card-desc">Bone offering, ensouled heads, Libation Bowl, and Sinister/Demonic Offering — all with exact math.</div>
+  </a>
+</div>
+<div class="footer">Every planner supports Wise Old Man username lookup and pulls live Grand Exchange prices.</div>
+</body>
+</html>

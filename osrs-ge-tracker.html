@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GE Tracker – OSRS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap');
+
+/* ── THEME TOKENS ── */
+:root {
+  --bg:#0d0f14;--surface:#141720;--surface2:#1b1f2e;--border:#252a3a;
+  --gold:#c8a84b;--gold-dim:#8a7030;--green:#2ecc71;--red:#e74c3c;
+  --text:#dde1ec;--text-dim:#6b7490;
+}
+[data-theme="light"] {
+  --bg:#f0f2f5;--surface:#ffffff;--surface2:#e8eaf0;--border:#d0d4e0;
+  --gold:#8a6a1a;--gold-dim:#b89030;--green:#1a8a45;--red:#c0392b;
+  --text:#1a1e2e;--text-dim:#6b7490;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;transition:background .2s,color .2s;}
+
+/* HEADER */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;gap:14px;height:50px;flex-shrink:0;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--gold);letter-spacing:1px;white-space:nowrap;}
+.logo span{color:var(--text-dim);font-weight:400;}
+.search-wrap{flex:1;max-width:320px;position:relative;}
+#searchInput{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:6px 28px 6px 11px;outline:none;transition:border-color .2s;}
+#searchInput:focus{border-color:var(--gold-dim);}
+#searchInput::placeholder{color:var(--text-dim);}
+.search-icon{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none;font-size:14px;}
+#autocomplete{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:6px;z-index:300;max-height:220px;overflow-y:auto;display:none;}
+#autocomplete.open{display:block;}
+.ac-item{display:flex;align-items:center;gap:9px;padding:7px 11px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border);}
+.ac-item:last-child{border-bottom:none;}
+.ac-item:hover{background:var(--surface);}
+.ac-item img{width:20px;height:20px;object-fit:contain;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--text-dim);}
+.header-right strong{color:var(--text);}
+.icon-btn{background:none;border:none;cursor:pointer;font-size:17px;color:var(--text-dim);line-height:1;position:relative;transition:color .2s;padding:0;}
+.icon-btn:hover{color:var(--gold);}
+.icon-btn .badge{position:absolute;top:-4px;right:-5px;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:1px 4px;display:none;}
+.icon-btn .badge.show{display:block;}
+
+/* LAYOUT */
+.main{display:flex;flex:1;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:244px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.sidebar-tabs{display:flex;border-bottom:1px solid var(--border);}
+.stab{flex:1;padding:8px 2px;font-size:10px;font-weight:600;text-align:center;cursor:pointer;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid transparent;transition:color .2s;}
+.stab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.sidebar-filter{display:flex;gap:4px;padding:5px 8px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.filt-btn{flex:1;padding:3px 4px;font-size:10px;font-weight:600;border-radius:4px;cursor:pointer;color:var(--text-dim);background:transparent;border:1px solid var(--border);transition:all .15s;text-transform:uppercase;}
+.filt-btn:hover{color:var(--text);}
+.filt-btn.active{background:var(--surface2);border-color:var(--gold-dim);color:var(--gold);}
+.sidebar-list{overflow-y:auto;flex:1;}
+.item-row{display:flex;align-items:center;gap:7px;padding:7px 9px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s;}
+.item-row:hover,.item-row.active{background:var(--surface2);}
+.item-row img{width:24px;height:24px;object-fit:contain;flex-shrink:0;}
+.item-name{font-size:12px;font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-meta{text-align:right;flex-shrink:0;}
+.item-price{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold);}
+.item-change{font-size:10px;}
+.pos{color:var(--green);}
+.neg{color:var(--red);}
+.star-btn{background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-dim);flex-shrink:0;line-height:1;padding:0 1px;transition:color .15s;}
+.star-btn:hover,.star-btn.starred{color:var(--gold);}
+
+/* CENTRE */
+.chart-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+#dashboard{flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 14px;display:flex;gap:8px;align-items:stretch;overflow-x:auto;}
+.dash-section{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.dash-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);}
+.dash-tiles{display:flex;gap:5px;}
+.dash-tile{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:5px 9px;cursor:pointer;min-width:100px;transition:border-color .2s;flex-shrink:0;}
+.dash-tile:hover{border-color:var(--gold-dim);}
+.dash-tile-name{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;}
+.dash-tile-price{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold);margin-top:1px;}
+.dash-tile-pct{font-size:11px;font-weight:700;margin-top:1px;}
+.dash-tile.up{border-left:3px solid var(--green);}
+.dash-tile.down{border-left:3px solid var(--red);}
+
+.item-header{padding:8px 14px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+#itemIconLink{flex-shrink:0;display:block;line-height:0;}
+#itemIcon{width:72px;height:72px;object-fit:contain;display:block;}
+#itemIconFallback{width:32px;height:32px;object-fit:contain;display:none;}
+.item-info{flex:1;}
+.item-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;cursor:pointer;transition:color .15s;}
+.item-title:hover{color:var(--gold);}
+.item-subtitle{color:var(--text-dim);font-size:11px;margin-top:1px;}
+.price-block{text-align:right;}
+.current-price{font-family:'Share Tech Mono',monospace;font-size:22px;color:var(--gold);}
+.price-badge{display:inline-block;font-size:11px;font-weight:600;padding:1px 6px;border-radius:4px;margin-top:2px;}
+.price-badge.pos{background:rgba(46,204,113,.15);color:var(--green);}
+.price-badge.neg{background:rgba(231,76,60,.15);color:var(--red);}
+.item-star-btn{background:none;border:none;cursor:pointer;font-size:19px;color:var(--text-dim);transition:color .15s;padding:0;}
+.item-star-btn:hover,.item-star-btn.starred{color:var(--gold);}
+
+/* TOOLBAR — clean TF + overlays dropdown + zoom */
+.chart-toolbar{display:flex;align-items:center;padding:5px 12px;gap:3px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.tf-label{font-size:10px;color:var(--text-dim);margin-right:3px;text-transform:uppercase;letter-spacing:.5px;}
+.tf-btn{padding:3px 7px;font-size:11px;font-weight:600;border-radius:4px;cursor:pointer;color:var(--text-dim);background:transparent;border:1px solid transparent;transition:all .15s;}
+.tf-btn:hover{color:var(--text);border-color:var(--border);}
+.tf-btn.active{background:var(--gold);color:#000;border-color:var(--gold);}
+.toolbar-sep{width:1px;background:var(--border);height:16px;margin:0 4px;flex-shrink:0;}
+.toggle-btn{padding:3px 8px;font-size:11px;font-weight:600;border-radius:4px;cursor:pointer;color:var(--text-dim);background:transparent;border:1px solid var(--border);transition:all .15s;white-space:nowrap;}
+.toggle-btn:hover{color:var(--text);}
+.toggle-btn.on{background:var(--surface2);border-color:var(--gold-dim);color:var(--gold);}
+
+/* OVERLAYS DROPDOWN */
+.overlay-wrap{position:relative;}
+.overlay-menu{position:absolute;top:calc(100% + 6px);left:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;z-index:100;display:none;min-width:210px;box-shadow:0 4px 16px rgba(0,0,0,.35);}
+.overlay-menu.open{display:block;}
+.overlay-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;gap:10px;font-size:13px;border-bottom:1px solid var(--border);}
+.overlay-row:last-child{border-bottom:none;}
+.overlay-label{display:flex;align-items:center;gap:9px;cursor:pointer;color:var(--text);user-select:none;}
+.overlay-label input[type=checkbox]{accent-color:var(--gold);width:14px;height:14px;cursor:pointer;}
+.ma-input{width:46px;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;padding:2px 5px;outline:none;font-family:'Share Tech Mono',monospace;text-align:center;}
+.ma-input:focus{border-color:var(--gold-dim);}
+
+/* FLOATING DRAWING TOOLBAR */
+.draw-toolbar{position:absolute;left:8px;top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 4px;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.draw-tool{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:5px;cursor:pointer;color:var(--text-dim);background:transparent;border:1px solid transparent;transition:all .15s;flex-shrink:0;}
+.draw-tool:hover{color:var(--text);background:var(--surface2);}
+.draw-tool.on{background:var(--surface2);border-color:var(--gold-dim);color:var(--gold);}
+.draw-tool.danger:hover{color:var(--red);}
+.draw-sep{height:1px;background:var(--border);margin:2px 0;}
+
+/* CHART */
+.chart-wrap{flex:1;position:relative;padding:8px 64px 36px 48px;overflow:hidden;min-height:0;}
+#candleCanvas{width:100%;height:100%;display:block;cursor:crosshair;}
+.crosshair-h,.crosshair-v{position:absolute;pointer-events:none;display:none;}
+.crosshair-h{left:48px;right:64px;height:1px;background:rgba(200,168,75,.22);}
+.crosshair-v{top:8px;bottom:36px;width:1px;background:rgba(200,168,75,.22);}
+.chart-tooltip{position:absolute;top:12px;left:56px;background:rgba(20,23,32,0.92);border:1px solid var(--border);border-radius:6px;padding:7px 11px;font-size:12px;pointer-events:none;display:none;z-index:10;min-width:165px;backdrop-filter:blur(4px);}
+[data-theme="light"] .chart-tooltip{background:rgba(255,255,255,0.95);}
+.tt-date{color:var(--text-dim);margin-bottom:4px;font-size:10px;}
+.tt-row{display:flex;justify-content:space-between;gap:14px;line-height:1.7;}
+.tt-label{color:var(--text-dim);}
+.tt-val{font-family:'Share Tech Mono',monospace;color:var(--gold);}
+.draw-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--text-dim);pointer-events:none;white-space:nowrap;display:none;}
+.draw-hint.show{display:block;}
+#drawCtxMenu{position:fixed;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 0;z-index:500;display:none;min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,.4);}
+#drawCtxMenu.show{display:block;}
+.ctx-item{padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--text);}
+.ctx-item:hover{background:var(--surface);}
+.ctx-item.danger{color:var(--red);}
+.ctx-sep{height:1px;background:var(--border);margin:3px 0;}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.stat-cell{padding:7px 10px;border-right:1px solid var(--border);}
+.stat-cell:last-child{border-right:none;}
+.stat-label{color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;font-size:9px;margin-bottom:2px;}
+.stat-value{font-family:'Share Tech Mono',monospace;font-size:12px;}
+
+/* RIGHT PANEL — 4 primary tabs + More */
+.right-panel{width:306px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.panel-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.ptab{flex:1;padding:10px 2px;font-size:11px;font-weight:600;text-align:center;cursor:pointer;color:var(--text-dim);text-transform:uppercase;letter-spacing:.3px;border-bottom:2px solid transparent;transition:color .2s;white-space:nowrap;}
+.ptab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.more-tab{position:relative;flex:none;padding:10px 10px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text-dim);border-bottom:2px solid transparent;transition:color .2s;user-select:none;}
+.more-tab:hover,.more-tab.active{color:var(--gold);}
+.more-menu{position:absolute;top:calc(100% + 1px);right:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 0;z-index:200;display:none;min-width:190px;box-shadow:0 4px 16px rgba(0,0,0,.35);}
+.more-menu.open{display:block;}
+.more-item{padding:9px 16px;font-size:13px;cursor:pointer;color:var(--text);transition:background .15s;white-space:nowrap;}
+.more-item:hover{background:var(--surface);}
+.more-item.active{color:var(--gold);}
+.panel-body{flex:1;overflow-y:auto;padding:12px;}
+.panel-body.hidden{display:none;}
+
+
+/* SHARED PANEL */
+.section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:8px;}
+.hint{font-size:11px;color:var(--text-dim);margin-top:-4px;margin-bottom:9px;font-style:italic;}
+.field{margin-bottom:8px;}
+.field label{font-size:12px;color:var(--text-dim);display:block;margin-bottom:3px;}
+.field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:6px 9px;outline:none;transition:border-color .2s;}
+.field input:focus,.field select:focus{border-color:var(--gold-dim);}
+.field select{appearance:none;cursor:pointer;}
+.action-btn{width:100%;padding:7px;background:var(--gold);color:#000;border:none;border-radius:5px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.action-btn:hover{opacity:.85;}
+.action-btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.action-btn.secondary:hover{border-color:var(--gold-dim);}
+
+/* CALC */
+.calc-results{margin-top:10px;display:none;}
+.calc-results.show{display:block;}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.result-row:last-child{border-bottom:none;}
+.result-label{color:var(--text-dim);}
+.result-value{font-family:'Share Tech Mono',monospace;}
+.result-value.profit{color:var(--green);font-size:14px;font-weight:700;}
+.result-value.loss{color:var(--red);font-size:14px;font-weight:700;}
+
+/* FLIP TIMER */
+.timer-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
+.timer-card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;}
+.timer-card-name{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.timer-card-name:hover{color:var(--gold);}
+.timer-card-countdown{font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--gold);margin-top:3px;}
+.timer-card-countdown.ready{color:var(--green);}
+.timer-card-sub{font-size:10px;color:var(--text-dim);margin-top:1px;}
+.timer-del{float:right;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:0;line-height:1;}
+.timer-del:hover{color:var(--red);}
+.timer-add-row{display:flex;gap:6px;margin-bottom:10px;}
+.timer-add-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:12px;padding:5px 8px;outline:none;}
+.timer-add-row input:focus{border-color:var(--gold-dim);}
+.timer-add-row button{padding:5px 10px;background:var(--gold);color:#000;border:none;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer;}
+
+/* ANNOTATIONS */
+.ann-list{margin-top:8px;}
+.ann-row{display:flex;align-items:flex-start;gap:7px;padding:6px 0;border-bottom:1px solid var(--border);}
+.ann-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.ann-info{flex:1;min-width:0;}
+.ann-date{font-size:10px;color:var(--text-dim);}
+.ann-note{font-size:12px;margin-top:1px;word-break:break-word;}
+.ann-price{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold);}
+.ann-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:0;flex-shrink:0;}
+.ann-del:hover{color:var(--red);}
+
+/* ALCH */
+.alch-filters{display:flex;gap:6px;margin-bottom:8px;}
+.alch-filters input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:12px;padding:5px 8px;outline:none;}
+.alch-filters input:focus{border-color:var(--gold-dim);}
+.alch-filters input::placeholder{color:var(--text-dim);}
+#alchCanvas{width:100%;border-radius:5px;display:block;cursor:pointer;}
+.alch-item-list{margin-top:8px;}
+.alch-row{display:flex;align-items:center;gap:7px;padding:5px 3px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px;transition:background .15s;}
+.alch-row:hover{background:var(--surface2);}
+.alch-row img{width:20px;height:20px;object-fit:contain;flex-shrink:0;}
+.alch-row-name{font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.alch-row-profit{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap;}
+
+/* WATCHLIST */
+.wl-actions{display:flex;gap:5px;margin-bottom:10px;}
+.wl-actions button{flex:1;padding:5px;font-size:11px;font-weight:600;border-radius:4px;cursor:pointer;background:var(--surface2);color:var(--text-dim);border:1px solid var(--border);transition:all .15s;}
+.wl-actions button:hover{color:var(--text);border-color:var(--gold-dim);}
+.wl-row{display:flex;align-items:center;gap:7px;padding:6px 3px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px;transition:background .15s;}
+.wl-row:hover{background:var(--surface2);}
+.wl-row img{width:22px;height:22px;object-fit:contain;flex-shrink:0;}
+.wl-row-name{font-size:12px;font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wl-row-price{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold);}
+.wl-row-pct{font-size:10px;}
+.wl-note-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;padding:3px 6px;outline:none;margin-top:3px;font-family:'Barlow',sans-serif;}
+.wl-note-input::placeholder{color:var(--text-dim);}
+.wl-unstar{background:none;border:none;cursor:pointer;font-size:13px;color:var(--gold);padding:0;flex-shrink:0;}
+.wl-unstar:hover{color:var(--red);}
+
+/* LEADERBOARD */
+.lb-row{display:flex;align-items:center;gap:7px;padding:6px 3px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px;transition:background .15s;}
+.lb-row:hover{background:var(--surface2);}
+.lb-rank{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);width:16px;flex-shrink:0;}
+.lb-row img{width:20px;height:20px;object-fit:contain;flex-shrink:0;}
+.lb-name{font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-roi{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap;}
+.lb-margin{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold);white-space:nowrap;}
+
+/* RECENTLY VIEWED */
+.rv-row{display:flex;align-items:center;gap:7px;padding:5px 3px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px;transition:background .15s;}
+.rv-row:hover{background:var(--surface2);}
+.rv-row img{width:20px;height:20px;object-fit:contain;flex-shrink:0;}
+.rv-name{font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rv-time{font-size:10px;color:var(--text-dim);white-space:nowrap;}
+
+/* ALERTS */
+.alert-item{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:6px;display:flex;align-items:flex-start;gap:8px;}
+.alert-item.triggered{border-color:var(--gold);background:rgba(200,168,75,.07);}
+.alert-info{flex:1;min-width:0;}
+.alert-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.alert-desc{font-size:11px;color:var(--text-dim);margin-top:1px;}
+.alert-status{font-size:10px;margin-top:3px;font-weight:600;}
+.alert-status.hit{color:var(--gold);}
+.alert-status.watching{color:var(--text-dim);}
+.alert-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;transition:color .15s;}
+.alert-del:hover{color:var(--red);}
+
+/* COMPARISON */
+.cmp-item{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border);}
+.cmp-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.cmp-name{font-size:12px;flex:1;}
+.cmp-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:0;}
+.cmp-del:hover{color:var(--red);}
+#cmpCanvas{width:100%;border-radius:5px;display:block;margin-top:8px;}
+
+/* MARGIN CHART */
+#marginCanvas{width:100%;border-radius:5px;display:block;margin-top:6px;}
+
+/* EMPTY / LOADING */
+.empty-msg{text-align:center;color:var(--text-dim);font-size:13px;padding:24px 0;}
+.placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-dim);gap:12px;}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* TOAST */
+#toast{position:fixed;bottom:20px;right:20px;z-index:999;background:var(--surface2);border:1px solid var(--gold);border-radius:8px;padding:10px 15px;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,.4);transform:translateY(80px);opacity:0;transition:transform .3s,opacity .3s;pointer-events:none;max-width:270px;}
+#toast.show{transform:translateY(0);opacity:1;}
+.toast-title{color:var(--gold);font-weight:700;margin-bottom:2px;}
+
+/* MOBILE */
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .right-panel{display:none;}
+  .chart-area{flex:1;}
+  #mobileNav{display:flex;}
+  header{padding:0 10px;gap:8px;}
+  .logo span{display:none;}
+  #dashboard{padding:6px 10px;}
+  .dash-tile{min-width:85px;}
+}
+#mobileNav{display:none;position:fixed;bottom:0;left:0;right:0;height:52px;background:var(--surface);border-top:1px solid var(--border);z-index:200;flex-shrink:0;}
+.mnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:9px;font-weight:600;color:var(--text-dim);text-transform:uppercase;background:none;border:none;padding:0;}
+.mnav-btn.active{color:var(--gold);}
+.mnav-btn span{font-size:18px;line-height:1;}
+.mobile-panel{display:none;position:fixed;bottom:52px;left:0;right:0;top:50px;background:var(--surface);z-index:190;overflow-y:auto;padding:14px;}
+.mobile-panel.open{display:block;}
+
+/* PRICE TARGETS */
+.target-row{display:flex;align-items:center;gap:7px;padding:6px 3px;border-bottom:1px solid var(--border);}
+.target-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.target-info{flex:1;min-width:0;}
+.target-label{font-size:12px;font-weight:600;}
+.target-price{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold);}
+.target-item{font-size:10px;color:var(--text-dim);}
+.target-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:0;flex-shrink:0;}
+.target-del:hover{color:var(--red);}
+
+/* PORTFOLIO */
+.port-row{padding:7px 4px;border-bottom:1px solid var(--border);}
+.port-row-top{display:flex;align-items:center;gap:7px;}
+.port-row-top img{width:20px;height:20px;object-fit:contain;flex-shrink:0;}
+.port-name{font-size:12px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.port-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:0;flex-shrink:0;}
+.port-del:hover{color:var(--red);}
+.port-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:5px;}
+.port-stat{font-size:10px;}
+.port-stat-label{color:var(--text-dim);font-size:9px;text-transform:uppercase;}
+.port-stat-val{font-family:'Share Tech Mono',monospace;font-size:11px;}
+
+/* FLIP LOG */
+.flip-row{padding:7px 4px;border-bottom:1px solid var(--border);}
+.flip-row-top{display:flex;align-items:center;gap:6px;}
+.flip-row-top img{width:18px;height:18px;object-fit:contain;flex-shrink:0;}
+.flip-name{font-size:12px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.flip-date{font-size:10px;color:var(--text-dim);white-space:nowrap;}
+.flip-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:0;}
+.flip-del:hover{color:var(--red);}
+.flip-stats{display:flex;gap:12px;margin-top:4px;font-size:11px;}
+.flip-stat-label{color:var(--text-dim);font-size:10px;}
+.flip-profit{font-family:'Share Tech Mono',monospace;font-weight:700;}
+
+/* TC color picker */
+.tc-picker{display:flex;gap:5px;margin-bottom:12px;}
+.tc-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color .15s;}
+.tc-swatch.active{border-color:#fff;}
+
+/* CUSTOM RANGE PICKER */
+.custom-range-wrap{position:relative;}
+.custom-range-menu{position:absolute;top:calc(100% + 6px);left:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;z-index:100;display:none;min-width:200px;box-shadow:0 4px 16px rgba(0,0,0,.35);}
+.custom-range-menu.open{display:block;}
+.date-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;padding:5px 8px;outline:none;transition:border-color .2s;}
+.date-input:focus{border-color:var(--gold-dim);}
+.date-input::-webkit-calendar-picker-indicator{filter:invert(0.5);cursor:pointer;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">GE<span>Tracker</span></div>
+  <a href="osrs-skill-profit.html" style="font-size:12px;color:var(--text-dim);text-decoration:none;white-space:nowrap;transition:color .2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-dim)'">⚗️ Skill Profits</a>
+  <div class="search-wrap">
+    <input id="searchInput" type="text" placeholder="Search items…" autocomplete="off">
+    <span class="search-icon">⌕</span>
+    <div id="autocomplete"></div>
+  </div>
+  <div class="header-right">
+    <span class="hide-sm">Items <strong id="hItemCount">—</strong></span>
+    <span class="hide-sm">Updated <strong id="hUpdated">—</strong></span>
+    <button class="icon-btn" id="themeBtn" title="Toggle theme">🌙</button>
+    <button class="icon-btn" id="soundBtn" title="Toggle alert sounds">🔇</button>
+    <button class="icon-btn" id="bellBtn" title="Alerts">🔔<span class="badge" id="bellBadge"></span></button>
+  </div>
+</header>
+
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-tabs">
+      <div class="stab active" data-tab="trending">🔥 Hot</div>
+      <div class="stab" data-tab="flips">💰 Flips</div>
+    </div>
+    <div class="sidebar-filter">
+      <button class="filt-btn active" data-filter="all">All</button>
+      <button class="filt-btn" data-filter="f2p">F2P</button>
+      <button class="filt-btn" data-filter="members">Members</button>
+    </div>
+    <div class="sidebar-list" id="sidebarList">
+      <div class="placeholder" style="height:200px"><div class="spinner"></div><p>Loading…</p></div>
+    </div>
+  </div>
+
+  <!-- CENTRE -->
+  <div class="chart-area">
+    <div id="dashboard">
+      <div class="dash-section">
+        <div class="dash-label">📈 Biggest Gainers</div>
+        <div class="dash-tiles" id="gainerTiles"></div>
+      </div>
+      <div style="width:1px;background:var(--border);flex-shrink:0;margin:0 2px;"></div>
+      <div class="dash-section">
+        <div class="dash-label">📉 Biggest Losers</div>
+        <div class="dash-tiles" id="loserTiles"></div>
+      </div>
+    </div>
+
+    <div class="placeholder" id="emptyState">
+      <svg width="50" height="50" viewBox="0 0 64 64" fill="none" style="opacity:.18">
+        <rect x="8" y="30" width="10" height="24" rx="2" fill="currentColor"/>
+        <line x1="13" y1="20" x2="13" y2="30" stroke="currentColor" stroke-width="2"/>
+        <line x1="13" y1="54" x2="13" y2="60" stroke="currentColor" stroke-width="2"/>
+        <rect x="27" y="18" width="10" height="30" rx="2" fill="currentColor"/>
+        <line x1="32" y1="8" x2="32" y2="18" stroke="currentColor" stroke-width="2"/>
+        <line x1="32" y1="48" x2="32" y2="56" stroke="currentColor" stroke-width="2"/>
+        <rect x="46" y="24" width="10" height="20" rx="2" fill="currentColor"/>
+        <line x1="51" y1="14" x2="51" y2="24" stroke="currentColor" stroke-width="2"/>
+        <line x1="51" y1="44" x2="51" y2="52" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      <p style="font-size:15px;font-weight:600;color:var(--text);">Search for an item to get started</p>
+      <p style="font-size:12px;max-width:280px;text-align:center;line-height:1.6;">Or pick one from the <strong style="color:var(--gold);">🔥 Hot</strong> or <strong style="color:var(--gold);">💰 Flips</strong> tabs on the left sidebar</p>
+      <p style="font-size:11px;color:var(--text-dim);margin-top:4px;">Drawing tools · Price targets · Flip calculator · Alch finder · Portfolio tracker</p>
+    </div>
+
+    <div id="itemView" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="item-header">
+        <a id="itemIconLink" href="#" target="_blank" rel="noopener" title="View on OSRS Wiki">
+          <img id="itemIcon" src="" alt="">
+          <img id="itemIconFallback" src="" alt="">
+        </a>
+        <div class="item-info">
+          <a id="itemTitleLink" href="#" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+            <div class="item-title" id="itemTitle">—</div>
+          </a>
+          <div class="item-subtitle" id="itemSubtitle">—</div>
+        </div>
+        <div class="price-block">
+          <div class="current-price" id="itemPrice">—</div>
+          <div class="price-badge" id="itemChange">—</div>
+        </div>
+        <button class="item-star-btn" id="itemStarBtn">☆</button>
+      </div>
+
+      <div class="chart-toolbar">
+        <span class="tf-label">TF</span>
+        <button class="tf-btn" data-tf="5m">5M</button>
+        <button class="tf-btn" data-tf="10m">10M</button>
+        <button class="tf-btn" data-tf="15m">15M</button>
+        <button class="tf-btn" data-tf="1h">1H</button>
+        <button class="tf-btn" data-tf="6h">6H</button>
+        <button class="tf-btn active" data-tf="24h">1D</button>
+        <button class="tf-btn" data-tf="week">1W</button>
+        <button class="tf-btn" data-tf="month">1M</button>
+        <button class="tf-btn" data-tf="3month">3M</button>
+        <button class="tf-btn" data-tf="6month">6M</button>
+        <button class="tf-btn" data-tf="1year">1Y</button>
+        <div class="custom-range-wrap" id="customRangeWrap">
+          <button class="tf-btn" id="customRangeBtn">Custom ▾</button>
+          <div class="custom-range-menu" id="customRangeMenu">
+            <div style="font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">Custom Date Range</div>
+            <div style="display:flex;flex-direction:column;gap:7px;">
+              <div>
+                <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:3px;">From</label>
+                <input type="date" id="customFrom" class="date-input">
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:3px;">To</label>
+                <input type="date" id="customTo" class="date-input">
+              </div>
+              <button class="action-btn" id="applyRangeBtn" style="margin-top:2px;">Apply</button>
+            </div>
+          </div>
+        </div>
+        <div class="toolbar-sep"></div>
+        <!-- Overlays dropdown -->
+        <div class="overlay-wrap" id="overlayWrap">
+          <button class="toggle-btn" id="overlayBtn">Overlays ▾</button>
+          <div class="overlay-menu" id="overlayMenu">
+            <div class="overlay-row">
+              <label class="overlay-label">
+                <input type="checkbox" id="toggleMA"> Moving Average
+              </label>
+              <input id="maPeriod" type="number" min="2" max="100" value="20" class="ma-input">
+            </div>
+            <div class="overlay-row"><label class="overlay-label"><input type="checkbox" id="toggleVol"> Volume</label></div>
+            <div class="overlay-row"><label class="overlay-label"><input type="checkbox" id="toggleMargin"> Margin Spread</label></div>
+          </div>
+        </div>
+        <div class="toolbar-sep"></div>
+        <button class="toggle-btn" id="zoomIn" title="Zoom in">＋</button>
+        <button class="toggle-btn" id="zoomOut" title="Zoom out">－</button>
+        <button class="toggle-btn" id="zoomReset" title="Reset zoom">⤢</button>
+        <div class="toolbar-sep"></div>
+        <button class="toggle-btn" id="undoBtn" title="Undo (Ctrl+Z)" style="opacity:.35">↩</button>
+        <button class="toggle-btn" id="redoBtn" title="Redo (Ctrl+Y)" style="opacity:.35">↪</button>
+      </div>
+
+      <div class="chart-wrap">
+        <!-- Floating drawing toolbar on left edge -->
+        <div class="draw-toolbar" id="drawToolbar">
+          <button class="draw-tool on" id="toolCursor" title="Select / Pan">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M3 1l10 6-5 1.5L6 14z"/></svg>
+          </button>
+          <button class="draw-tool" id="toolArrow" title="Draw Arrow">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="13" x2="13" y2="3"/><polyline points="7,3 13,3 13,9"/></svg>
+          </button>
+          <button class="draw-tool" id="toolRect" title="Draw Zone">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="8" rx="1"/></svg>
+          </button>
+          <button class="draw-tool" id="toolPosition" title="Risk:Reward Box">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="5" rx="1" stroke="#2ecc71"/><rect x="2" y="9" width="12" height="5" rx="1" stroke="#e74c3c"/><line x1="2" y1="7" x2="14" y2="7" stroke="white" stroke-dasharray="2,2"/></svg>
+          </button>
+          <button class="draw-tool" id="toolAnnotate" title="Add Note">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><text x="2" y="13" font-size="13">📍</text></svg>
+          </button>
+          <div class="draw-sep"></div>
+          <button class="draw-tool" id="toggleHorizArrow" title="Horizontal lock (arrows)">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="8" x2="15" y2="8"/><polyline points="5,4 1,8 5,12"/><polyline points="11,4 15,8 11,12"/></svg>
+          </button>
+          <button class="draw-tool" id="toggleLockRatio" title="Aspect ratio lock (zones)">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="10" height="10" rx="1"/><line x1="3" y1="8" x2="13" y2="8" stroke-dasharray="2,2"/><line x1="8" y1="3" x2="8" y2="13" stroke-dasharray="2,2"/></svg>
+          </button>
+          <div class="draw-sep"></div>
+          <button class="draw-tool danger" id="clearDrawings" title="Clear all drawings">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3,4 13,4"/><path d="M5,4V3h6v1"/><path d="M4,4l1,9h6l1-9"/></svg>
+          </button>
+        </div>
+
+        <canvas id="candleCanvas"></canvas>
+        <div class="crosshair-h" id="chH"></div>
+        <div class="crosshair-v" id="chV"></div>
+        <div class="chart-tooltip" id="tooltip"></div>
+        <div class="draw-hint" id="drawHint">Click a drawing to select · Drag handles to resize · Right-click to delete</div>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-cell"><div class="stat-label">Buy</div><div class="stat-value" id="statBuy">—</div></div>
+        <div class="stat-cell"><div class="stat-label">Sell</div><div class="stat-value" id="statSell">—</div></div>
+        <div class="stat-cell"><div class="stat-label">Margin</div><div class="stat-value" id="statMargin">—</div></div>
+        <div class="stat-cell"><div class="stat-label">Limit</div><div class="stat-value" id="statLimit">—</div></div>
+        <div class="stat-cell"><div class="stat-label">High Alch</div><div class="stat-value" id="statAlch">—</div></div>
+        <div class="stat-cell"><div class="stat-label">Alch Profit</div><div class="stat-value" id="statAlchProfit">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="panel-tabs">
+      <div class="ptab active" data-ptab="calc">🧮 Flip</div>
+      <div class="ptab" data-ptab="alch">🔥 Alch</div>
+      <div class="ptab" data-ptab="watchlist">⭐ Watch</div>
+      <div class="ptab" data-ptab="alerts">🔔 Alerts</div>
+      <div class="ptab more-tab" id="moreTab">More ▾
+        <div class="more-menu" id="moreMenu">
+          <div class="more-item" data-ptab="leaderboard">🏆 ROI Leaderboard</div>
+          <div class="more-item" data-ptab="targets">🎯 Price Targets</div>
+          <div class="more-item" data-ptab="portfolio">💼 Portfolio</div>
+          <div class="more-item" data-ptab="fliplog">📒 Flip Log</div>
+          <div class="more-item" data-ptab="recent">🕐 History & Notes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLIP CALC -->
+    <div class="panel-body" id="panelCalc">
+      <div class="section-title">Flip Calculator</div>
+      <p class="hint">Auto-fills on item select.</p>
+      <div class="field"><label>Buy Price (gp)</label><input type="number" id="calcBuy" placeholder="e.g. 50000" min="1"></div>
+      <div class="field"><label>Sell Price (gp)</label><input type="number" id="calcSell" placeholder="e.g. 55000" min="1"></div>
+      <div class="field"><label>Quantity</label><input type="number" id="calcQty" value="1" min="1"></div>
+      <button class="action-btn" id="calcBtn">Calculate Profit</button>
+      <div class="calc-results" id="calcResults">
+        <div class="result-row"><span class="result-label">Buy Total</span><span class="result-value" id="rBuyTotal">—</span></div>
+        <div class="result-row"><span class="result-label">GE Tax (1%)</span><span class="result-value" id="rTax">—</span></div>
+        <div class="result-row"><span class="result-label">Sell (after tax)</span><span class="result-value" id="rSellNet">—</span></div>
+        <div class="result-row"><span class="result-label">Profit / item</span><span class="result-value" id="rProfitEach">—</span></div>
+        <div class="result-row"><span class="result-label">Total Profit</span><span class="result-value" id="rProfitTotal">—</span></div>
+        <div class="result-row"><span class="result-label">ROI</span><span class="result-value" id="rRoi">—</span></div>
+      </div>
+      <div style="margin-top:14px;" class="section-title">Reverse Calculator</div>
+      <p class="hint">Find sell price for target profit.</p>
+      <div class="field"><label>Target Net Profit (gp)</label><input type="number" id="revProfit" placeholder="e.g. 10000" min="1"></div>
+      <div class="field"><label>Buy Price (gp)</label><input type="number" id="revBuy" placeholder="e.g. 50000" min="1"></div>
+      <button class="action-btn secondary" id="revCalcBtn" style="margin-top:2px;">Find Sell Price</button>
+      <div class="calc-results" id="revResults">
+        <div class="result-row"><span class="result-label">Sell price needed</span><span class="result-value profit" id="revSellPrice">—</span></div>
+        <div class="result-row"><span class="result-label">GE Tax paid</span><span class="result-value" id="revTax">—</span></div>
+      </div>
+
+      <div style="margin-top:14px;" class="section-title">⏱ Flip Timers</div>
+      <p class="hint">GE buy limit resets every 4 hours.</p>
+      <div class="timer-add-row">
+        <input type="text" id="timerItemName" placeholder="Item name (auto-fills)" readonly>
+        <button id="timerAddBtn">Start</button>
+      </div>
+      <div class="timer-grid" id="timerGrid"><div class="empty-msg" style="grid-column:span 2;padding:10px 0;">No active timers.</div></div>
+    </div>
+
+    <!-- ALCH -->
+    <div class="panel-body hidden" id="panelAlch">
+      <div class="section-title">High Alch Profit Chart</div>
+      <p class="hint">Nat rune cost auto-filled. Click bar to open item.</p>
+      <div class="alch-filters">
+        <input type="number" id="alchNatCost" placeholder="Nat cost" min="1">
+        <input type="number" id="alchMinProfit" placeholder="Min profit" min="1">
+      </div>
+      <button class="action-btn" id="alchRefreshBtn" style="margin-bottom:8px;">Refresh</button>
+      <canvas id="alchCanvas" height="200"></canvas>
+      <div class="alch-item-list" id="alchList"></div>
+    </div>
+
+    <!-- ROI LEADERBOARD -->
+    <div class="panel-body hidden" id="panelLeaderboard">
+      <div class="section-title">Top Flips by ROI</div>
+      <p class="hint">Best margin-to-price ratio right now.</p>
+      <div class="field"><label>Min buy price (gp)</label><input type="number" id="lbMinPrice" value="1000" min="0"></div>
+      <button class="action-btn" id="lbRefreshBtn" style="margin-bottom:8px;">Refresh</button>
+      <div id="lbList"><div class="empty-msg">Loading…</div></div>
+    </div>
+
+    <!-- WATCHLIST -->
+    <div class="panel-body hidden" id="panelWatchlist">
+      <div class="section-title">Your Watchlist</div>
+      <div class="wl-actions">
+        <button id="wlCopyBtn">📋 Copy</button>
+        <button id="wlCsvBtn">⬇ CSV</button>
+      </div>
+      <div id="watchlistContent"><div class="empty-msg">No starred items yet.</div></div>
+
+      <div style="margin-top:14px;" class="section-title">📊 Compare Items</div>
+      <p class="hint">Overlay price charts to spot correlated moves.</p>
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        <input type="text" id="cmpSearch" placeholder="Search to add…" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:12px;padding:5px 8px;outline:none;">
+        <button id="cmpAddBtn" style="padding:5px 10px;background:var(--gold);color:#000;border:none;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer;">Add</button>
+      </div>
+      <div id="cmpList"></div>
+      <canvas id="cmpCanvas" height="140" style="display:none;"></canvas>
+
+      <div style="margin-top:14px;" class="section-title">📉 Margin History</div>
+      <p class="hint">Buy/sell spread over time for current item.</p>
+      <canvas id="marginCanvas" height="120" style="display:none;"></canvas>
+      <div id="marginEmpty" class="empty-msg">Select an item to see margin history.</div>
+    </div>
+
+    <!-- RECENTLY VIEWED / ANNOTATIONS -->
+    <div class="panel-body hidden" id="panelRecent">
+      <div class="section-title">Recently Viewed</div>
+      <p class="hint">Last 10 items opened.</p>
+      <div id="recentList"><div class="empty-msg">Nothing viewed yet.</div></div>
+      <div style="margin-top:14px;" class="section-title">📍 Price Annotations</div>
+      <p class="hint">Notes pinned to the chart. Use 📍 tool to place one.</p>
+      <div class="ann-list" id="annList"><div class="empty-msg">No annotations yet.</div></div>
+    </div>
+
+    <!-- ALERTS -->
+    <div class="panel-body hidden" id="panelAlerts">
+      <div class="section-title">New Price Alert</div>
+      <div class="field"><label>Item</label><input type="text" id="alertItemName" placeholder="Select an item first" readonly><input type="hidden" id="alertItemId"></div>
+      <div class="field"><label>Condition</label>
+        <select id="alertCondition">
+          <option value="above">Price rises above</option>
+          <option value="below">Price falls below</option>
+        </select>
+      </div>
+      <div class="field"><label>Target Price (gp)</label><input type="number" id="alertPrice" placeholder="e.g. 100000" min="1"></div>
+      <button class="action-btn" id="addAlertBtn">Add Alert</button>
+      <div style="margin-top:14px;margin-bottom:8px;" class="section-title">Active Alerts</div>
+      <div id="alertList"><div class="empty-msg">No alerts set yet.</div></div>
+    </div>
+
+    <!-- PRICE TARGETS -->
+    <div class="panel-body hidden" id="panelTargets">
+      <div class="section-title">🎯 Price Target Lines</div>
+      <p class="hint">Draws a horizontal level on the chart. Auto-fills current item.</p>
+      <div class="field"><label>Item</label><input type="text" id="targetItemName" placeholder="Select an item first" readonly><input type="hidden" id="targetItemId"></div>
+      <div class="field"><label>Target Price (gp)</label><input type="number" id="targetPrice" placeholder="e.g. 100000" min="1"></div>
+      <div class="field"><label>Label (optional)</label><input type="text" id="targetLabel" placeholder="e.g. Support, Resistance…"></div>
+      <div style="display:flex;gap:6px;margin-bottom:4px;">
+        <button class="action-btn" id="addTargetBtn" style="flex:1;">Add Target</button>
+      </div>
+      <div style="display:flex;gap:5px;margin-bottom:12px;">
+        <button class="filt-btn active" data-tc="#c8a84b" id="tcGold" style="background:#c8a84b;color:#000;border-color:#c8a84b;">Gold</button>
+        <button class="filt-btn" data-tc="#2ecc71" id="tcGreen" style="background:#2ecc71;color:#000;border-color:#2ecc71;">Green</button>
+        <button class="filt-btn" data-tc="#e74c3c" id="tcRed" style="background:#e74c3c;color:#fff;border-color:#e74c3c;">Red</button>
+        <button class="filt-btn" data-tc="#4a7eff" id="tcBlue" style="background:#4a7eff;color:#fff;border-color:#4a7eff;">Blue</button>
+      </div>
+      <div class="section-title">Active Targets</div>
+      <div id="targetList"><div class="empty-msg">No targets set.</div></div>
+    </div>
+
+    <!-- PORTFOLIO -->
+    <div class="panel-body hidden" id="panelPortfolio">
+      <div class="section-title">💼 Portfolio</div>
+      <p class="hint">Track items you're holding. P&L updates with live prices.</p>
+      <div id="portfolioSummary" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:12px;display:none;">
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Total Unrealized P&L</div>
+        <div id="portfolioTotalPnl" style="font-family:'Share Tech Mono',monospace;font-size:18px;"></div>
+        <div id="portfolioTotalVal" style="font-size:11px;color:var(--text-dim);margin-top:2px;"></div>
+      </div>
+      <div class="section-title" style="margin-bottom:8px;">Add Position</div>
+      <div class="field"><label>Item</label><input type="text" id="portItemName" placeholder="Select an item first" readonly><input type="hidden" id="portItemId"></div>
+      <div style="display:flex;gap:6px;">
+        <div class="field" style="flex:1;"><label>Qty</label><input type="number" id="portQty" placeholder="100" min="1"></div>
+        <div class="field" style="flex:1;"><label>Buy Price (gp)</label><input type="number" id="portBuyPrice" placeholder="50000" min="1"></div>
+      </div>
+      <button class="action-btn" id="addPortBtn">Add to Portfolio</button>
+      <div style="margin-top:12px;" id="portfolioList"><div class="empty-msg">No positions yet.</div></div>
+    </div>
+
+    <!-- FLIP LOG -->
+    <div class="panel-body hidden" id="panelFliplog">
+      <div class="section-title">📒 Flip Log</div>
+      <p class="hint">Record completed flips and track your profit history.</p>
+      <div id="fliplogSummary" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:12px;display:none;">
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Total Logged Profit</div>
+        <div id="fliplogTotalProfit" style="font-family:'Share Tech Mono',monospace;font-size:18px;"></div>
+        <div id="fliplogCount" style="font-size:11px;color:var(--text-dim);margin-top:1px;"></div>
+      </div>
+      <div class="section-title" style="margin-bottom:8px;">Log a Flip</div>
+      <div class="field"><label>Item</label><input type="text" id="logItemName" placeholder="Select an item first" readonly><input type="hidden" id="logItemId"></div>
+      <div style="display:flex;gap:6px;">
+        <div class="field" style="flex:1;"><label>Buy Price</label><input type="number" id="logBuyPrice" placeholder="50000" min="1"></div>
+        <div class="field" style="flex:1;"><label>Sell Price</label><input type="number" id="logSellPrice" placeholder="55000" min="1"></div>
+      </div>
+      <div class="field"><label>Quantity</label><input type="number" id="logQty" placeholder="100" min="1" value="1"></div>
+      <button class="action-btn" id="addFlipBtn">Log Flip</button>
+      <div style="margin-top:12px;" id="fliplogList"><div class="empty-msg">No flips logged yet.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE NAV -->
+<nav id="mobileNav">
+  <button class="mnav-btn active" data-mv="chart"><span>📊</span>Chart</button>
+  <button class="mnav-btn" data-mv="list"><span>🔥</span>Items</button>
+  <button class="mnav-btn" data-mv="calc"><span>🧮</span>Calc</button>
+  <button class="mnav-btn" data-mv="watch"><span>⭐</span>Watch</button>
+  <button class="mnav-btn" data-mv="alerts"><span>🔔</span>Alerts</button>
+</nav>
+<div class="mobile-panel" id="mobileList"></div>
+<div class="mobile-panel" id="mobileCalc"></div>
+<div class="mobile-panel" id="mobileWatch"></div>
+<div class="mobile-panel" id="mobileAlerts"></div>
+
+<div id="toast"><div class="toast-title" id="toastTitle"></div><div id="toastBody"></div></div>
+<div id="drawCtxMenu">
+  <div class="ctx-item" id="ctxDuplicate">⧉ Duplicate</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" id="ctxDelete">🗑 Delete</div>
+</div>
+<script>
+// ── CONSTANTS ────────────────────────────────────────────
+const WIKI_LATEST  = 'https://prices.runescape.wiki/api/v1/osrs/latest';
+const WIKI_MAPPING = 'https://prices.runescape.wiki/api/v1/osrs/mapping';
+const H            = {'User-Agent':'GE-Tracker-App/1.0'};
+const GE_TAX       = 0.01;
+const GE_TAX_CAP   = 5_000_000;
+
+// ── STATE ────────────────────────────────────────────────
+let allItems={}, prices={}, watchlist=[], alerts=[], recentViewed=[];
+let alertIdSeq=0, currentTab='trending', currentPTab='calc';
+let currentItem=null, currentTf='24h', candles=[], dpr=1;
+let memberFilter='all', showMA=false, showVol=false, showMargin=false;
+let soundEnabled=false;
+let zoomStart=0, zoomEnd=0;
+let customDateRange=null; // {from, to} in unix seconds
+let activeTool='cursor', drawings=[], drawingInProgress=null;
+
+let selectedDrawingIdx=-1, dragHandle=null, dragStartMx=0, dragStartMy=0, dragStartP1=null, dragStartP2=null;
+let undoStack=[], redoStack=[];
+let _isPanning=false, _panStartX=0, _panStartZoom={s:0,e:0};
+let _chartGeom=null;
+let flipTimers=[];  // [{id, name, itemId, startedAt}]
+let annotations={}; // itemId -> [{id, candleIdx, price, note, color}]
+let annIdSeq=0;
+let cmpItems=[];    // [{id, info, color}]
+let cmpCandles={};  // id -> candles array
+const CMP_COLORS=['#4a7eff','#e74c3c','#2ecc71','#f39c12','#9b59b6'];
+
+// ── HELPERS ───────────────────────────────────────────────
+const fmt=n=>{if(!n&&n!==0)return'—';if(n>=1e9)return(n/1e9).toFixed(2)+'B';if(n>=1e6)return(n/1e6).toFixed(2)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return n.toLocaleString();};
+const fmtFull=n=>n?n.toLocaleString()+' gp':'—';
+const iconUrl=info=>`https://secure.runescape.com/m=itemdb_oldschool/obj_sprite.gif?id=${info.id}`;
+const detailUrl=info=>`https://secure.runescape.com/m=itemdb_oldschool/obj_big.gif?id=${info.id}`;
+const wikiUrl=info=>`https://oldschool.runescape.wiki/w/${encodeURIComponent(info.name.replace(/ /g,'_'))}`;
+const relTime=ts=>{const d=Math.round((Date.now()-ts)/60000);return d<1?'just now':d<60?d+'m ago':Math.round(d/60)+'h ago';};
+
+// ── TOAST ─────────────────────────────────────────────────
+let toastTimer=null;
+function showToast(title,body=''){
+  document.getElementById('toastTitle').textContent=title;
+  document.getElementById('toastBody').textContent=body;
+  const el=document.getElementById('toast');
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),4000);
+}
+
+// ── THEME ─────────────────────────────────────────────────
+let isDark=true;
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+});
+
+// ── SOUND ─────────────────────────────────────────────────
+document.getElementById('soundBtn').addEventListener('click',()=>{
+  soundEnabled=!soundEnabled;
+  document.getElementById('soundBtn').textContent=soundEnabled?'🔊':'🔇';
+  showToast(soundEnabled?'Sound ON':'Sound OFF');
+});
+function playAlert(){
+  if(!soundEnabled)return;
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.frequency.setValueAtTime(880,ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(440,ctx.currentTime+0.3);
+    g.gain.setValueAtTime(0.3,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+    o.start();o.stop(ctx.currentTime+0.4);
+  }catch(e){}
+}
+
+// ── BOOT ─────────────────────────────────────────────────
+async function boot(){
+  try{
+    const[mapRes,priceRes]=await Promise.all([
+      fetch(WIKI_MAPPING,{headers:H}),fetch(WIKI_LATEST,{headers:H})
+    ]);
+    const mapData=await mapRes.json(),priceData=await priceRes.json();
+    mapData.forEach(i=>{allItems[i.id]=i;});
+    Object.entries(priceData.data).forEach(([id,p])=>{prices[id]=p;});
+    document.getElementById('hItemCount').textContent=Object.keys(prices).length.toLocaleString();
+    document.getElementById('hUpdated').textContent='live';
+    const nat=Object.values(allItems).find(i=>i.name==='Nature rune');
+    document.getElementById('alchNatCost').value=(nat&&prices[nat.id]?.high)||200;
+    renderSidebar();renderDashboard();renderAlchPanel();renderLeaderboard();
+    startAlertChecker();startTimerTick();
+  }catch(e){
+    console.error(e);
+    document.getElementById('sidebarList').innerHTML='<div class="placeholder" style="height:200px"><p>Failed to load — check connection</p></div>';
+  }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────
+function renderDashboard(){
+  const scored=Object.entries(prices).filter(([id])=>allItems[id]).map(([id,p])=>{
+    if(!p.high||!p.low||p.high<500)return null;
+    const pct=(p.high-p.low)/p.low*100;
+    return{id:+id,info:allItems[id],p,pct};
+  }).filter(Boolean);
+  const gainers=[...scored].sort((a,b)=>b.pct-a.pct).slice(0,5);
+  const losers=[...scored].sort((a,b)=>a.pct-b.pct).slice(0,5);
+  const make=(item,cls)=>{
+    const t=document.createElement('div');
+    t.className=`dash-tile ${cls}`;
+    t.innerHTML=`<div class="dash-tile-name">${item.info.name}</div><div class="dash-tile-price">${fmt(item.p.high)}</div><div class="dash-tile-pct ${cls==='up'?'pos':'neg'}">${cls==='up'?'+':''}${item.pct.toFixed(1)}%</div>`;
+    t.addEventListener('click',()=>loadItem(item.id));
+    return t;
+  };
+  const gEl=document.getElementById('gainerTiles'),lEl=document.getElementById('loserTiles');
+  gEl.innerHTML='';lEl.innerHTML='';
+  gainers.forEach(x=>gEl.appendChild(make(x,'up')));
+  losers.forEach(x=>lEl.appendChild(make(x,'down')));
+}
+
+// ── MEMBER FILTER ─────────────────────────────────────────
+function memberOk(info){
+  if(memberFilter==='all')return true;
+  if(memberFilter==='f2p')return!info.members;
+  return!!info.members;
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────
+function renderSidebar(){
+  const list=document.getElementById('sidebarList');
+  let items=[];
+  if(currentTab==='trending'){
+    items=Object.entries(prices).filter(([id])=>allItems[id]&&memberOk(allItems[id]))
+      .map(([id,p])=>({id:+id,p,info:allItems[id],margin:(p.high||0)-(p.low||0)}))
+      .filter(x=>x.p.high>1000).sort((a,b)=>b.margin-a.margin).slice(0,60);
+  }else{
+    items=Object.entries(prices).filter(([id])=>allItems[id]&&memberOk(allItems[id]))
+      .map(([id,p])=>{const m=(p.high||0)-(p.low||0);return{id:+id,p,info:allItems[id],margin:m,roi:p.low?m/p.low:0};})
+      .filter(x=>x.p.high>500&&x.p.low>500).sort((a,b)=>b.roi-a.roi).slice(0,60);
+  }
+  if(!items.length){list.innerHTML='<div class="placeholder" style="height:200px"><p>No data</p></div>';return;}
+  list.innerHTML=items.map(({id,p,info})=>{
+    const margin=(p.high||0)-(p.low||0),pct=p.low?margin/p.low*100:0,cls=pct>=0?'pos':'neg';
+    const active=currentItem?.id===id?' active':'';
+    const starred=watchlist.some(w=>w.id===id);
+    return`<div class="item-row${active}" data-id="${id}">
+      <img src="${iconUrl(info)}" onerror="this.src='https://secure.runescape.com/m=itemdb_oldschool/obj_sprite.gif?id=995'" loading="lazy" alt="">
+      <span class="item-name">${info.name}</span>
+      <div class="item-meta"><div class="item-price">${fmt(p.high)}</div><div class="item-change ${cls}">${pct>=0?'+':''}${pct.toFixed(1)}%</div></div>
+      <button class="star-btn ${starred?'starred':''}" data-sid="${id}">${starred?'★':'☆'}</button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.item-row').forEach(el=>el.addEventListener('click',e=>{if(!e.target.classList.contains('star-btn'))loadItem(+el.dataset.id);}));
+  list.querySelectorAll('.star-btn').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();toggleWatch(+btn.dataset.sid);}));
+}
+
+document.querySelectorAll('.stab').forEach(tab=>tab.addEventListener('click',()=>{
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');currentTab=tab.dataset.tab;renderSidebar();
+}));
+document.querySelectorAll('.filt-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.filt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');memberFilter=btn.dataset.filter;renderSidebar();
+}));
+
+// ── SEARCH ────────────────────────────────────────────────
+const searchInput=document.getElementById('searchInput'),ac=document.getElementById('autocomplete');
+searchInput.addEventListener('input',()=>{
+  const q=searchInput.value.trim().toLowerCase();
+  if(q.length<2){ac.classList.remove('open');return;}
+  const matches=Object.values(allItems).filter(i=>i.name.toLowerCase().includes(q)&&prices[i.id]).slice(0,12);
+  if(!matches.length){ac.classList.remove('open');return;}
+  ac.innerHTML=matches.map(i=>`<div class="ac-item" data-id="${i.id}"><img src="${iconUrl(i)}" onerror="this.src=''" alt=""><span>${i.name}</span><span style="margin-left:auto;font-family:'Share Tech Mono';font-size:11px;color:var(--gold)">${fmt(prices[i.id]?.high)}</span></div>`).join('');
+  ac.classList.add('open');
+  ac.querySelectorAll('.ac-item').forEach(el=>el.addEventListener('click',()=>{loadItem(+el.dataset.id);searchInput.value='';ac.classList.remove('open');}));
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))ac.classList.remove('open');});
+
+// ── WATCHLIST ─────────────────────────────────────────────
+function toggleWatch(id){
+  const idx=watchlist.findIndex(w=>w.id===id);
+  if(idx>-1){watchlist.splice(idx,1);showToast('Removed',allItems[id]?.name+' removed');}
+  else{watchlist.push({id,note:''});showToast('⭐ Added',allItems[id]?.name+' added to watchlist');}
+  renderSidebar();renderWatchlistPanel();updateItemStar();
+}
+function updateItemStar(){
+  if(!currentItem)return;
+  const btn=document.getElementById('itemStarBtn'),starred=watchlist.some(w=>w.id===currentItem.id);
+  btn.textContent=starred?'★':'☆';btn.className='item-star-btn'+(starred?' starred':'');
+}
+document.getElementById('itemStarBtn').addEventListener('click',()=>{if(currentItem)toggleWatch(currentItem.id);});
+
+function renderWatchlistPanel(){
+  const el=document.getElementById('watchlistContent');
+  if(!watchlist.length){el.innerHTML='<div class="empty-msg">No starred items yet.</div>';return;}
+  el.innerHTML=watchlist.map(({id,note})=>{
+    const info=allItems[id],p=prices[id]||{};if(!info)return'';
+    const margin=(p.high||0)-(p.low||0),pct=p.low?margin/p.low*100:0,cls=pct>=0?'pos':'neg';
+    return`<div class="wl-row" data-id="${id}">
+      <img src="${iconUrl(info)}" onerror="this.src=''" alt="">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:5px;">
+          <span class="wl-row-name">${info.name}</span>
+          <span class="wl-row-price">${fmt(p.high)}</span>
+          <span class="wl-row-pct ${cls}">${pct>=0?'+':''}${pct.toFixed(1)}%</span>
+        </div>
+        <input class="wl-note-input" data-wid="${id}" placeholder="Add a note…" value="${note}">
+      </div>
+      <button class="wl-unstar" data-uid="${id}">★</button>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.wl-row').forEach(r=>r.addEventListener('click',e=>{if(!e.target.classList.contains('wl-unstar')&&!e.target.classList.contains('wl-note-input'))loadItem(+r.dataset.id);}));
+  el.querySelectorAll('.wl-unstar').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();toggleWatch(+btn.dataset.uid);}));
+  el.querySelectorAll('.wl-note-input').forEach(inp=>inp.addEventListener('change',()=>{const w=watchlist.find(x=>x.id===+inp.dataset.wid);if(w)w.note=inp.value.trim();renderWatchlistPanel();}));
+}
+document.getElementById('wlCopyBtn').addEventListener('click',()=>{
+  navigator.clipboard.writeText(watchlist.map(({id})=>allItems[id]?.name||id).join('\n')).then(()=>showToast('Copied','Watchlist copied to clipboard'));
+});
+document.getElementById('wlCsvBtn').addEventListener('click',()=>{
+  const rows=['Name,Buy,Sell,Margin,Note'];
+  watchlist.forEach(({id,note})=>{const info=allItems[id],p=prices[id]||{};if(info)rows.push(`"${info.name}",${p.low||''},${p.high||''},${(p.high||0)-(p.low||0)},"${note}"`)});
+  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(rows.join('\n'));a.download='watchlist.csv';a.click();
+});
+
+// ── RECENTLY VIEWED ───────────────────────────────────────
+function addRecent(id,name){
+  recentViewed=recentViewed.filter(x=>x.id!==id);
+  recentViewed.unshift({id,name,ts:Date.now()});
+  if(recentViewed.length>10)recentViewed.pop();
+}
+function renderRecentPanel(){
+  const el=document.getElementById('recentList');
+  if(!recentViewed.length){el.innerHTML='<div class="empty-msg">Nothing viewed yet.</div>';return;}
+  el.innerHTML=recentViewed.map(r=>{
+    const info=allItems[r.id]||{name:r.name,id:r.id};
+    return`<div class="rv-row" data-id="${r.id}"><img src="${iconUrl(info)}" onerror="this.src=''" alt="" loading="lazy"><span class="rv-name">${r.name}</span><span class="rv-time">${relTime(r.ts)}</span></div>`;
+  }).join('');
+  el.querySelectorAll('.rv-row').forEach(r=>r.addEventListener('click',()=>loadItem(+r.dataset.id)));
+}
+
+// ── FLIP TIMER ────────────────────────────────────────────
+const LIMIT_RESET_MS = 4*60*60*1000; // 4 hours
+let timerInterval=null;
+function startTimerTick(){
+  timerInterval=setInterval(renderTimers,1000);
+}
+function renderTimers(){
+  const grid=document.getElementById('timerGrid');
+  if(!flipTimers.length){grid.innerHTML='<div class="empty-msg" style="grid-column:span 2;padding:10px 0;">No active timers.</div>';return;}
+  grid.innerHTML=flipTimers.map(t=>{
+    const elapsed=Date.now()-t.startedAt;
+    const remaining=Math.max(0,LIMIT_RESET_MS-elapsed);
+    const h=Math.floor(remaining/3600000);
+    const m=Math.floor((remaining%3600000)/60000);
+    const s=Math.floor((remaining%60000)/1000);
+    const ready=remaining===0;
+    const timeStr=ready?'READY!':`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    return`<div class="timer-card">
+      <button class="timer-del" data-tid="${t.id}">✕</button>
+      <div class="timer-card-name" data-id="${t.itemId}">${t.name}</div>
+      <div class="timer-card-countdown ${ready?'ready':''}">${timeStr}</div>
+      <div class="timer-card-sub">${ready?'Buy limit reset':'Until reset'}</div>
+    </div>`;
+  }).join('');
+  grid.querySelectorAll('.timer-card-name').forEach(el=>el.addEventListener('click',()=>loadItem(+el.dataset.id)));
+  grid.querySelectorAll('.timer-del').forEach(btn=>btn.addEventListener('click',()=>{flipTimers=flipTimers.filter(t=>t.id!==btn.dataset.tid);renderTimers();}));
+}
+document.getElementById('timerAddBtn').addEventListener('click',()=>{
+  if(!currentItem){showToast('Select an item first');return;}
+  if(flipTimers.some(t=>t.itemId===currentItem.id)){showToast('Timer already running for this item');return;}
+  flipTimers.push({id:Date.now().toString(),name:currentItem.info.name,itemId:currentItem.id,startedAt:Date.now()});
+  renderTimers();
+  showToast('⏱ Timer started',currentItem.info.name+' — resets in 4h');
+});
+
+// ── ANNOTATIONS ───────────────────────────────────────────
+function getAnns(itemId){return annotations[itemId]||[];}
+function renderAnnPanel(){
+  const el=document.getElementById('annList');
+  if(!currentItem){el.innerHTML='<div class="empty-msg">No annotations yet.</div>';return;}
+  const anns=getAnns(currentItem.id);
+  if(!anns.length){el.innerHTML='<div class="empty-msg">No annotations for this item.</div>';return;}
+  el.innerHTML=anns.map(a=>`<div class="ann-row">
+    <div class="ann-dot" style="background:${a.color}"></div>
+    <div class="ann-info">
+      <div class="ann-date">${new Date(a.ts).toLocaleDateString()} · <span class="ann-price">${fmtFull(Math.round(a.price))}</span></div>
+      <div class="ann-note">${a.note||'(no note)'}</div>
+    </div>
+    <button class="ann-del" data-aid="${a.id}">✕</button>
+  </div>`).join('');
+  el.querySelectorAll('.ann-del').forEach(btn=>btn.addEventListener('click',()=>{
+    if(!currentItem)return;
+    annotations[currentItem.id]=(annotations[currentItem.id]||[]).filter(a=>a.id!==+btn.dataset.aid);
+    renderAnnPanel();redraw();
+  }));
+}
+
+// ── ROI LEADERBOARD ───────────────────────────────────────
+function renderLeaderboard(){
+  const minP=parseInt(document.getElementById('lbMinPrice').value)||0;
+  const items=Object.entries(prices).filter(([id])=>allItems[id]&&memberOk(allItems[id]))
+    .map(([id,p])=>{const m=(p.high||0)-(p.low||0),roi=p.low?m/p.low*100:0;return{id:+id,info:allItems[id],p,margin:m,roi};})
+    .filter(x=>x.p.low>=minP&&x.margin>0).sort((a,b)=>b.roi-a.roi).slice(0,40);
+  const el=document.getElementById('lbList');
+  if(!items.length){el.innerHTML='<div class="empty-msg">No results</div>';return;}
+  el.innerHTML=items.map((x,i)=>`<div class="lb-row" data-id="${x.id}">
+    <span class="lb-rank">${i+1}</span>
+    <img src="${iconUrl(x.info)}" onerror="this.src=''" alt="" loading="lazy">
+    <span class="lb-name">${x.info.name}</span>
+    <div style="text-align:right"><div class="lb-roi">+${x.roi.toFixed(1)}%</div><div class="lb-margin">${fmt(x.margin)} gp</div></div>
+  </div>`).join('');
+  el.querySelectorAll('.lb-row').forEach(r=>r.addEventListener('click',()=>loadItem(+r.dataset.id)));
+}
+document.getElementById('lbRefreshBtn').addEventListener('click',renderLeaderboard);
+
+// ── COMPARISON ────────────────────────────────────────────
+const CMP_TF_MS={'5m':5*60000,'10m':10*60000,'15m':15*60000,'1h':60*60000,'6h':6*3600000,'24h':24*3600000,'week':7*24*3600000,'month':30*24*3600000,'3month':90*24*3600000};
+let cmpSearchResults=[];
+const cmpSearchEl=document.getElementById('cmpSearch');
+cmpSearchEl.addEventListener('input',()=>{
+  const q=cmpSearchEl.value.trim().toLowerCase();
+  cmpSearchResults=q.length>=2?Object.values(allItems).filter(i=>i.name.toLowerCase().includes(q)&&prices[i.id]).slice(0,5):[];
+});
+document.getElementById('cmpAddBtn').addEventListener('click',async()=>{
+  const q=cmpSearchEl.value.trim().toLowerCase();
+  const match=Object.values(allItems).find(i=>i.name.toLowerCase()===q&&prices[i.id])
+    ||(cmpSearchResults[0]);
+  if(!match){showToast('Item not found');return;}
+  if(cmpItems.some(c=>c.id===match.id)){showToast('Already in comparison');return;}
+  if(cmpItems.length>=4){showToast('Max 4 items');return;}
+  cmpItems.push({id:match.id,info:match,color:CMP_COLORS[cmpItems.length]});
+  await loadCmpCandles(match.id);
+  cmpSearchEl.value='';renderCmpPanel();
+});
+
+async function loadCmpCandles(id){
+  try{
+    const now=Date.now()/1000,cutoff=now-7*24*3600;
+    const url=`https://prices.runescape.wiki/api/v1/osrs/timeseries?timestep=24h&id=${id}`;
+    const res=await fetch(url,{headers:H});const data=await res.json();
+    cmpCandles[id]=parseSeries((data.data||[]).filter(d=>d.timestamp>=cutoff));
+  }catch(e){cmpCandles[id]=[];}
+}
+
+function renderCmpPanel(){
+  const listEl=document.getElementById('cmpList');
+  const canvas=document.getElementById('cmpCanvas');
+  if(!cmpItems.length){listEl.innerHTML='';canvas.style.display='none';return;}
+  listEl.innerHTML=cmpItems.map(c=>`<div class="cmp-item">
+    <div class="cmp-dot" style="background:${c.color}"></div>
+    <span class="cmp-name">${c.info.name}</span>
+    <button class="cmp-del" data-cid="${c.id}">✕</button>
+  </div>`).join('');
+  listEl.querySelectorAll('.cmp-del').forEach(btn=>btn.addEventListener('click',()=>{
+    cmpItems=cmpItems.filter(c=>c.id!==+btn.dataset.cid);renderCmpPanel();
+  }));
+  canvas.style.display='block';drawCmpChart();
+}
+
+function drawCmpChart(){
+  const canvas=document.getElementById('cmpCanvas');
+  const panel=document.getElementById('panelWatchlist');
+  const W=panel.clientWidth-24,H=140,sc=window.devicePixelRatio||1;
+  canvas.width=W*sc;canvas.height=H*sc;canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');ctx.setTransform(1,0,0,1,0,0);ctx.scale(sc,sc);
+  ctx.clearRect(0,0,W,H);
+  const PL=8,PR=8,PT=10,PB=20,cW=W-PL-PR,cH=H-PT-PB;
+  ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+  ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=PT+cH*(1-i/4);ctx.beginPath();ctx.moveTo(PL,y);ctx.lineTo(PL+cW,y);ctx.stroke();}
+  cmpItems.forEach(c=>{
+    const data=cmpCandles[c.id]||[];
+    if(data.length<2)return;
+    const base=data[0].c||1;
+    ctx.strokeStyle=c.color;ctx.lineWidth=1.5;ctx.beginPath();
+    const n=data.length;
+    data.forEach((d,i)=>{
+      const x=PL+(i/(n-1))*cW;
+      const norm=((d.c/base)-0.97)/(1.06-0.97);
+      const y=PT+cH*(1-Math.max(0,Math.min(1,norm)));
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.fillStyle=c.color;ctx.font='9px Share Tech Mono';ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText(c.info.name.slice(0,10),PL+2,PT+2+cmpItems.indexOf(c)*11);
+  });
+}
+
+// ── MARGIN HISTORY ────────────────────────────────────────
+async function loadMarginHistory(id){
+  const canvas=document.getElementById('marginCanvas');
+  const emptyEl=document.getElementById('marginEmpty');
+  try{
+    const now=Date.now()/1000,cutoff=now-7*24*3600;
+    const url=`https://prices.runescape.wiki/api/v1/osrs/timeseries?timestep=6h&id=${id}`;
+    const res=await fetch(url,{headers:H});const data=await res.json();
+    const series=(data.data||[]).filter(d=>d.timestamp>=cutoff&&d.avgHighPrice&&d.avgLowPrice)
+      .map(d=>({t:d.timestamp*1000,margin:d.avgHighPrice-d.avgLowPrice}));
+    if(!series.length){canvas.style.display='none';emptyEl.textContent='No margin data available.';emptyEl.style.display='block';return;}
+    canvas.style.display='block';emptyEl.style.display='none';
+    drawMarginChart(canvas,series);
+  }catch(e){canvas.style.display='none';}
+}
+
+function drawMarginChart(canvas,series){
+  const panel=document.getElementById('panelWatchlist');
+  const W=panel.clientWidth-24,H=120,sc=window.devicePixelRatio||1;
+  canvas.width=W*sc;canvas.height=H*sc;canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');ctx.setTransform(1,0,0,1,0,0);ctx.scale(sc,sc);
+  ctx.clearRect(0,0,W,H);
+  const PL=8,PR=48,PT=8,PB=18,cW=W-PL-PR,cH=H-PT-PB;
+  const margins=series.map(s=>s.margin);
+  const minM=Math.min(...margins),maxM=Math.max(...margins);
+  const range=maxM-minM||1;
+  const toY=m=>PT+cH-((m-minM)/range)*cH;
+  ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+  ctx.lineWidth=1;
+  for(let i=0;i<=3;i++){const y=PT+cH*(1-i/3);ctx.beginPath();ctx.moveTo(PL,y);ctx.lineTo(PL+cW,y);ctx.stroke();
+    ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text-dim').trim();
+    ctx.font='9px Share Tech Mono';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(fmt(Math.round(minM+range*i/3)),PL+cW+3,y);
+  }
+  const n=series.length;
+  const grad=ctx.createLinearGradient(0,PT,0,PT+cH);
+  grad.addColorStop(0,'rgba(200,168,75,0.4)');grad.addColorStop(1,'rgba(200,168,75,0.02)');
+  ctx.beginPath();
+  series.forEach((s,i)=>{const x=PL+(i/(n-1))*cW,y=toY(s.margin);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.lineTo(PL+(n-1)/(n-1)*cW,PT+cH);ctx.lineTo(PL,PT+cH);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+  ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--gold').trim();
+  ctx.lineWidth=1.5;ctx.beginPath();
+  series.forEach((s,i)=>{const x=PL+(i/(n-1))*cW,y=toY(s.margin);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+}
+
+// ── PANEL TABS ────────────────────────────────────────────
+const panelMap={calc:'panelCalc',alch:'panelAlch',leaderboard:'panelLeaderboard',watchlist:'panelWatchlist',recent:'panelRecent',alerts:'panelAlerts',targets:'panelTargets',portfolio:'panelPortfolio',fliplog:'panelFliplog'};
+function switchPanel(p){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`[data-ptab="${p}"]`)?.classList.add('active');
+  currentPTab=p;
+  Object.values(panelMap).forEach(pid=>document.getElementById(pid).classList.add('hidden'));
+  document.getElementById(panelMap[p])?.classList.remove('hidden');
+  if(p==='watchlist'){renderWatchlistPanel();if(currentItem){loadMarginHistory(currentItem.id);renderCmpPanel();}}
+  if(p==='recent'){renderRecentPanel();renderAnnPanel();}
+  if(p==='alch')renderAlchPanel();
+  if(p==='leaderboard')renderLeaderboard();
+  if(p==='targets')renderTargets();
+  if(p==='portfolio')renderPortfolio();
+  if(p==='fliplog')renderFlipLog();
+}
+document.querySelectorAll('.ptab:not(.more-tab)').forEach(tab=>tab.addEventListener('click',()=>{
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  // clear More menu active state
+  document.querySelectorAll('.more-item').forEach(i=>i.classList.remove('active'));
+  switchPanel(tab.dataset.ptab);
+}));
+document.getElementById('bellBtn').addEventListener('click',()=>switchPanel('alerts'));
+
+// ── LOAD ITEM ─────────────────────────────────────────────
+async function loadItem(id){
+  const info=allItems[id],p=prices[id]||{};
+  if(!info)return;
+  currentItem={id,info,p};
+  addRecent(id,info.name);
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('itemView').style.display='flex';
+
+  const iconEl=document.getElementById('itemIcon'),fbEl=document.getElementById('itemIconFallback');
+  iconEl.onerror=null;fbEl.onerror=null;iconEl.src='';fbEl.src='';
+  iconEl.style.display='block';fbEl.style.display='none';
+  iconEl.src=detailUrl(info);
+  iconEl.onerror=()=>{iconEl.onerror=null;iconEl.style.display='none';fbEl.style.display='block';fbEl.src=iconUrl(info);fbEl.onerror=()=>{fbEl.onerror=null;fbEl.src='';};};
+
+  const wUrl=wikiUrl(info);
+  document.getElementById('itemIconLink').href=wUrl;
+  document.getElementById('itemTitleLink').href=wUrl;
+  document.getElementById('itemTitle').textContent=info.name;
+  document.getElementById('itemSubtitle').textContent=info.examine||'';
+  document.getElementById('itemPrice').textContent=fmtFull(p.high);
+
+  const margin=(p.high||0)-(p.low||0),pct=p.low?margin/p.low*100:0;
+  const badge=document.getElementById('itemChange');
+  badge.textContent=`${pct>=0?'+':''}${pct.toFixed(1)}% margin`;
+  badge.className='price-badge '+(pct>=0?'pos':'neg');
+
+  document.getElementById('statBuy').textContent=fmtFull(p.low);
+  document.getElementById('statSell').textContent=fmtFull(p.high);
+  document.getElementById('statMargin').textContent=fmt(margin)+' gp';
+  document.getElementById('statLimit').textContent=info.limit?info.limit.toLocaleString():'—';
+
+  const natCost=parseInt(document.getElementById('alchNatCost').value)||200;
+  const alchVal=info.highalch||0;
+  const alchProfit=alchVal>0?alchVal-(p.low||p.high||0)-natCost:null;
+  document.getElementById('statAlch').textContent=alchVal>0?fmtFull(alchVal):'N/A';
+  const apEl=document.getElementById('statAlchProfit');
+  if(!alchVal){apEl.textContent='N/A';apEl.style.color='';}
+  else{apEl.textContent=(alchProfit>=0?'+':'')+fmt(alchProfit)+' gp';apEl.style.color=alchProfit>=0?'var(--green)':'var(--red)';}
+
+  if(p.low)document.getElementById('calcBuy').value=p.low;
+  if(p.high)document.getElementById('calcSell').value=p.high;
+  if(info.limit)document.getElementById('calcQty').value=info.limit;
+  document.getElementById('calcResults').classList.remove('show');
+  document.getElementById('revResults').classList.remove('show');
+  document.getElementById('revBuy').value=p.low||'';
+  document.getElementById('alertItemName').value=info.name;
+  document.getElementById('alertItemId').value=id;
+  document.getElementById('timerItemName').value=info.name;
+  document.getElementById('targetItemName').value=info.name;
+  document.getElementById('targetItemId').value=id;
+  document.getElementById('portItemName').value=info.name;
+  document.getElementById('portItemId').value=id;
+  if(p.low)document.getElementById('portBuyPrice').value=p.low;
+  document.getElementById('logItemName').value=info.name;
+  document.getElementById('logItemId').value=id;
+  if(p.low)document.getElementById('logBuyPrice').value=p.low;
+  if(p.high)document.getElementById('logSellPrice').value=p.high;
+  if(info.limit)document.getElementById('logQty').value=info.limit;
+
+  updateItemStar();
+  document.querySelectorAll('.item-row').forEach(r=>r.classList.toggle('active',+r.dataset.id===id));
+  drawings=[];drawingInProgress=null;selectedDrawingIdx=-1;dragHandle=null;undoStack=[];redoStack=[];updateUndoButtons();
+  await loadChart(id,currentTf);
+  if(currentPTab==='watchlist')loadMarginHistory(id);
+  if(currentPTab==='recent')renderAnnPanel();
+}
+// ── FLIP CALCULATOR ──────────────────────────────────────
+document.getElementById('calcBtn').addEventListener('click',()=>{
+  const buyP=parseFloat(document.getElementById('calcBuy').value),sellP=parseFloat(document.getElementById('calcSell').value),qty=parseInt(document.getElementById('calcQty').value)||1;
+  if(!buyP||!sellP)return;
+  const taxEach=Math.min(Math.floor(sellP*GE_TAX),GE_TAX_CAP),profEach=(sellP-taxEach)-buyP,profTotal=profEach*qty,pos=profTotal>=0;
+  document.getElementById('rBuyTotal').textContent=(buyP*qty).toLocaleString()+' gp';
+  document.getElementById('rTax').textContent=(taxEach*qty).toLocaleString()+' gp';
+  document.getElementById('rSellNet').textContent=((sellP-taxEach)*qty).toLocaleString()+' gp';
+  document.getElementById('rProfitEach').textContent=(pos?'+':'')+profEach.toLocaleString()+' gp';
+  document.getElementById('rProfitTotal').textContent=(pos?'+':'')+profTotal.toLocaleString()+' gp';
+  document.getElementById('rRoi').textContent=(pos?'+':'')+((buyP>0?profTotal/(buyP*qty)*100:0).toFixed(2))+'%';
+  document.getElementById('rProfitTotal').className='result-value '+(pos?'profit':'loss');
+  document.getElementById('calcResults').classList.add('show');
+});
+document.getElementById('revCalcBtn').addEventListener('click',()=>{
+  const tp=parseFloat(document.getElementById('revProfit').value),buyP=parseFloat(document.getElementById('revBuy').value);
+  if(!tp||!buyP)return;
+  const sell=Math.ceil((buyP+tp)/(1-GE_TAX)),tax=Math.min(Math.floor(sell*GE_TAX),GE_TAX_CAP);
+  document.getElementById('revSellPrice').textContent=sell.toLocaleString()+' gp';
+  document.getElementById('revTax').textContent=tax.toLocaleString()+' gp';
+  document.getElementById('revResults').classList.add('show');
+});
+
+// ── HIGH ALCH ────────────────────────────────────────────
+let alchItems=[];
+function renderAlchPanel(){
+  const natCost=parseInt(document.getElementById('alchNatCost').value)||200;
+  const minProfit=parseInt(document.getElementById('alchMinProfit').value)||1;
+  alchItems=Object.values(allItems).filter(info=>info.highalch>0&&prices[info.id]).map(info=>{
+    const p=prices[info.id],buy=p.low||p.high||0;if(!buy)return null;
+    const profit=info.highalch-buy-natCost;return{id:info.id,info,buy,alchVal:info.highalch,profit};
+  }).filter(x=>x&&x.profit>=minProfit).sort((a,b)=>b.profit-a.profit).slice(0,30);
+  const canvas=document.getElementById('alchCanvas'),panel=document.getElementById('panelAlch'),ctx=canvas.getContext('2d');
+  const W=panel.clientWidth-24||260,sc=window.devicePixelRatio||1;
+  canvas.width=W*sc;canvas.style.width=W+'px';
+  if(!alchItems.length){canvas.height=50*sc;canvas.style.height='50px';ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#6b7490';ctx.font='12px Barlow';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('No profitable alch items',canvas.width/2,25*sc);document.getElementById('alchList').innerHTML='<div class="empty-msg">Adjust filters.</div>';return;}
+  const H=200;canvas.height=H*sc;canvas.style.height=H+'px';ctx.setTransform(1,0,0,1,0,0);ctx.scale(sc,sc);ctx.clearRect(0,0,W,H);
+  const PT=10,PB=36,PL=8,PR=8,cW=W-PL-PR,cH=H-PT-PB;
+  const maxP=Math.max(...alchItems.map(x=>x.profit)),n=alchItems.length,gap=cW/n,barW=Math.max(3,gap-2);
+  for(let i=0;i<=4;i++){const y=PT+cH*(1-i/4);ctx.strokeStyle='#252a3a';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(PL,y);ctx.lineTo(PL+cW,y);ctx.stroke();ctx.fillStyle='#6b7490';ctx.font='9px Share Tech Mono';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(fmt(Math.round(maxP*i/4)),PL+cW+3,y);}
+  alchItems.forEach((item,i)=>{
+    const x=PL+i*gap+gap/2,bH=(item.profit/maxP)*cH,y=PT+cH-bH,sel=currentItem?.id===item.id;
+    const grad=ctx.createLinearGradient(0,y,0,y+bH);grad.addColorStop(0,sel?'#c8a84b':'#26a65b');grad.addColorStop(1,sel?'#8a7030':'#1a6e3a');
+    ctx.fillStyle=grad;if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x-barW/2,y,barW,bH,[3,3,0,0]);ctx.fill();}else ctx.fillRect(x-barW/2,y,barW,bH);
+  });
+  const every=Math.max(1,Math.floor(n/7));ctx.fillStyle='#6b7490';ctx.font='9px Share Tech Mono';ctx.textAlign='center';ctx.textBaseline='top';
+  alchItems.forEach((item,i)=>{if(i%every!==0)return;const x=PL+i*gap+gap/2;ctx.fillText(item.info.name.length>7?item.info.name.slice(0,6)+'…':item.info.name,x,PT+cH+4);});
+  if(canvas._click)canvas.removeEventListener('click',canvas._click);
+  canvas._click=e=>{const r=canvas.getBoundingClientRect(),idx=Math.floor((e.clientX-r.left-PL)/gap);if(idx>=0&&idx<alchItems.length)loadItem(alchItems[idx].id);};
+  canvas.addEventListener('click',canvas._click);
+  document.getElementById('alchList').innerHTML=alchItems.map(x=>`<div class="alch-row" data-id="${x.id}"><img src="${iconUrl(x.info)}" onerror="this.src=''" alt="" loading="lazy"><span class="alch-row-name">${x.info.name}</span><span class="alch-row-profit">+${x.profit.toLocaleString()} gp</span></div>`).join('');
+  document.querySelectorAll('.alch-row').forEach(r=>r.addEventListener('click',()=>loadItem(+r.dataset.id)));
+}
+document.getElementById('alchRefreshBtn').addEventListener('click',renderAlchPanel);
+
+// ── ALERTS ───────────────────────────────────────────────
+function renderAlerts(){
+  const list=document.getElementById('alertList'),badge=document.getElementById('bellBadge');
+  if(!alerts.length){list.innerHTML='<div class="empty-msg">No alerts set yet.</div>';badge.classList.remove('show');return;}
+  badge.textContent=alerts.filter(a=>a.triggered).length||alerts.length;badge.classList.add('show');
+  list.innerHTML=alerts.map(a=>`<div class="alert-item ${a.triggered?'triggered':''}">
+    <div class="alert-info"><div class="alert-name">${a.itemName}</div>
+    <div class="alert-desc">${a.condition==='above'?'↑ Above':'↓ Below'} ${a.target.toLocaleString()} gp</div>
+    <div class="alert-status ${a.triggered?'hit':'watching'}">${a.triggered?'🔔 TRIGGERED':'👁 Watching…'}</div></div>
+    <button class="alert-del" data-aid="${a.id}">✕</button></div>`).join('');
+  list.querySelectorAll('.alert-del').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();alerts=alerts.filter(a=>a.id!==+btn.dataset.aid);renderAlerts();}));
+}
+document.getElementById('addAlertBtn').addEventListener('click',()=>{
+  const itemId=+document.getElementById('alertItemId').value,itemName=document.getElementById('alertItemName').value,condition=document.getElementById('alertCondition').value,target=parseFloat(document.getElementById('alertPrice').value);
+  if(!itemId||!itemName||!target){showToast('Missing info','Select an item and enter a price.');return;}
+  alerts.push({id:++alertIdSeq,itemId,itemName,condition,target,triggered:false});
+  document.getElementById('alertPrice').value='';renderAlerts();
+  showToast('Alert added',`${itemName} ${condition==='above'?'above':'below'} ${target.toLocaleString()} gp`);
+});
+function startAlertChecker(){
+  setInterval(async()=>{
+    try{
+      const res=await fetch(WIKI_LATEST,{headers:H}),data=await res.json();
+      Object.entries(data.data).forEach(([id,p])=>{prices[id]=p;});
+      document.getElementById('hUpdated').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      let hit=false;
+      alerts.forEach(a=>{if(a.triggered)return;const p=prices[a.itemId];if(!p)return;const cur=p.high||p.low||0;
+        if((a.condition==='above'&&cur>=a.target)||(a.condition==='below'&&cur<=a.target)){a.triggered=true;hit=true;playAlert();showToast('🔔 Alert!',`${a.itemName} hit ${cur.toLocaleString()} gp`);}
+      });
+      if(hit)renderAlerts();
+    }catch(e){}
+  },60_000);
+}
+
+// ── DRAWING TOOLS & CHART ENGINE ─────────────────────────
+const H_R=6;
+const HANDLE_CURSORS={tl:'nwse-resize',tr:'nesw-resize',bl:'nesw-resize',br:'nwse-resize',tc:'ns-resize',bc:'ns-resize',ml:'ew-resize',mr:'ew-resize',p1:'move',p2:'move',body:'move',pos_entry:'ns-resize',pos_tp:'ns-resize',pos_sl:'ns-resize',pos_right:'ew-resize',pos_body:'move'};
+
+function rectHandles(x1,y1,x2,y2){const lx=Math.min(x1,x2),rx=Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2),mx=(lx+rx)/2,my=(ty+by)/2;return{tl:{x:lx,y:ty},tc:{x:mx,y:ty},tr:{x:rx,y:ty},ml:{x:lx,y:my},mr:{x:rx,y:my},bl:{x:lx,y:by},bc:{x:mx,y:by},br:{x:rx,y:by}};}
+
+function setTool(t){activeTool=t;['toolCursor','toolArrow','toolRect','toolPosition','toolAnnotate'].forEach(id=>document.getElementById(id).classList.remove('on'));const map={cursor:'toolCursor',arrow:'toolArrow',rect:'toolRect',position:'toolPosition',annotate:'toolAnnotate'};if(map[t])document.getElementById(map[t]).classList.add('on');}
+document.getElementById('toolCursor').addEventListener('click',()=>setTool('cursor'));
+document.getElementById('toolArrow').addEventListener('click',()=>setTool('arrow'));
+document.getElementById('toolRect').addEventListener('click',()=>setTool('rect'));
+document.getElementById('toolPosition').addEventListener('click',()=>setTool('position'));
+document.getElementById('toolAnnotate').addEventListener('click',()=>setTool('annotate'));
+document.getElementById('clearDrawings').addEventListener('click',()=>{if(drawings.length){pushUndo();drawings=[];drawingInProgress=null;selectedDrawingIdx=-1;redraw();}});
+
+let horizArrowEnabled=false,lockRatioEnabled=false;
+document.getElementById('toggleHorizArrow').addEventListener('click',()=>{horizArrowEnabled=!horizArrowEnabled;document.getElementById('toggleHorizArrow').classList.toggle('on',horizArrowEnabled);showToast(horizArrowEnabled?'⟷ Horiz lock ON':'Horiz lock OFF');});
+document.getElementById('toggleLockRatio').addEventListener('click',()=>{lockRatioEnabled=!lockRatioEnabled;document.getElementById('toggleLockRatio').classList.toggle('on',lockRatioEnabled);showToast(lockRatioEnabled?'⛶ Aspect lock ON':'Aspect lock OFF');});
+
+// ── CUSTOM DATE RANGE ────────────────────────────────────
+const customRangeBtn = document.getElementById('customRangeBtn');
+const customRangeMenu = document.getElementById('customRangeMenu');
+
+// Seed default dates: past 30 days
+const todayStr = new Date().toISOString().slice(0,10);
+const monthAgoStr = new Date(Date.now()-30*24*3600*1000).toISOString().slice(0,10);
+document.getElementById('customFrom').value = monthAgoStr;
+document.getElementById('customTo').value   = todayStr;
+
+customRangeBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  customRangeMenu.classList.toggle('open');
+});
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.custom-range-wrap')) customRangeMenu.classList.remove('open');
+});
+
+document.getElementById('applyRangeBtn').addEventListener('click', async ()=>{
+  const from = document.getElementById('customFrom').value;
+  const to   = document.getElementById('customTo').value;
+  if(!from||!to){ showToast('Pick both dates'); return; }
+  if(new Date(from)>new Date(to)){ showToast('From must be before To'); return; }
+  if(!currentItem){ showToast('Select an item first'); return; }
+
+  customRangeMenu.classList.remove('open');
+  // deactivate all tf buttons, activate Custom
+  document.querySelectorAll('.tf-btn').forEach(b=>b.classList.remove('active'));
+  customRangeBtn.classList.add('active');
+  currentTf = 'custom';
+  customDateRange = { from: new Date(from).getTime()/1000, to: new Date(to).getTime()/1000 + 86399 };
+  await loadChart(currentItem.id, 'custom');
+});
+const overlayBtn=document.getElementById('overlayBtn');
+const overlayMenu=document.getElementById('overlayMenu');
+overlayBtn.addEventListener('click',e=>{e.stopPropagation();overlayMenu.classList.toggle('open');});
+document.addEventListener('click',e=>{if(!e.target.closest('.overlay-wrap'))overlayMenu.classList.remove('open');});
+
+document.getElementById('toggleMA').addEventListener('change',e=>{showMA=e.target.checked;redraw();});
+document.getElementById('toggleVol').addEventListener('change',e=>{showVol=e.target.checked;redraw();});
+document.getElementById('toggleMargin').addEventListener('change',e=>{showMargin=e.target.checked;redraw();});
+document.getElementById('maPeriod').addEventListener('change',redraw);
+
+// ── MORE MENU ────────────────────────────────────────────
+const moreTab=document.getElementById('moreTab');
+const moreMenu=document.getElementById('moreMenu');
+moreTab.addEventListener('click',e=>{e.stopPropagation();moreMenu.classList.toggle('open');});
+document.addEventListener('click',e=>{if(!e.target.closest('.more-tab'))moreMenu.classList.remove('open');});
+moreMenu.querySelectorAll('.more-item').forEach(item=>item.addEventListener('click',()=>{
+  moreMenu.classList.remove('open');
+  moreMenu.querySelectorAll('.more-item').forEach(i=>i.classList.remove('active'));
+  item.classList.add('active');
+  moreTab.classList.add('active');
+  switchPanel(item.dataset.ptab);
+}));
+function redraw(){if(currentItem&&candles.length){const cv=document.getElementById('candleCanvas');drawChart(cv.getContext('2d'),cv,candles);}}
+
+// zoom
+document.getElementById('zoomIn').addEventListener('click',()=>{const n=zoomEnd-zoomStart,mid=Math.floor((zoomStart+zoomEnd)/2),q=Math.max(4,Math.floor(n*.25));zoomStart=Math.max(0,mid-q);zoomEnd=Math.min(candles.length,mid+q);redraw();});
+document.getElementById('zoomOut').addEventListener('click',()=>{const n=zoomEnd-zoomStart,mid=Math.floor((zoomStart+zoomEnd)/2),q=Math.floor(n*.75);zoomStart=Math.max(0,mid-q);zoomEnd=Math.min(candles.length,mid+q);redraw();});
+document.getElementById('zoomReset').addEventListener('click',()=>{resetZoom();redraw();});
+function resetZoom(){zoomStart=0;zoomEnd=candles.length;}
+
+// undo/redo
+function pushUndo(){undoStack.push(JSON.stringify(drawings));if(undoStack.length>50)undoStack.shift();redoStack=[];updateUndoButtons();}
+function doUndo(){if(!undoStack.length)return;redoStack.push(JSON.stringify(drawings));drawings=JSON.parse(undoStack.pop());selectedDrawingIdx=-1;dragHandle=null;updateUndoButtons();redraw();}
+function doRedo(){if(!redoStack.length)return;undoStack.push(JSON.stringify(drawings));drawings=JSON.parse(redoStack.pop());selectedDrawingIdx=-1;dragHandle=null;updateUndoButtons();redraw();}
+function updateUndoButtons(){document.getElementById('undoBtn').style.opacity=undoStack.length?'1':'0.35';document.getElementById('redoBtn').style.opacity=redoStack.length?'1':'0.35';}
+document.getElementById('undoBtn').addEventListener('click',doUndo);
+document.getElementById('redoBtn').addEventListener('click',doRedo);
+updateUndoButtons();
+
+// context menu
+const ctxMenu=document.getElementById('drawCtxMenu');let ctxTargetIdx=-1;
+function showCtxMenu(x,y,idx){ctxTargetIdx=idx;ctxMenu.style.left=x+'px';ctxMenu.style.top=y+'px';ctxMenu.classList.add('show');}
+function hideCtxMenu(){ctxMenu.classList.remove('show');ctxTargetIdx=-1;}
+document.getElementById('ctxDelete').addEventListener('click',()=>{if(ctxTargetIdx<0){hideCtxMenu();return;}pushUndo();drawings.splice(ctxTargetIdx,1);if(selectedDrawingIdx===ctxTargetIdx)selectedDrawingIdx=-1;else if(selectedDrawingIdx>ctxTargetIdx)selectedDrawingIdx--;hideCtxMenu();redraw();});
+document.getElementById('ctxDuplicate').addEventListener('click',()=>{if(ctxTargetIdx<0){hideCtxMenu();return;}pushUndo();const o=drawings[ctxTargetIdx];drawings.push({...o,p1:{...o.p1,idx:o.p1.idx+2},p2:{...o.p2,idx:o.p2.idx+2}});selectedDrawingIdx=drawings.length-1;hideCtxMenu();redraw();});
+document.addEventListener('click',e=>{if(!e.target.closest('#drawCtxMenu'))hideCtxMenu();});
+
+// timeframes
+document.querySelectorAll('.tf-btn[data-tf]').forEach(btn=>btn.addEventListener('click',async()=>{
+  document.querySelectorAll('.tf-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  customRangeBtn.classList.remove('active');
+  currentTf=btn.dataset.tf;
+  if(currentItem)await loadChart(currentItem.id,currentTf);
+}));
+// ── CHART DATA ───────────────────────────────────────────
+function merge5m(raw,n){const out=[];for(let i=0;i+n<=raw.length;i+=n){const s=raw.slice(i,i+n);out.push({t:s[0].t,o:s[0].o,c:s[s.length-1].c,h:Math.max(...s.map(x=>x.h)),l:Math.min(...s.map(x=>x.l)),vol:s.reduce((a,x)=>a+x.vol,0)});}return out;}
+
+function parseSeries(series){
+  const raw=series.map(d=>{const hi=d.avgHighPrice,lo=d.avgLowPrice;if(!hi&&!lo)return null;const mid=(hi&&lo)?(hi+lo)/2:(hi||lo);return{t:d.timestamp*1000,hi:hi||mid,lo:lo||mid,mid,vol:(d.highPriceVolume||0)+(d.lowPriceVolume||0)};}).filter(Boolean);
+  return raw.map((d,i)=>{const open=i===0?d.mid:raw[i-1].mid,close=d.mid;return{t:d.t,o:open,c:close,h:Math.max(open,close,d.hi),l:Math.min(open,close,d.lo),vol:d.vol,hi:d.hi,lo:d.lo};});
+}
+
+async function loadChart(id,tf){
+  const canvas=document.getElementById('candleCanvas'),ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);drawLoading(ctx,canvas);
+  try{
+    const now=Date.now()/1000;
+    let step,cutoff,merge=1,customTo=null;
+    if(tf==='custom'&&customDateRange){
+      // Pick step based on range length for sensible candle density
+      const rangeDays=(customDateRange.to-customDateRange.from)/86400;
+      if(rangeDays<=2)       {step='5m'; merge=1;}
+      else if(rangeDays<=14) {step='1h'; merge=1;}
+      else if(rangeDays<=90) {step='6h'; merge=1;}
+      else                   {step='24h';merge=1;}
+      cutoff=customDateRange.from;
+      customTo=customDateRange.to;
+    } else if(tf==='5m'){step='5m';cutoff=now-4*3600;merge=1;}
+    else if(tf==='10m'){step='5m';cutoff=now-8*3600;merge=2;}
+    else if(tf==='15m'){step='5m';cutoff=now-12*3600;merge=3;}
+    else if(tf==='1h'){step='5m';cutoff=now-24*3600;merge=12;}
+    else if(tf==='6h'){step='1h';cutoff=now-7*24*3600;merge=1;}
+    else if(tf==='24h'){step='1h';cutoff=now-24*3600;merge=1;}
+    else if(tf==='week'){step='6h';cutoff=now-7*24*3600;merge=1;}
+    else if(tf==='month'){step='24h';cutoff=now-30*24*3600;merge=1;}
+    else if(tf==='3month'){step='24h';cutoff=now-90*24*3600;merge=1;}
+    else if(tf==='6month'){step='24h';cutoff=now-180*24*3600;merge=1;}
+    else if(tf==='1year'){step='24h';cutoff=now-365*24*3600;merge=1;}
+    else{step='24h';cutoff=now-90*24*3600;merge=1;}
+    const url=`https://prices.runescape.wiki/api/v1/osrs/timeseries?timestep=${step}&id=${id}`;
+    const res=await fetch(url,{headers:H});const data=await res.json();
+    let filtered=(data.data||[]).filter(d=>d.timestamp>=cutoff);
+    if(customTo) filtered=filtered.filter(d=>d.timestamp<=customTo);
+    const raw=parseSeries(filtered);
+    candles=merge>1?merge5m(raw,merge):raw;
+    resetZoom();drawChart(ctx,canvas,candles);
+  }catch(e){console.error(e);resizeCanvas(canvas);ctx.fillStyle='#6b7490';ctx.font='13px Barlow';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Failed to load chart',canvas.width/2/dpr,canvas.height/2/dpr);}
+}
+
+function drawLoading(ctx,canvas){resizeCanvas(canvas);ctx.fillStyle='#6b7490';ctx.font='13px Barlow';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Loading…',canvas.width/2/dpr,canvas.height/2/dpr);}
+function resizeCanvas(canvas){const wrap=canvas.parentElement;dpr=window.devicePixelRatio||1;const W=Math.max(1,wrap.clientWidth-78),H=Math.max(1,wrap.clientHeight-50);canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';}
+
+function calcMA(data,period){return data.map((_,i)=>{if(i<period-1)return null;const s=data.slice(i-period+1,i+1);return s.reduce((a,c)=>a+(c.h+c.l)/2,0)/period;});}
+
+// ── DRAW CHART ───────────────────────────────────────────
+function drawChart(ctx,canvas,data){
+  resizeCanvas(canvas);ctx.setTransform(1,0,0,1,0,0);ctx.scale(dpr,dpr);
+  const W=canvas.width/dpr,H=canvas.height/dpr;
+  const PL=12,PR=70,PT=16;
+  const volH=showVol?36:0,marginH=showMargin?36:0;
+  const PB=18+volH+marginH;
+  const cW=W-PL-PR,cH=H-PT-PB;
+
+  if(!data.length){ctx.fillStyle='#6b7490';ctx.font='13px Barlow';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('No data for this period',W/2,H/2);return;}
+
+  zoomStart=Math.max(0,Math.min(zoomStart,data.length-4));
+  zoomEnd=Math.max(zoomStart+4,Math.min(zoomEnd,data.length));
+  const view=data.slice(zoomStart,zoomEnd);const n=view.length;
+  const space=cW/n,candW=Math.max(1,space-Math.max(1,space*.15));
+  const maPeriod=Math.max(2,parseInt(document.getElementById('maPeriod').value)||20);
+  const maVals=showMA?calcMA(view,maPeriod):[];
+  const allP=view.flatMap(c=>[c.h,c.l]).filter(p=>p>0);
+  if(showMA)maVals.forEach(v=>{if(v!=null)allP.push(v);});
+  const minP=Math.min(...allP),maxP=Math.max(...allP);
+  const pad=(maxP-minP||1)*.08,lo=minP-pad,hi=maxP+pad;
+  const toY=p=>PT+cH-((p-lo)/(hi-lo))*cH;
+  const toP=y=>lo+(1-(y-PT)/cH)*(hi-lo);
+  const toX=i=>PL+(i+.5)*space;
+  const toIdx=x=>Math.min(Math.floor((x-PL)/space),n-1);
+  _chartGeom={PL,PR,PT,PB,cW,cH,volH,marginH,W,H,lo,hi,n,space,zoomStart,toY,toP,toX,toIdx,view};
+
+  // grid
+  ctx.strokeStyle=isDark?'#1e2336':'#e0e4f0';ctx.lineWidth=1;
+  for(let i=0;i<=6;i++){const p=lo+(hi-lo)*(i/6),y=toY(p);ctx.beginPath();ctx.moveTo(PL,y);ctx.lineTo(PL+cW,y);ctx.stroke();ctx.fillStyle='#6b7490';ctx.font='10px Share Tech Mono';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(fmt(Math.round(p)),PL+cW+5,y);}
+
+  // time labels
+  ctx.fillStyle='#6b7490';ctx.font='10px Share Tech Mono';ctx.textAlign='center';ctx.textBaseline='top';
+  const every=Math.max(1,Math.floor(n/6));
+  view.forEach((c,i)=>{if(i%every!==0&&i!==n-1)return;const x=toX(i),d=new Date(c.t);ctx.fillText(n<=24?d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString([],{month:'short',day:'numeric'}),x,PT+cH+(volH?volH+marginH+3:marginH+3));});
+
+  // candles
+  view.forEach((c,i)=>{
+    const x=toX(i),bull=c.c>=c.o,col=bull?'#26a65b':'#c0392b',hw=Math.max(.5,candW/2-.5);
+    ctx.strokeStyle=col;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,toY(c.h));ctx.lineTo(x,toY(c.l));ctx.stroke();
+    const yO=toY(c.o),yC=toY(c.c);ctx.fillStyle=col;ctx.fillRect(x-hw,Math.min(yO,yC),hw*2,Math.max(1,Math.abs(yC-yO)));
+  });
+
+  // MA
+  if(showMA&&maVals.length){ctx.strokeStyle='#f39c12';ctx.lineWidth=1.5;ctx.setLineDash([]);let started=false;maVals.forEach((v,i)=>{if(v==null)return;const x=toX(i),y=toY(v);if(!started){ctx.beginPath();ctx.moveTo(x,y);started=true;}else ctx.lineTo(x,y);});if(started)ctx.stroke();ctx.font='bold 10px Share Tech Mono';ctx.fillStyle='#f39c12';ctx.textAlign='left';ctx.fillText(`MA${maPeriod}`,PL+2,PT+4);}
+
+  // volume
+  if(showVol){
+    const volTop=PT+cH+4,vbH=volH-8;
+    const maxVol=Math.max(...view.map(c=>c.vol||0))||1;
+    ctx.strokeStyle=isDark?'#1e2336':'#e0e4f0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(PL,volTop);ctx.lineTo(PL+cW,volTop);ctx.stroke();
+    ctx.fillStyle='#6b7490';ctx.font='9px Share Tech Mono';ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('VOL',PL+2,volTop+2);
+    view.forEach((c,i)=>{const x=toX(i),bH=((c.vol||0)/maxVol)*vbH,hw=Math.max(.5,candW/2-.5);ctx.fillStyle=c.c>=c.o?'rgba(38,166,91,.5)':'rgba(192,57,43,.5)';ctx.fillRect(x-hw,volTop+vbH-bH,hw*2,bH);});
+  }
+
+  // margin overlay
+  if(showMargin){
+    const mTop=PT+cH+(showVol?volH:0)+4,mbH=marginH-8;
+    const margins=view.map(c=>(c.hi||c.h)-(c.lo||c.l));
+    const maxM=Math.max(...margins)||1;
+    ctx.strokeStyle=isDark?'#1e2336':'#e0e4f0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(PL,mTop);ctx.lineTo(PL+cW,mTop);ctx.stroke();
+    ctx.fillStyle='#6b7490';ctx.font='9px Share Tech Mono';ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('MARGIN',PL+2,mTop+2);
+    ctx.strokeStyle='#c8a84b';ctx.lineWidth=1.2;ctx.beginPath();
+    view.forEach((c,i)=>{const x=toX(i),m=(c.hi||c.h)-(c.lo||c.l),y=mTop+mbH-(m/maxM)*mbH;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();
+  }
+
+  // target lines
+  if(currentItem)drawTargetLines(ctx,toY,PL,cW,PR,W,currentItem.id);
+
+  // annotations
+  if(currentItem){
+    const anns=getAnns(currentItem.id);
+    anns.forEach(a=>{
+      const li=a.candleIdx-zoomStart;
+      if(li<0||li>=n)return;
+      const x=toX(li),y=toY(a.price);
+      ctx.fillStyle=a.color||'#f39c12';
+      ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';
+      ctx.fillText('📍',x,y);
+      if(a.note){ctx.font='10px Barlow';ctx.fillStyle=a.color||'#f39c12';ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(a.note.slice(0,20),x+8,y);}
+    });
+  }
+
+  // drawings
+  drawings.forEach((d,i)=>{
+    if(d.type==='position')renderPosition(ctx,d,toY,toX,zoomStart,i===selectedDrawingIdx);
+    else renderDrawing(ctx,d,toY,toX,zoomStart,n,i===selectedDrawingIdx);
+  });
+  if(drawingInProgress){
+    if(drawingInProgress.type==='position')renderPosition(ctx,drawingInProgress,toY,toX,zoomStart,false);
+    else renderDrawing(ctx,drawingInProgress,toY,toX,zoomStart,n,false);
+  }
+
+  attachMouseHandlers(canvas,data);
+}
+
+// ── RENDER DRAWING ────────────────────────────────────────
+function renderDrawing(ctx,d,toY,toX,zoomStart,n,selected){
+  const li1=d.p1.idx-zoomStart,li2=d.p2.idx-zoomStart;
+  const x1=toX(li1),y1=toY(d.p1.price),x2=toX(li2),y2=toY(d.p2.price),col=d.color||'#c8a84b';
+  ctx.save();
+  if(d.type==='arrow'){
+    ctx.strokeStyle=selected?'#fff':col;ctx.lineWidth=selected?2.5:2;ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    const angle=Math.atan2(y2-y1,x2-x1),hs=12;
+    ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-hs*Math.cos(angle-Math.PI/7),y2-hs*Math.sin(angle-Math.PI/7));ctx.lineTo(x2-hs*Math.cos(angle+Math.PI/7),y2-hs*Math.sin(angle+Math.PI/7));
+    ctx.closePath();ctx.fillStyle=selected?'#fff':col;ctx.fill();
+    if(Math.abs(y2-y1)<1.5){ctx.font='10px Share Tech Mono';ctx.fillStyle=col;ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(fmt(Math.round(d.p1.price)),Math.max(x1,x2)+6,y1-2);}
+    if(selected)[[x1,y1],[x2,y2]].forEach(([hx,hy])=>{ctx.beginPath();ctx.arc(hx,hy,H_R,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();});
+  }else if(d.type==='rect'){
+    const lx=Math.min(x1,x2),rx2=Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2);
+    ctx.fillStyle=selected?'rgba(200,168,75,0.18)':'rgba(200,168,75,0.09)';ctx.fillRect(lx,ty,rx2-lx,by-ty);
+    ctx.strokeStyle=selected?'#fff':col;ctx.lineWidth=selected?2:1.5;ctx.setLineDash(selected?[]:[5,3]);ctx.strokeRect(lx,ty,rx2-lx,by-ty);ctx.setLineDash([]);
+    if(selected){const handles=rectHandles(x1,y1,x2,y2);Object.values(handles).forEach(({x,y})=>{ctx.beginPath();ctx.arc(x,y,H_R,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();});}
+  }
+  ctx.restore();
+}
+
+// ── POSITION TOOL ─────────────────────────────────────────
+function renderPosition(ctx,d,toY,toX,zoomStart,selected){
+  if(!d.entry||!d.tp||!d.sl)return;
+  const isLong=d.side==='long';
+  const lx=toX(d.entry.idx-zoomStart),ex=toX(d.entry.rightIdx-zoomStart);
+  const ey=toY(d.entry.price),ty=toY(d.tp.price),sy=toY(d.sl.price);
+  const boxW=ex-lx;
+  const profitColor=isLong?'rgba(38,166,91,':'rgba(192,57,43,';const lossColor=isLong?'rgba(192,57,43,':'rgba(38,166,91,';
+  const profitStroke=isLong?'#26a65b':'#c0392b';const lossStroke=isLong?'#c0392b':'#26a65b';
+  ctx.fillStyle=profitColor+'0.13)';ctx.fillRect(lx,Math.min(ey,ty),boxW,Math.abs(ty-ey));
+  ctx.strokeStyle=profitStroke;ctx.lineWidth=1.5;ctx.setLineDash([]);ctx.strokeRect(lx,Math.min(ey,ty),boxW,Math.abs(ty-ey));
+  ctx.fillStyle=lossColor+'0.13)';ctx.fillRect(lx,Math.min(ey,sy),boxW,Math.abs(sy-ey));
+  ctx.strokeStyle=lossStroke;ctx.lineWidth=1.5;ctx.strokeRect(lx,Math.min(ey,sy),boxW,Math.abs(sy-ey));
+  ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(lx,ey);ctx.lineTo(ex,ey);ctx.stroke();ctx.setLineDash([]);
+  const profitPct=Math.abs((d.tp.price-d.entry.price)/d.entry.price*100);const lossPct=Math.abs((d.entry.price-d.sl.price)/d.entry.price*100);const rr=lossPct>0?profitPct/lossPct:0;
+  const profitGp=Math.abs(d.tp.price-d.entry.price),lossGp=Math.abs(d.entry.price-d.sl.price);
+  ctx.font='bold 10px Share Tech Mono';ctx.textBaseline='middle';
+  if(Math.abs(ty-ey)>16){const pm=(Math.min(ey,ty)+Math.max(ey,ty))/2;ctx.fillStyle=profitStroke;ctx.textAlign='right';ctx.fillText(`+${fmt(profitGp)} (+${profitPct.toFixed(1)}%)`,ex-4,pm);}
+  if(Math.abs(sy-ey)>16){const lm=(Math.min(ey,sy)+Math.max(ey,sy))/2;ctx.fillStyle=lossStroke;ctx.textAlign='right';ctx.fillText(`-${fmt(lossGp)} (-${lossPct.toFixed(1)}%)`,ex-4,lm);}
+  ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(`${isLong?'L':'S'}  1:${rr.toFixed(2)}`,lx+4,ey-7);
+  ctx.font='10px Share Tech Mono';ctx.textAlign='left';
+  ctx.fillStyle=profitStroke;ctx.fillText(fmt(Math.round(d.tp.price)),ex+4,ty);
+  ctx.fillStyle='#aaa';ctx.fillText(fmt(Math.round(d.entry.price)),ex+4,ey);
+  ctx.fillStyle=lossStroke;ctx.fillText(fmt(Math.round(d.sl.price)),ex+4,sy);
+  if(selected){[{x:lx+boxW/2,y:ty},{x:lx+boxW/2,y:ey},{x:lx+boxW/2,y:sy},{x:ex,y:ey}].forEach(({x,y})=>{ctx.beginPath();ctx.arc(x,y,H_R,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#c8a84b';ctx.lineWidth=2;ctx.stroke();});}
+}
+
+// ── HIT TESTING ───────────────────────────────────────────
+function hitTestDrawing(d,mx,my,toY,toX,zoomStart){
+  const li1=d.p1.idx-zoomStart,li2=d.p2.idx-zoomStart;
+  const x1=toX(li1),y1=toY(d.p1.price),x2=toX(li2),y2=toY(d.p2.price);
+  if(d.type==='arrow'){
+    if(Math.hypot(mx-x1,my-y1)<H_R+3)return'p1';if(Math.hypot(mx-x2,my-y2)<H_R+3)return'p2';
+    const len=Math.hypot(x2-x1,y2-y1)||1,t=Math.max(0,Math.min(1,((mx-x1)*(x2-x1)+(my-y1)*(y2-y1))/(len*len)));
+    if(Math.hypot(mx-(x1+t*(x2-x1)),my-(y1+t*(y2-y1)))<8)return'body';
+  }else if(d.type==='rect'){
+    const handles=rectHandles(x1,y1,x2,y2);for(const[name,{x,y}]of Object.entries(handles))if(Math.hypot(mx-x,my-y)<H_R+4)return name;
+    const lx=Math.min(x1,x2),rx=Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2);if(mx>=lx&&mx<=rx&&my>=ty&&my<=by)return'body';
+  }
+  return null;
+}
+function hitTestPosition(d,mx,my,toY,toX,zoomStart){
+  if(!d.entry||!d.tp||!d.sl)return null;
+  const lx=toX(d.entry.idx-zoomStart),ex=toX(d.entry.rightIdx-zoomStart);
+  const ey=toY(d.entry.price),ty=toY(d.tp.price),sy=toY(d.sl.price),boxW=ex-lx;
+  const handles=[{x:lx+boxW/2,y:ty,name:'pos_tp'},{x:lx+boxW/2,y:ey,name:'pos_entry'},{x:lx+boxW/2,y:sy,name:'pos_sl'},{x:ex,y:ey,name:'pos_right'}];
+  for(const h of handles)if(Math.hypot(mx-h.x,my-h.y)<H_R+5)return h.name;
+  if(mx>=lx&&mx<=ex&&my>=Math.min(ty,sy)&&my<=Math.max(ty,sy))return'pos_body';
+  return null;
+}
+
+function applyRectHandle(d,handle,mx,my,toP,toIdx2,zoomStart,dataLen){
+  const newPrice=toP(my),newIdx=Math.max(0,Math.min(dataLen-1,zoomStart+Math.max(0,toIdx2(mx))));
+  const isLeft=['tl','ml','bl'].includes(handle),isRight=['tr','mr','br'].includes(handle);
+  const isTop=['tl','tc','tr'].includes(handle),isBot=['bl','bc','br'].includes(handle);
+  const p1IsLeft=d.p1.idx<=d.p2.idx,p1IsTop=d.p1.price>=d.p2.price;
+  if(isLeft){if(p1IsLeft)d.p1={...d.p1,idx:newIdx};else d.p2={...d.p2,idx:newIdx};}
+  if(isRight){if(!p1IsLeft)d.p1={...d.p1,idx:newIdx};else d.p2={...d.p2,idx:newIdx};}
+  if(isTop){if(p1IsTop)d.p1={...d.p1,price:newPrice};else d.p2={...d.p2,price:newPrice};}
+  if(isBot){if(!p1IsTop)d.p1={...d.p1,price:newPrice};else d.p2={...d.p2,price:newPrice};}
+}
+// ── MOUSE HANDLERS ───────────────────────────────────────
+function attachMouseHandlers(canvas,data){
+  if(canvas._mm)canvas.removeEventListener('mousemove',canvas._mm);
+  if(canvas._ml)canvas.removeEventListener('mouseleave',canvas._ml);
+  if(canvas._md)canvas.removeEventListener('mousedown',canvas._md);
+  if(canvas._mu)canvas.removeEventListener('mouseup',canvas._mu);
+  if(canvas._wh)canvas.removeEventListener('wheel',canvas._wh);
+  if(canvas._rc)canvas.removeEventListener('contextmenu',canvas._rc);
+  if(canvas._kd)document.removeEventListener('keydown',canvas._kd);
+
+  const tooltip=document.getElementById('tooltip'),chH=document.getElementById('chH'),chV=document.getElementById('chV');
+
+  function pxToChart(e){const r=canvas.getBoundingClientRect();return{mx:e.clientX-r.left,my:e.clientY-r.top};}
+  function chartCoords(mx,my){
+    if(!_chartGeom)return null;
+    const{PL,cW,PT,cH,toIdx,toP,zoomStart,n}=_chartGeom;
+    if(mx<PL||mx>PL+cW||my<PT||my>PT+cH)return null;
+    const li=Math.max(0,Math.min(toIdx(mx),n-1));
+    return{li,globalIdx:zoomStart+li,price:toP(my),mx,my};
+  }
+  function redrawFull(){drawChart(canvas.getContext('2d'),canvas,data);}
+
+  canvas._kd=e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!e.shiftKey){e.preventDefault();doUndo();return;}
+    if((e.ctrlKey||e.metaKey)&&(e.key==='y'||(e.key==='z'&&e.shiftKey))){e.preventDefault();doRedo();return;}
+    if((e.key==='Delete'||e.key==='Backspace')&&selectedDrawingIdx>=0&&document.activeElement===document.body){e.preventDefault();pushUndo();drawings.splice(selectedDrawingIdx,1);selectedDrawingIdx=-1;dragHandle=null;redrawFull();}
+  };
+  document.addEventListener('keydown',canvas._kd);
+
+  canvas._rc=e=>{
+    e.preventDefault();if(!_chartGeom)return;
+    const{mx,my}=pxToChart(e),{toY,toX,zoomStart}=_chartGeom;
+    for(let i=drawings.length-1;i>=0;i--){
+      const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,zoomStart):hitTestDrawing(d,mx,my,toY,toX,zoomStart);
+      if(hit){selectedDrawingIdx=i;redrawFull();showCtxMenu(e.clientX,e.clientY,i);return;}
+    }
+  };
+  canvas.addEventListener('contextmenu',canvas._rc);
+
+  canvas._md=e=>{
+    if(e.button!==0)return;
+    hideCtxMenu();
+    const{mx,my}=pxToChart(e);
+    if(!_chartGeom)return;
+    const{toY,toX,zoomStart}=_chartGeom;
+    const cc=chartCoords(mx,my);
+
+    // annotation tool
+    if(activeTool==='annotate'){
+      if(!cc||!currentItem)return;
+      const note=prompt('Annotation note (optional):','');
+      if(note===null)return; // cancelled
+      if(!annotations[currentItem.id])annotations[currentItem.id]=[];
+      annotations[currentItem.id].push({id:++annIdSeq,candleIdx:cc.globalIdx,price:cc.price,note:note.trim(),color:'#f39c12',ts:Date.now()});
+      redrawFull();renderAnnPanel();
+      return;
+    }
+
+    // hit test existing drawings first (any tool)
+    for(let i=drawings.length-1;i>=0;i--){
+      const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,zoomStart):hitTestDrawing(d,mx,my,toY,toX,zoomStart);
+      if(hit){
+        selectedDrawingIdx=i;dragHandle=hit;dragStartMx=mx;dragStartMy=my;
+        dragStartP1=d.type==='position'?{...d.entry,sl:{...d.sl},rightIdx:d.entry.rightIdx}:{...d.p1};
+        dragStartP2=d.type==='position'?{...d.tp}:{...d.p2};
+        canvas.style.cursor=HANDLE_CURSORS[hit]||'move';
+        redrawFull();return;
+      }
+    }
+
+    selectedDrawingIdx=-1;dragHandle=null;
+
+    if(activeTool==='cursor'){
+      _isPanning=true;_panStartX=mx;_panStartZoom={s:zoomStart,e:zoomEnd};canvas.style.cursor='grabbing';return;
+    }
+
+    if(!cc)return;
+    pushUndo();
+    if(activeTool==='position'){
+      const span=Math.max(4,Math.floor((zoomEnd-zoomStart)*.3));
+      drawingInProgress={type:'position',side:'long',entry:{idx:cc.globalIdx,price:cc.price},tp:{idx:cc.globalIdx,price:cc.price*1.05},sl:{idx:cc.globalIdx,price:cc.price*.97},rightIdx:Math.min(candles.length-1,cc.globalIdx+span)};
+      // Fix: store rightIdx on entry for rendering
+      drawingInProgress.entry.rightIdx=drawingInProgress.rightIdx;
+    }else{
+      drawingInProgress={type:activeTool,p1:{idx:cc.globalIdx,price:cc.price},p2:{idx:cc.globalIdx,price:cc.price},color:'#c8a84b'};
+    }
+  };
+
+  canvas._mm=e=>{
+    const{mx,my}=pxToChart(e);
+    if(!_chartGeom)return;
+    const{toY,toX,toP,toIdx,zoomStart,PL,space}=_chartGeom;
+
+    if(_isPanning){
+      const dx=mx-_panStartX,deltaIdx=Math.round(-dx/space),span=_panStartZoom.e-_panStartZoom.s;
+      let ns=_panStartZoom.s+deltaIdx,ne=_panStartZoom.e+deltaIdx;
+      if(ns<0){ns=0;ne=span;}if(ne>data.length){ne=data.length;ns=ne-span;}
+      zoomStart=ns;zoomEnd=ne;redrawFull();return;
+    }
+
+    if(dragHandle!==null&&selectedDrawingIdx>=0){
+      const d=drawings[selectedDrawingIdx];
+      if(d.type==='position'){
+        const cc2=chartCoords(mx,my);if(!cc2)return;
+        if(dragHandle==='pos_entry'){const delta=cc2.price-dragStartP1.price;d.entry.price=cc2.price;d.tp.price=dragStartP2.price+delta;d.sl.price=dragStartP1.sl.price+delta;}
+        else if(dragHandle==='pos_tp'){d.tp.price=cc2.price;d.side=d.tp.price>d.entry.price?'long':'short';}
+        else if(dragHandle==='pos_sl'){d.sl.price=cc2.price;d.side=d.tp.price>d.entry.price?'long':'short';}
+        else if(dragHandle==='pos_right'){d.entry.rightIdx=Math.max(d.entry.idx+1,Math.min(candles.length-1,cc2.globalIdx));}
+        else if(dragHandle==='pos_body'){const origCc=chartCoords(dragStartMx,dragStartMy);if(!origCc)return;const dIdx=cc2.globalIdx-origCc.globalIdx,dP=cc2.price-origCc.price;d.entry.idx=Math.max(0,Math.min(candles.length-1,dragStartP1.idx+dIdx));d.entry.price=dragStartP1.price+dP;d.tp.price=dragStartP2.price+dP;d.sl.price=dragStartP1.sl.price+dP;d.entry.rightIdx=Math.max(d.entry.idx+1,Math.min(candles.length-1,dragStartP1.rightIdx+dIdx));}
+        redrawFull();return;
+      }
+      if(d.type==='arrow'){
+        const cc2=chartCoords(mx,my);if(!cc2)return;
+        if(dragHandle==='p1'){d.p1={idx:cc2.globalIdx,price:horizArrowEnabled?cc2.price:cc2.price};if(horizArrowEnabled){d.p1.price=cc2.price;d.p2={...d.p2,price:cc2.price};}}
+        else if(dragHandle==='p2'){d.p2={idx:cc2.globalIdx,price:cc2.price};if(horizArrowEnabled){d.p2.price=cc2.price;d.p1={...d.p1,price:cc2.price};}}
+        else if(dragHandle==='body'){const origCc=chartCoords(dragStartMx,dragStartMy);if(!origCc)return;const dIdx=cc2.globalIdx-origCc.globalIdx,dP=horizArrowEnabled?0:cc2.price-origCc.price;d.p1={idx:Math.max(0,Math.min(data.length-1,dragStartP1.idx+dIdx)),price:dragStartP1.price+dP};d.p2={idx:Math.max(0,Math.min(data.length-1,dragStartP2.idx+dIdx)),price:dragStartP2.price+dP};if(horizArrowEnabled){const avg=(d.p1.price+d.p2.price)/2;d.p1.price=avg;d.p2.price=avg;}}
+        redrawFull();return;
+      }
+      if(d.type==='rect'){
+        if(dragHandle==='body'){const cc2=chartCoords(mx,my),origCc=chartCoords(dragStartMx,dragStartMy);if(!cc2||!origCc)return;const dIdx=cc2.globalIdx-origCc.globalIdx,dP=cc2.price-origCc.price;d.p1={idx:Math.max(0,Math.min(data.length-1,dragStartP1.idx+dIdx)),price:dragStartP1.price+dP};d.p2={idx:Math.max(0,Math.min(data.length-1,dragStartP2.idx+dIdx)),price:dragStartP2.price+dP};}
+        else{const snap={p1:{...dragStartP1},p2:{...dragStartP2}};applyRectHandle(snap,dragHandle,mx,my,toP,toIdx,zoomStart,data.length);if(lockRatioEnabled&&_chartGeom){const{toX:tX,toY:tY}=_chartGeom;const px1=tX(snap.p1.idx-zoomStart),px2=tX(snap.p2.idx-zoomStart);const pxW=Math.abs(px2-px1);const signY=snap.p2.price<snap.p1.price?1:-1;snap.p2={...snap.p2,price:toP(tY(snap.p1.price)+signY*pxW)};}d.p1=snap.p1;d.p2=snap.p2;}
+        redrawFull();return;
+      }
+    }
+
+    if(drawingInProgress){
+      const cc2=chartCoords(mx,my);if(!cc2)return;
+      if(drawingInProgress.type==='position'){
+        const ep=drawingInProgress.entry.price,tpDist=Math.abs(cc2.price-ep),slDist=tpDist*.5;
+        drawingInProgress.tp.price=cc2.price;drawingInProgress.sl.price=cc2.price>ep?ep-slDist:ep+slDist;drawingInProgress.side=cc2.price>=ep?'long':'short';
+        const span=Math.max(4,Math.floor((zoomEnd-zoomStart)*.3));drawingInProgress.entry.rightIdx=Math.min(candles.length-1,drawingInProgress.entry.idx+span);
+        redrawFull();return;
+      }
+      let newP2={idx:cc2.globalIdx,price:cc2.price};
+      if(drawingInProgress.type==='arrow'&&horizArrowEnabled){newP2.price=cc2.price;drawingInProgress.p1={...drawingInProgress.p1,price:cc2.price};}
+      if(drawingInProgress.type==='rect'&&lockRatioEnabled&&_chartGeom){const{toX:tX,toY:tY}=_chartGeom;const x1=tX(drawingInProgress.p1.idx-zoomStart),x2=tX(cc2.globalIdx-zoomStart);const pxW=Math.abs(x2-x1);const signY=cc2.price<drawingInProgress.p1.price?1:-1;newP2.price=toP(tY(drawingInProgress.p1.price)+signY*pxW);}
+      drawingInProgress.p2=newP2;redrawFull();return;
+    }
+
+    // hover cursors
+    let hovering=false;
+    for(let i=drawings.length-1;i>=0;i--){const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,zoomStart):hitTestDrawing(d,mx,my,toY,toX,zoomStart);if(hit){canvas.style.cursor=HANDLE_CURSORS[hit]||'move';hovering=true;break;}}
+    if(!hovering)canvas.style.cursor='crosshair';
+
+    // crosshair + tooltip
+    const cc=chartCoords(mx,my);chH.style.display='none';chV.style.display='none';
+    if(!cc){tooltip.style.display='none';return;}
+    chV.style.display='block';chV.style.left=(14+PL+(cc.li+.5)*space)+'px';
+    chH.style.display='block';chH.style.top=(8+my)+'px';
+    const c=data[cc.globalIdx];if(!c)return;
+    const ds=new Date(c.t).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const maPeriod=Math.max(2,parseInt(document.getElementById('maPeriod').value)||20);
+    const maVals=showMA?calcMA(_chartGeom.view,maPeriod):[];
+    const maLine=showMA&&maVals[cc.li]!=null?`<div class="tt-row"><span class="tt-label">MA${maPeriod}</span><span class="tt-val" style="color:#f39c12">${Math.round(maVals[cc.li]).toLocaleString()}</span></div>`:'';
+    const volLine=showVol?`<div class="tt-row"><span class="tt-label">Vol</span><span class="tt-val">${fmt(c.vol)}</span></div>`:'';
+    const marginLine=showMargin?`<div class="tt-row"><span class="tt-label">Spread</span><span class="tt-val">${fmt((c.hi||c.h)-(c.lo||c.l))}</span></div>`:'';
+    tooltip.style.display='block';
+    tooltip.innerHTML=`<div class="tt-date">${ds}</div>
+      <div class="tt-row"><span class="tt-label">Open</span><span class="tt-val">${c.o.toLocaleString()}</span></div>
+      <div class="tt-row"><span class="tt-label">High</span><span class="tt-val">${c.h.toLocaleString()}</span></div>
+      <div class="tt-row"><span class="tt-label">Low</span><span class="tt-val">${c.l.toLocaleString()}</span></div>
+      <div class="tt-row"><span class="tt-label">Close</span><span class="tt-val">${c.c.toLocaleString()}</span></div>
+      ${maLine}${volLine}${marginLine}`;
+  };
+
+  canvas._mu=e=>{
+    if(e.button!==0)return;
+    if(_isPanning){_isPanning=false;canvas.style.cursor='crosshair';return;}
+    if(dragHandle!==null){dragHandle=null;canvas.style.cursor='crosshair';redrawFull();return;}
+    if(drawingInProgress){
+      const{mx,my}=pxToChart(e);const cc=chartCoords(mx,my);
+      if(drawingInProgress.type==='position'){drawings.push({...drawingInProgress});selectedDrawingIdx=drawings.length-1;drawingInProgress=null;redrawFull();return;}
+      if(cc)drawingInProgress.p2={idx:cc.globalIdx,price:cc.price};
+      if(drawingInProgress.p1.idx!==drawingInProgress.p2.idx||Math.abs(drawingInProgress.p1.price-drawingInProgress.p2.price)>0){drawings.push({...drawingInProgress});selectedDrawingIdx=drawings.length-1;}
+      else{undoStack.pop();updateUndoButtons();}
+      drawingInProgress=null;redrawFull();
+    }
+  };
+
+  canvas._ml=()=>{
+    tooltip.style.display='none';chH.style.display='none';chV.style.display='none';
+    if(_isPanning){_isPanning=false;canvas.style.cursor='crosshair';}
+    if(drawingInProgress){drawingInProgress=null;undoStack.pop();updateUndoButtons();redrawFull();}
+  };
+
+  canvas._wh=e=>{
+    e.preventDefault();if(!_chartGeom||!data.length)return;
+    const{mx}=pxToChart(e),{PL:pl,space,zoomStart:zs}=_chartGeom;
+    const li=Math.max(0,Math.min(Math.floor((mx-pl)/space),_chartGeom.n-1)),pivotIdx=zs+li;
+    const span=zoomEnd-zoomStart,factor=e.deltaY>0?1.25:0.8;
+    const newSpan=Math.max(4,Math.min(data.length,Math.round(span*factor)));
+    const ratio=(pivotIdx-zoomStart)/span;
+    let ns=Math.round(pivotIdx-ratio*newSpan),ne=ns+newSpan;
+    if(ns<0){ns=0;ne=newSpan;}if(ne>data.length){ne=data.length;ns=ne-newSpan;}
+    zoomStart=Math.max(0,ns);zoomEnd=Math.min(data.length,ne);redrawFull();
+  };
+
+  canvas.addEventListener('mousedown',canvas._md);
+  canvas.addEventListener('mousemove',canvas._mm);
+  canvas.addEventListener('mouseup',canvas._mu);
+  canvas.addEventListener('mouseleave',canvas._ml);
+  canvas.addEventListener('wheel',canvas._wh,{passive:false});
+  canvas.addEventListener('contextmenu',canvas._rc);
+}
+
+// ── MOBILE NAV ────────────────────────────────────────────
+document.querySelectorAll('.mnav-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.mobile-panel').forEach(p=>p.classList.remove('open'));
+  const mv=btn.dataset.mv;
+  if(mv!=='chart')document.getElementById('mobile'+mv.charAt(0).toUpperCase()+mv.slice(1))?.classList.add('open');
+}));
+
+window.addEventListener('resize',()=>{if(currentItem&&candles.length){const cv=document.getElementById('candleCanvas');drawChart(cv.getContext('2d'),cv,candles);}});
+// ── PRICE TARGETS ────────────────────────────────────────
+let priceTargets=[];  // [{id,itemId,itemName,price,label,color}]
+let targetIdSeq=0;
+let selectedTargetColor='#c8a84b';
+
+document.querySelectorAll('[data-tc]').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('[data-tc]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedTargetColor=btn.dataset.tc;
+}));
+
+document.getElementById('addTargetBtn').addEventListener('click',()=>{
+  const itemId=+document.getElementById('targetItemId').value;
+  const itemName=document.getElementById('targetItemName').value;
+  const price=parseFloat(document.getElementById('targetPrice').value);
+  const label=document.getElementById('targetLabel').value.trim()||'Target';
+  if(!itemId||!price){showToast('Missing info','Select an item and enter a price.');return;}
+  priceTargets.push({id:++targetIdSeq,itemId,itemName,price,label,color:selectedTargetColor});
+  document.getElementById('targetPrice').value='';
+  document.getElementById('targetLabel').value='';
+  renderTargets();
+  if(currentItem?.id===itemId)redraw();
+  showToast('🎯 Target set',`${label} at ${price.toLocaleString()} gp for ${itemName}`);
+});
+
+function renderTargets(){
+  const el=document.getElementById('targetList');
+  if(!priceTargets.length){el.innerHTML='<div class="empty-msg">No targets set.</div>';return;}
+  el.innerHTML=priceTargets.map(t=>`<div class="target-row">
+    <div class="target-dot" style="background:${t.color}"></div>
+    <div class="target-info">
+      <div class="target-label">${t.label}</div>
+      <div class="target-price">${t.price.toLocaleString()} gp</div>
+      <div class="target-item">${t.itemName}</div>
+    </div>
+    <button class="target-del" data-tid="${t.id}">✕</button>
+  </div>`).join('');
+  el.querySelectorAll('.target-del').forEach(btn=>btn.addEventListener('click',()=>{
+    priceTargets=priceTargets.filter(t=>t.id!==+btn.dataset.tid);
+    renderTargets();redraw();
+  }));
+}
+
+// Draw target lines on chart — called inside drawChart
+function drawTargetLines(ctx,toY,PL,cW,PR,W,itemId){
+  const targets=priceTargets.filter(t=>t.itemId===itemId);
+  if(!targets.length)return;
+  targets.forEach(t=>{
+    const y=toY(t.price);
+    if(y<0||y>10000)return;
+    ctx.save();
+    ctx.strokeStyle=t.color;ctx.lineWidth=1.5;ctx.setLineDash([6,4]);
+    ctx.beginPath();ctx.moveTo(PL,y);ctx.lineTo(PL+cW,y);ctx.stroke();
+    ctx.setLineDash([]);
+    // Label on right
+    ctx.fillStyle=t.color;ctx.font='bold 10px Share Tech Mono';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(`${t.label} ${fmt(Math.round(t.price))}`,PL+cW+5,y);
+    ctx.restore();
+  });
+}
+
+// ── PORTFOLIO ────────────────────────────────────────────
+let portfolio=[];  // [{id,itemId,itemName,qty,buyPrice,addedAt}]
+let portIdSeq=0;
+
+document.getElementById('addPortBtn').addEventListener('click',()=>{
+  const itemId=+document.getElementById('portItemId').value;
+  const itemName=document.getElementById('portItemName').value;
+  const qty=parseInt(document.getElementById('portQty').value);
+  const buyPrice=parseFloat(document.getElementById('portBuyPrice').value);
+  if(!itemId||!qty||!buyPrice){showToast('Missing info','Fill in all fields.');return;}
+  portfolio.push({id:++portIdSeq,itemId,itemName,qty,buyPrice,addedAt:Date.now()});
+  document.getElementById('portQty').value='';
+  renderPortfolio();
+  showToast('💼 Added',`${qty.toLocaleString()}x ${itemName} @ ${buyPrice.toLocaleString()} gp`);
+});
+
+function renderPortfolio(){
+  const listEl=document.getElementById('portfolioList');
+  const summaryEl=document.getElementById('portfolioSummary');
+  const pnlEl=document.getElementById('portfolioTotalPnl');
+  const valEl=document.getElementById('portfolioTotalVal');
+  if(!portfolio.length){listEl.innerHTML='<div class="empty-msg">No positions yet.</div>';summaryEl.style.display='none';return;}
+  summaryEl.style.display='block';
+
+  let totalPnl=0,totalVal=0,totalCost=0;
+  const rows=portfolio.map(p=>{
+    const info=allItems[p.itemId],pr=prices[p.itemId]||{};
+    const currentPrice=pr.high||pr.low||p.buyPrice;
+    const cost=p.buyPrice*p.qty;
+    const value=currentPrice*p.qty;
+    const pnl=value-cost;
+    const pnlPct=cost>0?pnl/cost*100:0;
+    totalPnl+=pnl;totalVal+=value;totalCost+=cost;
+    const pnlColor=pnl>=0?'var(--green)':'var(--red)';
+    return`<div class="port-row">
+      <div class="port-row-top">
+        <img src="${info?iconUrl(info):'#'}" onerror="this.src=''" alt="" loading="lazy">
+        <span class="port-name">${p.itemName}</span>
+        <button class="port-del" data-pid="${p.id}">✕</button>
+      </div>
+      <div class="port-stats">
+        <div class="port-stat"><div class="port-stat-label">Qty</div><div class="port-stat-val">${p.qty.toLocaleString()}</div></div>
+        <div class="port-stat"><div class="port-stat-label">Avg Buy</div><div class="port-stat-val">${fmt(p.buyPrice)}</div></div>
+        <div class="port-stat"><div class="port-stat-label">Current</div><div class="port-stat-val">${fmt(currentPrice)}</div></div>
+        <div class="port-stat"><div class="port-stat-label">Cost</div><div class="port-stat-val">${fmt(cost)}</div></div>
+        <div class="port-stat"><div class="port-stat-label">Value</div><div class="port-stat-val">${fmt(value)}</div></div>
+        <div class="port-stat"><div class="port-stat-label">P&L</div><div class="port-stat-val" style="color:${pnlColor}">${pnl>=0?'+':''}${fmt(pnl)} (${pnlPct.toFixed(1)}%)</div></div>
+      </div>
+    </div>`;
+  }).join('');
+  listEl.innerHTML=rows;
+  listEl.querySelectorAll('.port-del').forEach(btn=>btn.addEventListener('click',()=>{portfolio=portfolio.filter(p=>p.id!==+btn.dataset.pid);renderPortfolio();}));
+
+  const pnlPct=totalCost>0?totalPnl/totalCost*100:0;
+  pnlEl.textContent=`${totalPnl>=0?'+':''}${totalPnl.toLocaleString()} gp (${pnlPct.toFixed(2)}%)`;
+  pnlEl.style.color=totalPnl>=0?'var(--green)':'var(--red)';
+  valEl.textContent=`Total value: ${totalVal.toLocaleString()} gp  ·  Cost: ${totalCost.toLocaleString()} gp`;
+}
+
+// ── FLIP LOG ─────────────────────────────────────────────
+let flipLog=[];  // [{id,itemId,itemName,buyPrice,sellPrice,qty,profit,date}]
+let flipLogIdSeq=0;
+
+document.getElementById('addFlipBtn').addEventListener('click',()=>{
+  const itemId=+document.getElementById('logItemId').value;
+  const itemName=document.getElementById('logItemName').value;
+  const buyPrice=parseFloat(document.getElementById('logBuyPrice').value);
+  const sellPrice=parseFloat(document.getElementById('logSellPrice').value);
+  const qty=parseInt(document.getElementById('logQty').value)||1;
+  if(!itemId||!buyPrice||!sellPrice){showToast('Missing info','Fill in all fields.');return;}
+  const taxEach=Math.min(Math.floor(sellPrice*GE_TAX),GE_TAX_CAP);
+  const profit=((sellPrice-taxEach)-buyPrice)*qty;
+  flipLog.unshift({id:++flipLogIdSeq,itemId,itemName,buyPrice,sellPrice,qty,profit,tax:taxEach*qty,date:Date.now()});
+  document.getElementById('logBuyPrice').value='';
+  document.getElementById('logSellPrice').value='';
+  document.getElementById('logQty').value=1;
+  renderFlipLog();
+  showToast(profit>=0?'💰 Profit logged!':'📉 Loss logged',`${profit>=0?'+':''}${profit.toLocaleString()} gp on ${itemName}`);
+});
+
+function renderFlipLog(){
+  const listEl=document.getElementById('fliplogList');
+  const summaryEl=document.getElementById('fliplogSummary');
+  const totalEl=document.getElementById('fliplogTotalProfit');
+  const countEl=document.getElementById('fliplogCount');
+  if(!flipLog.length){listEl.innerHTML='<div class="empty-msg">No flips logged yet.</div>';summaryEl.style.display='none';return;}
+  summaryEl.style.display='block';
+  const total=flipLog.reduce((s,f)=>s+f.profit,0);
+  totalEl.textContent=`${total>=0?'+':''}${total.toLocaleString()} gp`;
+  totalEl.style.color=total>=0?'var(--green)':'var(--red)';
+  const wins=flipLog.filter(f=>f.profit>=0).length;
+  countEl.textContent=`${flipLog.length} flips · ${wins} wins · ${flipLog.length-wins} losses`;
+  listEl.innerHTML=flipLog.map(f=>{
+    const info=allItems[f.itemId];
+    const pnlColor=f.profit>=0?'var(--green)':'var(--red)';
+    const date=new Date(f.date).toLocaleDateString([],{month:'short',day:'numeric'});
+    return`<div class="flip-row">
+      <div class="flip-row-top">
+        ${info?`<img src="${iconUrl(info)}" onerror="this.src=''" alt="" loading="lazy">`:''}
+        <span class="flip-name">${f.itemName}</span>
+        <span class="flip-date">${date}</span>
+        <button class="flip-del" data-fid="${f.id}">✕</button>
+      </div>
+      <div class="flip-stats">
+        <div><div class="flip-stat-label">Qty</div>${f.qty.toLocaleString()}</div>
+        <div><div class="flip-stat-label">Buy</div>${fmt(f.buyPrice)}</div>
+        <div><div class="flip-stat-label">Sell</div>${fmt(f.sellPrice)}</div>
+        <div><div class="flip-stat-label">Profit</div><span class="flip-profit" style="color:${pnlColor}">${f.profit>=0?'+':''}${fmt(f.profit)}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+  listEl.querySelectorAll('.flip-del').forEach(btn=>btn.addEventListener('click',()=>{flipLog=flipLog.filter(f=>f.id!==+btn.dataset.fid);renderFlipLog();}));
+}
+
+setTool('cursor');
+boot();
+</script>
+</body>
+</html>

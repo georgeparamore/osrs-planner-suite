@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill Profit Calculator – GE Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap');
+:root{--bg:#0d0f14;--surface:#141720;--surface2:#1b1f2e;--border:#252a3a;--gold:#c8a84b;--gold-dim:#8a7030;--green:#2ecc71;--red:#e74c3c;--text:#dde1ec;--text-dim:#6b7490;}
+[data-theme="light"]{--bg:#f0f2f5;--surface:#ffffff;--surface2:#e8eaf0;--border:#d0d4e0;--gold:#8a6a1a;--gold-dim:#b89030;--green:#1a8a45;--red:#c0392b;--text:#1a1e2e;--text-dim:#6b7490;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+/* HEADER */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:16px;height:50px;flex-shrink:0;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--gold);letter-spacing:1px;text-decoration:none;}
+.logo span{color:var(--text-dim);font-weight:400;}
+.nav-back{font-size:13px;color:var(--text-dim);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;}
+.nav-back:hover{color:var(--gold);}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.theme-btn{background:none;border:none;cursor:pointer;font-size:17px;color:var(--text-dim);transition:color .2s;}
+.theme-btn:hover{color:var(--gold);}
+.update-badge{font-size:11px;color:var(--text-dim);}
+.update-badge strong{color:var(--text);}
+
+/* LAYOUT */
+.main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px);}
+
+/* SKILL NAV */
+.skill-nav{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;}
+.skill-nav-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);padding:0 14px;margin-bottom:6px;}
+.skill-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;cursor:pointer;background:none;border:none;color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;text-align:left;transition:all .15s;border-left:3px solid transparent;}
+.skill-btn:hover{background:var(--surface2);color:var(--text);}
+.skill-btn.active{background:var(--surface2);color:var(--gold);border-left-color:var(--gold);}
+.skill-btn .skill-icon-img{width:22px;height:22px;object-fit:contain;flex-shrink:0;}
+.skill-icon-large{width:36px;height:36px;object-fit:contain;}
+.skill-sep{height:1px;background:var(--border);margin:8px 14px;}
+
+/* CONTENT */
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+
+/* SKILL HEADER */
+.skill-header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;flex-shrink:0;}
+.skill-header-top{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.skill-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;}
+.skill-desc{font-size:13px;color:var(--text-dim);}
+.skill-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.filter-group{display:flex;align-items:center;gap:6px;}
+.filter-label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;}
+.filter-select{background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;padding:5px 9px;outline:none;cursor:pointer;appearance:none;}
+.filter-select:focus{border-color:var(--gold-dim);}
+.search-input{background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;padding:5px 10px;outline:none;width:180px;}
+.search-input:focus{border-color:var(--gold-dim);}
+.search-input::placeholder{color:var(--text-dim);}
+.refresh-btn{padding:5px 12px;background:var(--gold);color:#000;border:none;border-radius:5px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .2s;margin-left:auto;}
+.refresh-btn:hover{opacity:.85;}
+
+/* TABLE */
+.table-wrap{flex:1;overflow:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead{position:sticky;top:0;z-index:10;}
+th{background:var(--surface);border-bottom:2px solid var(--border);padding:10px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);cursor:pointer;white-space:nowrap;user-select:none;}
+th:hover{color:var(--text);}
+th.sort-asc::after{content:' ↑';}
+th.sort-desc::after{content:' ↓';}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:hover td{background:var(--surface2);}
+.item-cell{display:flex;align-items:center;gap:8px;}
+.item-cell:hover .item-name{color:var(--gold);}
+.ing-item{transition:color .15s;}
+.ing-item:hover{color:var(--gold);}
+.item-cell img{width:24px;height:24px;object-fit:contain;flex-shrink:0;}
+.item-name{font-weight:500;}
+.item-level{font-size:10px;color:var(--text-dim);margin-top:1px;}
+.mono{font-family:'Share Tech Mono',monospace;}
+.profit-pos{color:var(--green);font-weight:600;}
+.profit-neg{color:var(--red);}
+.profit-zero{color:var(--text-dim);}
+.gpxp-great{color:var(--green);font-weight:700;}
+.gpxp-good{color:#f39c12;}
+.gpxp-bad{color:var(--red);}
+.ingredients{font-size:11px;color:var(--text-dim);max-width:260px;}
+.ing-item{display:inline-flex;align-items:center;gap:3px;margin-right:6px;white-space:nowrap;}
+.ing-item img{width:14px;height:14px;object-fit:contain;}
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;text-transform:uppercase;}
+.badge-profit{background:rgba(46,204,113,.15);color:var(--green);}
+.badge-loss{background:rgba(231,76,60,.15);color:var(--red);}
+.badge-member{background:rgba(200,168,75,.15);color:var(--gold);}
+.badge-f2p{background:rgba(74,126,255,.15);color:#4a7eff;}
+
+/* LOADING / EMPTY */
+.loading-row td{text-align:center;padding:40px;color:var(--text-dim);}
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* SUMMARY BAR */
+.summary-bar{background:var(--surface2);border:1px solid var(--gold-dim);border-radius:8px;margin:0 20px 10px;padding:10px 18px;display:flex;gap:24px;flex-wrap:wrap;flex-shrink:0;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,.15);}
+.summary-stat{color:var(--text-dim);}
+.summary-stat strong{color:var(--text);font-family:'Share Tech Mono',monospace;font-size:13px;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="osrs-ge-tracker.html">GE<span>Tracker</span></a>
+  <span style="color:var(--border);">|</span>
+  <a class="nav-back" href="osrs-ge-tracker.html">← Back to Charts</a>
+  <span style="color:var(--border);">|</span>
+  <a class="nav-back" href="osrs-training-planner.html">🗺️ Training Planner</a>
+  <div class="header-right">
+    <span class="update-badge">Prices <strong id="hUpdated">loading…</strong></span>
+    <button class="theme-btn" id="themeBtn">🌙</button>
+  </div>
+</header>
+
+<div class="main">
+  <!-- SKILL NAV -->
+  <nav class="skill-nav">
+    <div class="skill-nav-title">Skills</div>
+    <button class="skill-btn active" data-skill="herblore"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">Herblore</button>
+    <button class="skill-btn" data-skill="smithing"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing</button>
+    <button class="skill-btn" data-skill="fletching"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">Fletching</button>
+    <button class="skill-btn" data-skill="cooking"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking</button>
+    <button class="skill-btn" data-skill="crafting"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">Crafting</button>
+    <div class="skill-sep"></div>
+    <button class="skill-btn" data-skill="farming"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="">Farming</button>
+    <button class="skill-btn" data-skill="construction"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="">Construction</button>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="skill-header">
+      <div class="skill-header-top">
+        <img class="skill-icon-large" id="skillIconLarge" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">
+        <div>
+          <div class="skill-title" id="skillTitle">Herblore</div>
+          <div class="skill-desc" id="skillDesc">Unfinished and finished potion profits based on live GE prices</div>
+        </div>
+      </div>
+      <div class="skill-controls">
+        <div class="filter-group">
+          <span class="filter-label">Sort by</span>
+          <select class="filter-select" id="sortSelect">
+            <option value="profit">Profit / item</option>
+            <option value="gpHr">GP / hr</option>
+            <option value="xpHr">XP / hr</option>
+            <option value="gpxp">GP / XP</option>
+            <option value="xp">XP / action</option>
+            <option value="level">Level req</option>
+            <option value="name">Name</option>
+          </select>
+        </div>
+        <div class="filter-group" id="categoryFilterGroup" style="display:none;">
+          <span class="filter-label">Category</span>
+          <select class="filter-select" id="categorySelect"></select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Show</span>
+          <select class="filter-select" id="memberSelect">
+            <option value="all">All items</option>
+            <option value="f2p">F2P only</option>
+            <option value="members">Members only</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Min profit</span>
+          <select class="filter-select" id="minProfitSelect">
+            <option value="-999999">Any</option>
+            <option value="0">Profitable only</option>
+            <option value="100">100+ gp</option>
+            <option value="1000">1K+ gp</option>
+            <option value="10000">10K+ gp</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Price basis</span>
+          <select class="filter-select" id="priceBasisSelect">
+            <option value="spot">Spot (latest trade)</option>
+            <option value="1h" selected>1H Average ✓ recommended</option>
+            <option value="6h">6H Average</option>
+            <option value="24h">24H Average</option>
+          </select>
+        </div>
+        <input type="text" class="search-input" id="tableSearch" placeholder="Filter items…">
+        <button class="refresh-btn" id="refreshBtn">↻ Refresh Prices</button>
+      </div>
+      <div id="priceBasisNote" style="font-size:11px;color:var(--text-dim);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">
+        📊 Using <strong id="basisLabel">1H volume-weighted average</strong> prices — more stable than spot prices which can be skewed by single lucky trades
+      </div>
+    </div>
+
+    <div class="summary-bar">
+      <div class="summary-stat">Items shown: <strong id="summaryCount">—</strong></div>
+      <div class="summary-stat">Best profit: <strong id="summaryBest">—</strong></div>
+      <div class="summary-stat">Fastest XP/hr: <strong id="summaryXpHr">—</strong></div>
+      <div class="summary-stat">Best GP/XP: <strong id="summaryGpxp">—</strong></div>
+      <div class="summary-stat">Avg margin: <strong id="summaryAvg">—</strong></div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="skillTable">
+        <thead>
+          <tr id="tableHead"></tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr class="loading-row"><td colspan="8"><div class="spinner"></div>Loading prices…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+// ── CONSTANTS ────────────────────────────────────────────
+const WIKI_LATEST  = 'https://prices.runescape.wiki/api/v1/osrs/latest';
+const WIKI_MAPPING = 'https://prices.runescape.wiki/api/v1/osrs/mapping';
+const H = {'User-Agent':'GE-Tracker-Skills/1.0'};
+const iconUrl = id => `https://secure.runescape.com/m=itemdb_oldschool/obj_sprite.gif?id=${id}`;
+const fmt = n => { if(!n&&n!==0)return'—'; if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M'; if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K'; return Math.round(n).toLocaleString(); };
+// GP/XP always shown with exactly one decimal place, e.g. "4.2" or "-11.8" — never rounded to a whole number
+const fmtGpXp = n => { if(!n&&n!==0)return'—'; if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M'; if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K'; return n.toFixed(1); };
+const fmtGp = n => (n>=0?'+':'')+fmt(n)+' gp';
+
+// ── STATE ─────────────────────────────────────────────────
+let prices = {}, allItems = {}, avgPrices = {};
+let currentSkill = 'herblore';
+let sortCol = 'profit', sortDir = -1;
+let isDark = true;
+let priceBasis = '1h'; // 'spot' | '1h' | '6h' | '24h'
+
+// Basis label text
+const BASIS_LABELS = {
+  spot: 'spot price (last single trade — can be skewed by one lucky buy/sell)',
+  '1h': '1-hour volume-weighted average (recommended — smooths out single trades)',
+  '6h': '6-hour volume-weighted average (very stable, slower to react to price changes)',
+  '24h': '24-hour volume-weighted average (most stable — best for slow-moving items)'
+};
+
+// ── SKILL DATA ────────────────────────────────────────────
+// Format: { name, level, xp, members, output:{id,qty}, inputs:[{id,qty}] }
+// Item IDs from OSRS Wiki
+
+const SKILLS = {
+
+herblore: {
+  name:'Herblore', icon:'https://oldschool.runescape.wiki/images/Herblore_icon.png', desc:'Buy unfinished potions from GE, add the secondary ingredient, sell the finished 3-dose potion',
+  cols:['Item','Level','XP','Ingredients','Cost','Revenue','Profit','GP/XP'],
+  items:[
+    // Inputs = [unf potion bought from GE] + [secondary ingredient]
+    // Output = finished 3-dose potion (what you actually make and sell)
+    {name:'Attack potion',   level:3,  xp:25,    members:true, outputName:'Attack potion(3)',   output:{id:121,  qty:1}, actionsPerHr:2200, inputs:[{id:91,  qty:1},{id:221, qty:1}]},
+    {name:'Antipoison',      level:5,  xp:37.5,  members:true, outputName:'Antipoison(3)',       output:{id:175,  qty:1}, actionsPerHr:2200, inputs:[{id:93,  qty:1},{id:235, qty:1}]},
+    {name:'Strength potion', level:12, xp:50,    members:true, outputName:'Strength potion(3)',  output:{id:115,  qty:1}, actionsPerHr:2200, inputs:[{id:95,  qty:1},{id:225, qty:1}]},
+    {name:'Restore potion',  level:22, xp:62.5,  members:true, outputName:'Restore potion(3)',   output:{id:127,  qty:1}, actionsPerHr:2200, inputs:[{id:97,  qty:1},{id:223, qty:1}]},
+    {name:'Energy potion',   level:26, xp:67.5,  members:true, outputName:'Energy potion(3)',    output:{id:3008, qty:1}, actionsPerHr:2200, inputs:[{id:97,  qty:1},{id:1975,qty:1}]},
+    {name:'Defence potion',  level:30, xp:75,    members:true, outputName:'Defence potion(3)',   output:{id:133,  qty:1}, actionsPerHr:2200, inputs:[{id:99,  qty:1},{id:239, qty:1}]},
+    {name:'Prayer potion',   level:38, xp:87.5,  members:true, outputName:'Prayer potion(3)',    output:{id:139,  qty:1}, actionsPerHr:2200, inputs:[{id:99,  qty:1},{id:231, qty:1}]},
+    {name:'Super attack',    level:45, xp:100,   members:true, outputName:'Super attack(3)',     output:{id:145,  qty:1}, actionsPerHr:2200, inputs:[{id:101, qty:1},{id:221, qty:1}]},
+    {name:'Fishing potion',  level:50, xp:112.5, members:true, outputName:'Fishing potion(3)',   output:{id:151,  qty:1}, actionsPerHr:2200, inputs:[{id:103, qty:1},{id:231, qty:1}]},
+    {name:'Super energy',    level:52, xp:117.5, members:true, outputName:'Super energy(3)',     output:{id:3018, qty:1}, actionsPerHr:2200, inputs:[{id:103, qty:1},{id:2970,qty:1}]},
+    {name:'Super strength',  level:55, xp:125,   members:true, outputName:'Super strength(3)',   output:{id:157,  qty:1}, actionsPerHr:2200, inputs:[{id:105, qty:1},{id:225, qty:1}]},
+    {name:'Weapon poison',   level:60, xp:137.5, members:true, outputName:'Weapon poison(3)',    output:{id:187,  qty:1}, actionsPerHr:2200, inputs:[{id:105, qty:1},{id:241, qty:1}]},
+    {name:'Super restore',   level:63, xp:142.5, members:true, outputName:'Super restore(3)',    output:{id:3026, qty:1}, actionsPerHr:2200, inputs:[{id:3004,qty:1},{id:223, qty:1}]},
+    {name:'Super defence',   level:66, xp:150,   members:true, outputName:'Super defence(3)',    output:{id:163,  qty:1}, actionsPerHr:2200, inputs:[{id:107, qty:1},{id:239, qty:1}]},
+    {name:'Antifire potion', level:69, xp:157.5, members:true, outputName:'Antifire potion(3)',  output:{id:2452, qty:1}, actionsPerHr:2200, inputs:[{id:2483,qty:1},{id:241, qty:1}]},
+    {name:'Ranging potion',  level:72, xp:162.5, members:true, outputName:'Ranging potion(3)',   output:{id:169,  qty:1}, actionsPerHr:2200, inputs:[{id:109, qty:1},{id:245, qty:1}]},
+    {name:'Magic potion',    level:76, xp:172.5, members:true, outputName:'Magic potion(3)',     output:{id:3042, qty:1}, actionsPerHr:2200, inputs:[{id:2483,qty:1},{id:3138,qty:1}]},
+    {name:'Zamorak brew',    level:78, xp:175,   members:true, outputName:'Zamorak brew(3)',     output:{id:189,  qty:1}, actionsPerHr:2200, inputs:[{id:111, qty:1},{id:247, qty:1}]},
+    {name:'Saradomin brew',  level:81, xp:180,   members:true, outputName:'Saradomin brew(3)',   output:{id:6685, qty:1}, actionsPerHr:2200, inputs:[{id:3002,qty:1},{id:6693,qty:1}]},
+    {name:'Stamina potion',  level:77, xp:102,   members:true, outputName:'Stamina potion(3)',   output:{id:12625,qty:1}, inputNames:['Super energy(4)','Amylase crystal'], actionsPerHr:2200, inputs:[{id:3018,qty:1},{id:13440,qty:1}]},
+    {name:'Anti-venom',      level:87, xp:120,   members:true, outputName:'Anti-venom(3)',       output:{id:12905,qty:1}, inputNames:['Antidote++(4)','Zulrah\'s scales'], actionsPerHr:2200, inputs:[{id:5952,qty:1},{id:12934,qty:20}]},
+  ]
+},
+
+smithing: {
+  name:'Smithing', icon:'https://oldschool.runescape.wiki/images/Smithing_icon.png', desc:'Smelt bars at a furnace or smith items at an anvil — rates verified against OSRS Wiki Pay-to-play Smithing training page (11-tick Prifddinas bank, Blast Furnace gold)',
+  cols:['Item','Level','XP','Ingredients','Cost','Revenue','Profit','GP/XP'],
+  categories:['All','Bars','Items'],
+  items:[
+    // ── SMELTING BARS (1 bar = 1 action) ── Wiki 11-tick bank: bronze 13,900 xp/hr ÷ 6.2 xp = ~2240 actions/hr scaled per bar
+    {name:'Bronze bar',    category:'Bars', level:1,  xp:6.2,  members:false, outputName:'Bronze bar',        output:{id:2349,qty:1}, inputs:[{id:436,qty:1},{id:438,qty:1}], actionsPerHr:2242}, // 13,900 xp/hr verified
+    {name:'Iron bar',      category:'Bars', level:15, xp:12.5, members:false, outputName:'Iron bar',          output:{id:2351,qty:1}, inputs:[{id:440,qty:1}], actionsPerHr:2216}, // 27,700 xp/hr verified
+    {name:'Silver bar',    category:'Bars', level:20, xp:13.7, members:false, outputName:'Silver bar',        output:{id:2355,qty:1}, inputs:[{id:442,qty:1}], actionsPerHr:2200},
+    {name:'Steel bar',     category:'Bars', level:30, xp:17.5, members:false, outputName:'Steel bar',         output:{id:2353,qty:1}, inputs:[{id:440,qty:1},{id:453,qty:2}], actionsPerHr:2377}, // 41,600 xp/hr verified
+    {name:'Gold bar',      category:'Bars', level:40, xp:22.5, members:false, outputName:'Gold bar',          output:{id:2357,qty:1}, inputs:[{id:444,qty:1}], actionsPerHr:1200},
+    {name:'Mithril bar',   category:'Bars', level:50, xp:30,   members:false, outputName:'Mithril bar',       output:{id:2359,qty:1}, inputs:[{id:447,qty:1},{id:453,qty:4}], actionsPerHr:1850}, // 55,500 xp/hr verified
+    {name:'Adamantite bar',category:'Bars', level:70, xp:37.5, members:false, outputName:'Adamantite bar',    output:{id:2361,qty:1}, inputs:[{id:449,qty:1},{id:453,qty:6}], actionsPerHr:1848}, // 69,300 xp/hr verified
+    {name:'Runite bar',    category:'Bars', level:85, xp:50,   members:false, outputName:'Runite bar',        output:{id:2363,qty:1}, inputs:[{id:451,qty:1},{id:453,qty:8}], actionsPerHr:1664}, // 83,200 xp/hr verified
+
+    // ── BLAST FURNACE: GOLD BARS WITH GOLDSMITH GAUNTLETS ──
+    // Confirmed fastest single-item Smithing method in the game: 380,000 xp/hr (56.2 xp/bar with gauntlets, not the base 22.5)
+    // This is a distinct row from regular Gold bar above since the XP rate differs hugely (gauntlets effectively change banked xp/action)
+    {name:'Gold bar (Blast Furnace, gauntlets)', category:'Bars', level:40, xp:56.2, members:true, outputName:'Gold bar', output:{id:2357,qty:1}, inputs:[{id:444,qty:1}], actionsPerHr:6762}, // 380,000 xp/hr verified Wiki rate
+
+    // ── PLATEBODIES (5 bars each) ── Wiki 11-tick bank: bronze 52,100 xp/hr, iron 104,200, steel 156,200, mithril 208,300, adamant 260,400, rune 312,500
+    {name:'Bronze platebody', category:'Items', level:18, xp:62.5,  members:false, outputName:'Bronze platebody',   output:{id:1075,qty:1}, inputs:[{id:2349,qty:5}], actionsPerHr:833},  // 52,100 xp/hr verified
+    {name:'Iron platebody',   category:'Items', level:33, xp:125,   members:false, outputName:'Iron platebody',     output:{id:1115,qty:1}, inputs:[{id:2351,qty:5}], actionsPerHr:834},  // 104,200 xp/hr verified
+    {name:'Steel platebody',  category:'Items', level:48, xp:187.5, members:false, outputName:'Steel platebody',    output:{id:1119,qty:1}, inputs:[{id:2353,qty:5}], actionsPerHr:833},  // 156,200 xp/hr verified
+    {name:'Mithril platebody',category:'Items', level:68, xp:250,   members:false, outputName:'Mithril platebody',  output:{id:1123,qty:1}, inputs:[{id:2359,qty:5}], actionsPerHr:833},  // 208,300 xp/hr verified
+    {name:'Adamant platebody',category:'Items', level:88, xp:312.5, members:false, outputName:'Adamant platebody',  output:{id:1127,qty:1}, inputs:[{id:2361,qty:5}], actionsPerHr:833},  // 260,400 xp/hr verified
+    {name:'Rune platebody',   category:'Items', level:99, xp:375,   members:false, outputName:'Rune platebody',     output:{id:1129,qty:1}, inputs:[{id:2363,qty:5}], actionsPerHr:833},  // 312,500 xp/hr verified
+
+    // ── CANNONBALLS (1 bar → 4 cannonballs) ──
+    // Steel cannonball = the standard tradeable dwarf multicannon ammo
+    // Item ID 2 is a quest cannon ball (Cabin Fever) — must resolve by name
+    {name:'Cannonball', category:'Items', level:35, xp:25.6, members:true,  outputName:'Steel cannonball',   output:{id:2,   qty:4},  inputs:[{id:2353,qty:1}], actionsPerHr:1200},
+
+    // ── DART TIPS (1 bar → 10 dart tips) ──
+    {name:'Steel dart tip',    category:'Items', level:37, xp:37.5, members:true,  outputName:'Steel dart tip',     output:{id:821, qty:10}, inputs:[{id:2353,qty:1}], actionsPerHr:1400},
+    {name:'Mithril dart tip',  category:'Items', level:54, xp:50,   members:true,  outputName:'Mithril dart tip',   output:{id:822, qty:10}, inputs:[{id:2359,qty:1}], actionsPerHr:1400},
+    {name:'Adamant dart tip',  category:'Items', level:74, xp:62.5, members:true,  outputName:'Adamant dart tip',   output:{id:823, qty:10}, inputs:[{id:2361,qty:1}], actionsPerHr:1400},
+    {name:'Rune dart tip',     category:'Items', level:89, xp:75,   members:true,  outputName:'Rune dart tip',      output:{id:824, qty:10}, inputs:[{id:2363,qty:1}], actionsPerHr:1400},
+  ]
+},
+
+fletching: {
+  name:'Fletching', icon:'https://oldschool.runescape.wiki/images/Fletching_icon.png', desc:'Cut logs into bows, string bows, fletch bolts, darts, arrows, and javelins — rates verified against OSRS Wiki Fletching training page',
+  cols:['Item','Level','XP','Ingredients','Cost','Revenue','Profit','GP/XP'],
+  categories:['All','Cutting logs','Stringing bows','Bolts','Darts','Arrows','Javelins'],
+  items:[
+    // ── CUTTING LOGS INTO UNSTRUNG BOWS ── ~1800/hr without knife, up to 2700/hr with fletching knife
+    {name:'Shortbow (u)',        category:'Cutting logs', level:5,  xp:5,    members:false, outputName:'Shortbow (u)',       output:{id:50, qty:1},  inputs:[{id:1511,qty:1}], actionsPerHr:1800},
+    {name:'Longbow (u)',         category:'Cutting logs', level:10, xp:10,   members:false, outputName:'Longbow (u)',        output:{id:48, qty:1},  inputs:[{id:1511,qty:1}], actionsPerHr:1800},
+    {name:'Oak shortbow (u)',    category:'Cutting logs', level:20, xp:16.5, members:false, outputName:'Oak shortbow (u)',   output:{id:54, qty:1},  inputs:[{id:1521,qty:1}], actionsPerHr:1700},
+    {name:'Oak longbow (u)',     category:'Cutting logs', level:25, xp:25,   members:false, outputName:'Oak longbow (u)',    output:{id:56, qty:1},  inputs:[{id:1521,qty:1}], actionsPerHr:1700},
+    {name:'Willow shortbow (u)', category:'Cutting logs', level:35, xp:33.5, members:false, outputName:'Willow shortbow (u)',output:{id:60, qty:1},  inputs:[{id:1519,qty:1}], actionsPerHr:1650},
+    {name:'Willow longbow (u)',  category:'Cutting logs', level:40, xp:41.5, members:false, outputName:'Willow longbow (u)', output:{id:58, qty:1},  inputs:[{id:1519,qty:1}], actionsPerHr:1650},
+    {name:'Maple shortbow (u)',  category:'Cutting logs', level:50, xp:50,   members:false, outputName:'Maple shortbow (u)', output:{id:64, qty:1},  inputs:[{id:1517,qty:1}], actionsPerHr:1600},
+    {name:'Maple longbow (u)',   category:'Cutting logs', level:55, xp:58.3, members:false, outputName:'Maple longbow (u)',  output:{id:62, qty:1},  inputs:[{id:1517,qty:1}], actionsPerHr:1600},
+    {name:'Yew shortbow (u)',    category:'Cutting logs', level:65, xp:67.5, members:false, outputName:'Yew shortbow (u)',   output:{id:68, qty:1},  inputs:[{id:1515,qty:1}], actionsPerHr:1550},
+    {name:'Yew longbow (u)',     category:'Cutting logs', level:70, xp:75,   members:false, outputName:'Yew longbow (u)',    output:{id:66, qty:1},  inputs:[{id:1515,qty:1}], actionsPerHr:1550},
+    {name:'Magic shortbow (u)',  category:'Cutting logs', level:80, xp:83.3, members:false, outputName:'Magic shortbow (u)', output:{id:72, qty:1},  inputs:[{id:1513,qty:1}], actionsPerHr:1500},
+    {name:'Magic longbow (u)',   category:'Cutting logs', level:85, xp:91.5, members:false, outputName:'Magic longbow (u)',  output:{id:70, qty:1},  inputs:[{id:1513,qty:1}], actionsPerHr:1500}, // matches ~137k xp/hr verified rate
+
+    // ── STRINGING BOWS (unstrung bow + bowstring) ── 2-ticks/bow = up to 3000/hr, ~2450 realistic with banking
+    {name:'Shortbow',            category:'Stringing bows', level:5,  xp:5,    members:false, outputName:'Shortbow',       output:{id:841,qty:1},  inputs:[{id:50, qty:1},{id:1777,qty:1}], actionsPerHr:2500},
+    {name:'Longbow',             category:'Stringing bows', level:10, xp:10,   members:false, outputName:'Longbow',        output:{id:839,qty:1},  inputs:[{id:48, qty:1},{id:1777,qty:1}], actionsPerHr:2500},
+    {name:'Oak shortbow',        category:'Stringing bows', level:20, xp:16.5, members:false, outputName:'Oak shortbow',   output:{id:845,qty:1},  inputs:[{id:54, qty:1},{id:1777,qty:1}], actionsPerHr:2450},
+    {name:'Oak longbow',         category:'Stringing bows', level:25, xp:25,   members:false, outputName:'Oak longbow',    output:{id:843,qty:1},  inputs:[{id:56, qty:1},{id:1777,qty:1}], actionsPerHr:2450},
+    {name:'Willow shortbow',     category:'Stringing bows', level:35, xp:33.5, members:false, outputName:'Willow shortbow',output:{id:849,qty:1},  inputs:[{id:60, qty:1},{id:1777,qty:1}], actionsPerHr:2400},
+    {name:'Willow longbow',      category:'Stringing bows', level:40, xp:41.5, members:false, outputName:'Willow longbow', output:{id:847,qty:1},  inputs:[{id:58, qty:1},{id:1777,qty:1}], actionsPerHr:2400},
+    {name:'Maple shortbow',      category:'Stringing bows', level:50, xp:50,   members:false, outputName:'Maple shortbow', output:{id:853,qty:1},  inputs:[{id:64, qty:1},{id:1777,qty:1}], actionsPerHr:2350},
+    {name:'Maple longbow',       category:'Stringing bows', level:55, xp:58.3, members:false, outputName:'Maple longbow',  output:{id:851,qty:1},  inputs:[{id:62, qty:1},{id:1777,qty:1}], actionsPerHr:2350},
+    {name:'Yew shortbow',        category:'Stringing bows', level:65, xp:67.5, members:false, outputName:'Yew shortbow',   output:{id:857,qty:1},  inputs:[{id:68, qty:1},{id:1777,qty:1}], actionsPerHr:2300},
+    {name:'Yew longbow',         category:'Stringing bows', level:70, xp:75,   members:false, outputName:'Yew longbow',    output:{id:855,qty:1},  inputs:[{id:66, qty:1},{id:1777,qty:1}], actionsPerHr:2300},
+    {name:'Magic shortbow',      category:'Stringing bows', level:80, xp:83.3, members:false, outputName:'Magic shortbow', output:{id:861,qty:1},  inputs:[{id:72, qty:1},{id:1777,qty:1}], actionsPerHr:2150}, // ~180k xp/hr per Wiki
+    {name:'Magic longbow',       category:'Stringing bows', level:85, xp:91.5, members:false, outputName:'Magic longbow',  output:{id:859,qty:1},  inputs:[{id:70, qty:1},{id:1777,qty:1}], actionsPerHr:2150}, // ~195k xp/hr verified Wiki rate
+
+    // ── BOLTS (bar → 10 unfinished bolts, no make-x, fast clicking) ── ~3000-3500 actions/hr (sets of 10)
+    {name:'Bronze bolts (u)',    category:'Bolts', level:9,  xp:0.5, members:true,  outputName:'Bronze bolts (unf)',  output:{id:877, qty:10}, inputs:[{id:2349,qty:1}], actionsPerHr:3500},
+    {name:'Steel bolts (u)',     category:'Bolts', level:33, xp:3.5, members:true,  outputName:'Steel bolts (unf)',   output:{id:9375,qty:10}, inputs:[{id:2353,qty:1}], actionsPerHr:3000}, // ~105k xp/hr
+    {name:'Mithril bolts (u)',   category:'Bolts', level:54, xp:5,   members:true,  outputName:'Mithril bolts (unf)', output:{id:9376,qty:10}, inputs:[{id:2359,qty:1}], actionsPerHr:3000},
+    {name:'Adamant bolts (u)',   category:'Bolts', level:73, xp:7,   members:true,  outputName:'Adamant bolts (unf)', output:{id:9377,qty:10}, inputs:[{id:2361,qty:1}], actionsPerHr:3000},
+    {name:'Runite bolts (u)',    category:'Bolts', level:88, xp:9,   members:true,  outputName:'Runite bolts (unf)',  output:{id:9378,qty:10}, inputs:[{id:2363,qty:1}], actionsPerHr:3000},
+
+    // ── DARTS (dart tips + feathers, 10 per action) ── Wiki "Zero time methods" table: 10 sets/buy-limit basis, base rate ~13,000/hr (2 clicks/set)
+    // XP/buy limit column implies higher real-world throughput at high tiers from rapid 2-click cycling; using Wiki base assumption for consistency
+    {name:'Bronze darts',        category:'Darts', level:10, xp:1.8,  members:true,  outputName:'Bronze dart',   output:{id:806, qty:10}, inputs:[{id:820, qty:10},{id:314,qty:10}], actionsPerHr:1300}, // 23,400 xp / 1.8xp = 13,000 darts -> 1300 sets/hr
+    {name:'Iron darts',          category:'Darts', level:22, xp:3.8,  members:true,  outputName:'Iron dart',     output:{id:807, qty:10}, inputs:[{id:821, qty:10},{id:314,qty:10}], actionsPerHr:1300}, // 49,400 xp/hr verified
+    {name:'Steel darts',         category:'Darts', level:37, xp:7.5,  members:true,  outputName:'Steel dart',    output:{id:808, qty:10}, inputs:[{id:822, qty:10},{id:314,qty:10}], actionsPerHr:1300}, // 97,500 xp/hr verified
+    {name:'Mithril darts',       category:'Darts', level:52, xp:11.2, members:true,  outputName:'Mithril dart',  output:{id:809, qty:10}, inputs:[{id:823, qty:10},{id:314,qty:10}], actionsPerHr:2000}, // 224,000 xp/hr verified
+    {name:'Adamant darts',       category:'Darts', level:67, xp:15,   members:true,  outputName:'Adamant dart',  output:{id:810, qty:10}, inputs:[{id:824, qty:10},{id:314,qty:10}], actionsPerHr:2000}, // 300,000 xp/hr verified
+    {name:'Rune darts',          category:'Darts', level:81, xp:18.8, members:true,  outputName:'Rune dart',     output:{id:811, qty:10}, inputNames:['Rune dart tip'], inputs:[{id:11232,qty:10},{id:314,qty:10}], actionsPerHr:1100}, // 206,800 xp/hr verified
+    {name:'Amethyst darts',      category:'Darts', level:90, xp:21,   members:true,  outputName:'Amethyst dart', output:{id:21326,qty:10}, inputNames:['Amethyst dart tip'], inputs:[{id:21320,qty:10},{id:314,qty:10}], actionsPerHr:1100}, // 231,000 xp/hr verified
+
+    // ── ARROWS (shafts + arrowheads + feathers, 15 per action) ── Wiki: 3,000 actions/hr of 15 each
+    {name:'Headless arrows',     category:'Arrows', level:1,  xp:1,   members:false, outputName:'Headless arrow', output:{id:53, qty:15}, inputs:[{id:52,qty:15},{id:314,qty:15}], actionsPerHr:3000}, // 45,000 xp/hr verified
+    {name:'Bronze arrows',       category:'Arrows', level:1,  xp:1.3, members:false, outputName:'Bronze arrow',   output:{id:882,qty:15}, inputs:[{id:53,qty:15},{id:39, qty:15}], actionsPerHr:3000}, // 58,500 xp/hr verified
+    {name:'Iron arrows',         category:'Arrows', level:15, xp:2.5, members:false, outputName:'Iron arrow',     output:{id:884,qty:15}, inputs:[{id:53,qty:15},{id:40, qty:15}], actionsPerHr:3000}, // 112,500 xp/hr verified
+    {name:'Steel arrows',        category:'Arrows', level:30, xp:5,   members:false, outputName:'Steel arrow',    output:{id:886,qty:15}, inputs:[{id:53,qty:15},{id:41, qty:15}], actionsPerHr:3000}, // 225,000 xp/hr verified
+    {name:'Mithril arrows',      category:'Arrows', level:45, xp:7.5, members:false, outputName:'Mithril arrow',  output:{id:888,qty:15}, inputs:[{id:53,qty:15},{id:42, qty:15}], actionsPerHr:3000}, // 337,500 xp/hr verified
+    {name:'Adamant arrows',      category:'Arrows', level:60, xp:10,  members:false, outputName:'Adamant arrow',  output:{id:890,qty:15}, inputs:[{id:53,qty:15},{id:43, qty:15}], actionsPerHr:3000}, // 450,000 xp/hr verified
+    {name:'Rune arrows',         category:'Arrows', level:75, xp:12.5,members:false, outputName:'Rune arrow',     output:{id:892,qty:15}, inputs:[{id:53,qty:15},{id:44, qty:15}], actionsPerHr:3000}, // 562,500 xp/hr verified
+    {name:'Amethyst arrows',     category:'Arrows', level:82, xp:13.5,members:true,  outputName:'Amethyst arrow', output:{id:21326,qty:15}, inputNames:['Headless arrow','Amethyst arrowtips'], inputs:[{id:53,qty:15},{id:21341,qty:15}], actionsPerHr:3000}, // 607,500 xp/hr verified
+    {name:'Dragon arrows',       category:'Arrows', level:90, xp:15,  members:true,  outputName:'Dragon arrow',   output:{id:11212,qty:15}, inputNames:['Headless arrow','Dragon arrowtips'], inputs:[{id:53,qty:15},{id:11227,qty:15}], actionsPerHr:3000}, // 675,000 xp/hr verified
+
+    // ── JAVELINS (tips + shafts, 15 per action) ── Wiki: 3,000 actions/hr base, up to 6,000/hr with 1-tick manipulation
+    {name:'Bronze javelins',     category:'Javelins', level:3,  xp:1,   members:true, outputName:'Bronze javelin',   output:{id:825,qty:15}, inputNames:['Bronze javelin heads','Javelin shaft'], inputs:[{id:19161,qty:15},{id:19158,qty:15}], actionsPerHr:3000}, // 45,000 xp/hr base
+    {name:'Iron javelins',       category:'Javelins', level:17, xp:2,   members:true, outputName:'Iron javelin',     output:{id:826,qty:15}, inputNames:['Iron javelin heads','Javelin shaft'],   inputs:[{id:19162,qty:15},{id:19158,qty:15}], actionsPerHr:3000}, // 90,000 xp/hr base
+    {name:'Steel javelins',      category:'Javelins', level:32, xp:5,   members:true, outputName:'Steel javelin',    output:{id:827,qty:15}, inputNames:['Steel javelin heads','Javelin shaft'],  inputs:[{id:19163,qty:15},{id:19158,qty:15}], actionsPerHr:3000}, // 225,000 xp/hr base
+    {name:'Mithril javelins',    category:'Javelins', level:47, xp:8,   members:true, outputName:'Mithril javelin',  output:{id:828,qty:15}, inputNames:['Mithril javelin heads','Javelin shaft'],inputs:[{id:19164,qty:15},{id:19158,qty:15}], actionsPerHr:3000}, // 360,000 xp/hr base
+    {name:'Adamant javelins',    category:'Javelins', level:62, xp:10,  members:true, outputName:'Adamant javelin',  output:{id:829,qty:15}, inputNames:['Adamant javelin heads','Javelin shaft'],inputs:[{id:19165,qty:15},{id:19158,qty:15}], actionsPerHr:3000}, // 450,000 xp/hr base
+    {name:'Rune javelins',       category:'Javelins', level:77, xp:12.4,members:true, outputName:'Rune javelin',     output:{id:830,qty:15}, inputNames:['Rune javelin heads','Javelin shaft'],   inputs:[{id:19166,qty:15},{id:19158,qty:15}], actionsPerHr:3000}, // 558,000 xp/hr base
+  ]
+},
+
+cooking: {
+  name:'Cooking', icon:'https://oldschool.runescape.wiki/images/Cooking_icon.png', desc:'Raw food profits — buy raw, cook, sell cooked (assumes no burn)',
+  cols:['Item','Level','XP','Raw','Cost','Revenue','Profit','GP/XP'],
+  items:[
+    // actionsPerHr reflects realistic rates accounting for burn rate, banking, and clicking pace
+    {name:'Shrimps',       level:1,  xp:30,   members:false,output:{id:315,qty:1},  inputs:[{id:317,qty:1}],  actionsPerHr:1100},
+    {name:'Sardine',       level:1,  xp:40,   members:false,output:{id:325,qty:1},  inputs:[{id:327,qty:1}],  actionsPerHr:1100},
+    {name:'Herring',       level:5,  xp:50,   members:false,output:{id:347,qty:1},  inputs:[{id:345,qty:1}],  actionsPerHr:1100},
+    {name:'Anchovies',     level:1,  xp:30,   members:false,output:{id:319,qty:1},  inputs:[{id:321,qty:1}],  actionsPerHr:1100},
+    {name:'Trout',         level:15, xp:70,   members:false,output:{id:333,qty:1},  inputs:[{id:335,qty:1}],  actionsPerHr:1200},
+    {name:'Cod',           level:18, xp:75,   members:false,output:{id:339,qty:1},  inputs:[{id:341,qty:1}],  actionsPerHr:1200},
+    {name:'Pike',          level:20, xp:80,   members:false,output:{id:351,qty:1},  inputs:[{id:349,qty:1}],  actionsPerHr:1200},
+    {name:'Salmon',        level:25, xp:90,   members:false,output:{id:329,qty:1},  inputs:[{id:331,qty:1}],  actionsPerHr:1200},
+    {name:'Tuna',          level:30, xp:100,  members:false,output:{id:361,qty:1},  inputs:[{id:359,qty:1}],  actionsPerHr:1400}, // ~140k xp/hr at lvl 63+ per Probemas guide
+    {name:'Lobster',       level:40, xp:120,  members:false,output:{id:379,qty:1},  inputs:[{id:377,qty:1}],  actionsPerHr:1000}, // burn rate brings real rate to ~110-150k xp/hr
+    {name:'Bass',          level:43, xp:130,  members:false,output:{id:365,qty:1},  inputs:[{id:363,qty:1}], actionsPerHr:1000},
+    {name:'Swordfish',     level:45, xp:140,  members:false,output:{id:373,qty:1},  inputs:[{id:371,qty:1}], actionsPerHr:1000},
+    {name:'Monkfish',      level:62, xp:150,  members:true, output:{id:7946,qty:1}, inputs:[{id:7944,qty:1}],actionsPerHr:800}, // ~100-120k xp/hr per Hosidius guide
+    {name:'Shark',         level:80, xp:210,  members:true, output:{id:385,qty:1},  inputs:[{id:383,qty:1}], actionsPerHr:1190}, // ~210-300k xp/hr with gauntlets
+    {name:'Sea turtle',    level:82, xp:211.3,members:true, outputName:'Sea turtle', inputNames:['Raw sea turtle'], output:{id:4883,qty:1}, inputs:[{id:4877,qty:1}],actionsPerHr:1000},
+    {name:'Anglerfish',    level:84, xp:230,  members:true, outputName:'Anglerfish', inputNames:['Raw anglerfish'], output:{id:13441,qty:1},inputs:[{id:13439,qty:1}], actionsPerHr:1250}, // ~280-320k xp/hr optimal
+    {name:'Dark crab',     level:90, xp:215,  members:true, outputName:'Dark crab', inputNames:['Raw dark crab'], output:{id:11936,qty:1},inputs:[{id:11934,qty:1}],actionsPerHr:1100},
+    {name:'Manta ray',     level:91, xp:216.3,members:true, output:{id:391,qty:1},  inputs:[{id:389,qty:1}], actionsPerHr:1100},
+    {name:'Karambwan',     level:30, xp:190,  members:true, output:{id:3144,qty:1}, inputs:[{id:3142,qty:1}],actionsPerHr:500}, // ~95-115k xp/hr at normal pace (not 1-tick)
+  ]
+},
+
+crafting: {
+  name:'Crafting', icon:'https://oldschool.runescape.wiki/images/Crafting_icon.png', desc:'Leather, dragonhide bodies, battlestaves, gems, and jewelry profits',
+  cols:['Item','Level','XP','Ingredients','Cost','Revenue','Profit','GP/XP'],
+  categories:['All','Leather','Cutting Gems','Jewelry','Battlestaves','D\'hide Bodies','Glassblowing'],
+  items:[
+    // ── LEATHER (1 leather → 1 item) ── Wiki: 3 ticks/item = 1 every 1.8s ≈ 2000/hr theoretical, ~1400 realistic w/ banking
+    {name:'Leather gloves',    category:'Leather', level:1,  xp:13.8,  members:false,output:{id:1059,qty:1}, inputs:[{id:1741,qty:1}], actionsPerHr:1400},
+    {name:'Leather boots',     category:'Leather', level:7,  xp:16.25, members:false,output:{id:1061,qty:1}, inputs:[{id:1741,qty:1}], actionsPerHr:1400},
+    {name:'Leather cowl',      category:'Leather', level:9,  xp:18.5,  members:false,output:{id:1167,qty:1}, inputs:[{id:1741,qty:1}], actionsPerHr:1400},
+    {name:'Leather vambraces', category:'Leather', level:11, xp:22,    members:false,output:{id:1063,qty:1}, inputs:[{id:1741,qty:1}], actionsPerHr:1400},
+    {name:'Leather body',      category:'Leather', level:14, xp:25,    members:false,output:{id:1129,qty:1}, inputs:[{id:1741,qty:3}], actionsPerHr:1000},
+    {name:'Leather chaps',     category:'Leather', level:18, xp:27,    members:false,output:{id:1095,qty:1}, inputs:[{id:1741,qty:2}], actionsPerHr:1200},
+
+    // ── CUTTING UNCUT GEMS (chisel only, no jewelry) ── Wiki verified: 2780 gems/hr
+    {name:'Sapphire (cut)',     category:'Cutting Gems', level:20, xp:50,    members:false, outputName:'Sapphire',     output:{id:1623,qty:1}, inputs:[{id:1607,qty:1}], actionsPerHr:2780}, // 139,000 xp/hr verified
+    {name:'Emerald (cut)',      category:'Cutting Gems', level:27, xp:67.5,  members:false, outputName:'Emerald',      output:{id:1621,qty:1}, inputs:[{id:1605,qty:1}], actionsPerHr:2780}, // 187,650 xp/hr verified
+    {name:'Ruby (cut)',         category:'Cutting Gems', level:34, xp:85,    members:false, outputName:'Ruby',         output:{id:1619,qty:1}, inputs:[{id:1603,qty:1}], actionsPerHr:2780}, // 236,300 xp/hr verified
+    {name:'Diamond (cut)',      category:'Cutting Gems', level:43, xp:107.5, members:false, outputName:'Diamond',      output:{id:1617,qty:1}, inputs:[{id:1601,qty:1}], actionsPerHr:2780}, // 298,850 xp/hr verified
+    {name:'Dragonstone (cut)',  category:'Cutting Gems', level:55, xp:137.5, members:true,  outputName:'Dragonstone',  output:{id:1615,qty:1}, inputs:[{id:1613,qty:1}], actionsPerHr:2780}, // 382,250 xp/hr verified
+    {name:'Onyx (cut)',         category:'Cutting Gems', level:67, xp:167.5, members:true,  outputName:'Onyx',         output:{id:6573,qty:1}, inputs:[{id:6571,qty:1}], actionsPerHr:2780},
+    {name:'Zenyte (cut)',       category:'Cutting Gems', level:89, xp:50,    members:true,  outputName:'Zenyte', inputNames:['Uncut zenyte'], output:{id:19529,qty:1}, inputs:[{id:19493,qty:1}], actionsPerHr:2780},
+
+    // ── GOLD JEWELRY (gold bar + mould at furnace, no gem) ──
+    {name:'Gold ring',          category:'Jewelry', level:5,  xp:15,    members:false,output:{id:1635,qty:1}, inputs:[{id:2357,qty:1}], actionsPerHr:3000},
+    {name:'Gold necklace',      category:'Jewelry', level:6,  xp:20,    members:false,output:{id:1654,qty:1}, inputs:[{id:2357,qty:1}], actionsPerHr:2500},
+    {name:'Gold bracelet',      category:'Jewelry', level:7,  xp:25,    members:false,output:{id:11069,qty:1},inputs:[{id:2357,qty:1}], actionsPerHr:2000},
+    {name:'Gold amulet (u)',    category:'Jewelry', level:8,  xp:30,    members:false,output:{id:1673,qty:1}, inputs:[{id:2357,qty:1}], actionsPerHr:1700},
+    // Gem rings (gold bar + cut gem + ring mould)
+    {name:'Sapphire ring',      category:'Jewelry', level:20, xp:40,    members:false,output:{id:1637,qty:1}, inputs:[{id:2357,qty:1},{id:1623,qty:1}], actionsPerHr:1500},
+    {name:'Emerald ring',       category:'Jewelry', level:27, xp:55,    members:false,output:{id:1639,qty:1}, inputs:[{id:2357,qty:1},{id:1621,qty:1}], actionsPerHr:1500},
+    {name:'Ruby ring',          category:'Jewelry', level:34, xp:70,    members:false,output:{id:1641,qty:1}, inputs:[{id:2357,qty:1},{id:1619,qty:1}], actionsPerHr:1500},
+    {name:'Diamond ring',       category:'Jewelry', level:43, xp:85,    members:false,output:{id:1643,qty:1}, inputs:[{id:2357,qty:1},{id:1617,qty:1}], actionsPerHr:1500},
+    {name:'Dragonstone ring',   category:'Jewelry', level:55, xp:100,   members:true, output:{id:1645,qty:1}, inputs:[{id:2357,qty:1},{id:1615,qty:1}], actionsPerHr:1400},
+    {name:'Onyx ring',          category:'Jewelry', level:67, xp:115,   members:true, outputName:'Onyx ring',  output:{id:6575,qty:1}, inputs:[{id:2357,qty:1},{id:6573,qty:1}], actionsPerHr:1200},
+
+    // ── BATTLESTAVES (battlestaff + charged elemental orb) ── Wiki verified: 2450/hr realistic, up to 2625/hr perfect banking
+    // IMPORTANT: the Crafting action uses a CHARGED ORB (water/earth/fire/air orb), not runes.
+    // Runes are only used in the separate Magic step to charge an unpowered orb into an elemental orb at an Obelisk.
+    {name:'Water battlestaff',  category:'Battlestaves', level:54, xp:100,   members:true, output:{id:1395,qty:1}, inputNames:['Battlestaff','Water orb'], inputs:[{id:1391,qty:1},{id:571,qty:1}], actionsPerHr:2450}, // 245,000 xp/hr verified
+    {name:'Earth battlestaff',  category:'Battlestaves', level:58, xp:112.5, members:true, output:{id:1399,qty:1}, inputNames:['Battlestaff','Earth orb'], inputs:[{id:1391,qty:1},{id:575,qty:1}], actionsPerHr:2450}, // 275,625 xp/hr verified
+    {name:'Fire battlestaff',   category:'Battlestaves', level:62, xp:125,   members:true, output:{id:1393,qty:1}, inputNames:['Battlestaff','Fire orb'],  inputs:[{id:1391,qty:1},{id:569,qty:1}], actionsPerHr:2450}, // 306,250 xp/hr verified
+    {name:'Air battlestaff',    category:'Battlestaves', level:66, xp:137.5, members:true, output:{id:1397,qty:1}, inputNames:['Battlestaff','Air orb'],   inputs:[{id:1391,qty:1},{id:573,qty:1}], actionsPerHr:2450}, // 336,875 xp/hr verified
+
+    // ── DRAGONHIDE BODIES (3 hides each) ── Wiki verified: 1705/hr standard with costume needle, up to 1783/hr with tick manip
+    {name:'Green d\'hide body',  category:'D\'hide Bodies', level:63, xp:186,  members:true, output:{id:1135,qty:1}, inputs:[{id:1753,qty:3}], actionsPerHr:1705}, // 317,130 xp/hr verified
+    {name:'Blue d\'hide body',   category:'D\'hide Bodies', level:71, xp:210,  members:true, output:{id:2499,qty:1}, inputs:[{id:1751,qty:3}], actionsPerHr:1705}, // 358,050 xp/hr verified
+    {name:'Red d\'hide body',    category:'D\'hide Bodies', level:77, xp:234,  members:true, output:{id:2501,qty:1}, inputs:[{id:1749,qty:3}], actionsPerHr:1705}, // 398,970 xp/hr verified
+    {name:'Black d\'hide body',  category:'D\'hide Bodies', level:84, xp:258,  members:true, output:{id:2503,qty:1}, inputs:[{id:1747,qty:3}], actionsPerHr:1705}, // 439,890 xp/hr verified
+
+    // ── GLASSBLOWING (molten glass → item) ── Wiki verified: 1750 items blown per hour
+    {name:'Beer glass',          category:'Glassblowing', level:1,  xp:17.5, members:false, outputName:'Beer glass',          output:{id:1919,qty:1}, inputs:[{id:1775,qty:1}], actionsPerHr:1750}, // 30,625 xp/hr verified
+    {name:'Empty candle lantern',category:'Glassblowing', level:4,  xp:19,   members:true,  outputName:'Empty candle lantern',output:{id:4527,qty:1}, inputs:[{id:1775,qty:1}], actionsPerHr:1750}, // 33,250 xp/hr verified
+    {name:'Empty oil lamp',      category:'Glassblowing', level:12, xp:25,   members:true,  outputName:'Empty oil lamp',      output:{id:4525,qty:1}, inputs:[{id:1775,qty:1}], actionsPerHr:1750}, // 43,750 xp/hr verified
+    {name:'Vial (empty)',        category:'Glassblowing', level:33, xp:35,   members:false, outputName:'Vial',                output:{id:229, qty:1}, inputs:[{id:1775,qty:1}], actionsPerHr:1750}, // 61,250 xp/hr verified
+    {name:'Empty fishbowl',      category:'Glassblowing', level:42, xp:42.5, members:true,  outputName:'Empty fishbowl',       output:{id:6667,qty:1}, inputs:[{id:1775,qty:1}], actionsPerHr:1750}, // 74,375 xp/hr verified
+    {name:'Unpowered orb',       category:'Glassblowing', level:46, xp:52.5, members:true,  outputName:'Unpowered orb',        output:{id:567, qty:1}, inputs:[{id:1775,qty:1}], actionsPerHr:1750}, // 91,875 xp/hr verified — cheapest blowing method, often near break-even
+    {name:'Lantern lens',        category:'Glassblowing', level:49, xp:55,   members:true,  outputName:'Lantern lens',         output:{id:4542,qty:1}, inputs:[{id:1775,qty:1}], actionsPerHr:1750}, // 96,250 xp/hr verified
+  ]
+},
+
+farming: {
+  name:'Farming', icon:'https://oldschool.runescape.wiki/images/Farming_icon.png', desc:'Herb patch yields — buy seeds, sell harvested herbs',
+  cols:['Herb','Level','XP (plant)','Seed','Herb','Seed Cost','Herb Revenue','Profit (avg yield)','GP/XP'],
+  items:[
+    {name:'Guam',        level:9,  xp:11,  members:true, output:{id:249,qty:9},  inputs:[{id:5291,qty:1}], actionsPerHr:40},
+    {name:'Marrentill',  level:14, xp:13.5,members:true, output:{id:251,qty:9},  inputs:[{id:5292,qty:1}], actionsPerHr:40},
+    {name:'Tarromin',    level:19, xp:16,  members:true, output:{id:253,qty:9},  inputs:[{id:5293,qty:1}], actionsPerHr:40},
+    {name:'Harralander', level:26, xp:21.5,members:true, output:{id:255,qty:9},  inputs:[{id:5294,qty:1}], actionsPerHr:40},
+    {name:'Ranarr',      level:32, xp:27,  members:true, output:{id:257,qty:9},  inputs:[{id:5295,qty:1}], actionsPerHr:40},
+    {name:'Toadflax',    level:38, xp:34,  members:true, output:{id:2998,qty:9}, inputs:[{id:5296,qty:1}], actionsPerHr:40},
+    {name:'Irit',        level:44, xp:43,  members:true, output:{id:259,qty:9},  inputs:[{id:5297,qty:1}], actionsPerHr:40},
+    {name:'Avantoe',     level:50, xp:54.5,members:true, output:{id:261,qty:9},  inputs:[{id:5298,qty:1}], actionsPerHr:40},
+    {name:'Kwuarm',      level:56, xp:69,  members:true, output:{id:263,qty:9},  inputs:[{id:5299,qty:1}], actionsPerHr:40},
+    {name:'Snapdragon',  level:62, xp:87,  members:true, output:{id:3000,qty:9}, inputs:[{id:5300,qty:1}], actionsPerHr:40},
+    {name:'Cadantine',   level:67, xp:106.5,members:true,output:{id:265,qty:9},  inputs:[{id:5301,qty:1}], actionsPerHr:40},
+    {name:'Lantadyme',   level:73, xp:134.5,members:true,output:{id:2481,qty:9}, inputs:[{id:5302,qty:1}], actionsPerHr:40},
+    {name:'Dwarf weed',  level:79, xp:170.5,members:true,output:{id:267,qty:9},  inputs:[{id:5303,qty:1}], actionsPerHr:40},
+    {name:'Torstol',     level:85, xp:199.5,members:true,output:{id:269,qty:9},  inputs:[{id:5304,qty:1}], actionsPerHr:40},
+  ]
+},
+
+construction: {
+  name:'Construction', icon:'https://oldschool.runescape.wiki/images/Construction_icon.png',
+  desc:'Build furniture in your POH for XP (cost-only, no resale) or craft sellable Shipwright items — rates verified against OSRS Wiki Construction training page',
+  cols:['Item','Level','XP','Planks Used','Plank Cost','Cost/XP','XP/hr (with servant)','Cost/hr'],
+  isConstructionMode:true, // flags renderTable to use cost-only display (no revenue/profit columns)
+  categories:['All','POH Furniture','Shipwright (sellable)'],
+  items:[
+    // ── POH FURNITURE — no resale value, materials are consumed for XP only ──
+    {name:'Crude wooden chair', category:'POH Furniture', level:1,  xp:58,  members:true, outputName:'Crude wooden chair', output:{id:8980,qty:1},  inputs:[{id:960, qty:2}], actionsPerHr:3000},
+    {name:'Wooden bookcase',    category:'POH Furniture', level:4,  xp:115, members:true, outputName:'Wooden bookcase',     output:{id:8985,qty:1},  inputs:[{id:960, qty:4}], actionsPerHr:1700},
+    {name:'Wooden larder',      category:'POH Furniture', level:9,  xp:228, members:true, outputName:'Wooden larder',       output:{id:8990,qty:1},  inputs:[{id:960, qty:8}], actionsPerHr:900},
+    {name:'Repair bench',       category:'POH Furniture', level:15, xp:120, members:true, outputName:'Repair bench',        output:{id:13620,qty:1}, inputs:[{id:8778,qty:2}], actionsPerHr:3200},
+    {name:'Crafting table 1',   category:'POH Furniture', level:16, xp:240, members:true, outputName:'Crafting table',      output:{id:13282,qty:1}, inputs:[{id:8778,qty:4}], actionsPerHr:1700},
+    {name:'Oak dining table',   category:'POH Furniture', level:22, xp:240, members:true, outputName:'Oak dining table',    output:{id:8550,qty:1},  inputs:[{id:8778,qty:4}], actionsPerHr:1700},
+    {name:'Carved oak table',   category:'POH Furniture', level:31, xp:360, members:true, outputName:'Carved oak table',    output:{id:8552,qty:1},  inputs:[{id:8778,qty:6}], actionsPerHr:1200},
+    // Oak larders are the standard 33-52 (or 74) method — Wiki confirms ~480k xp/hr from level 50 onward
+    {name:'Oak larder',         category:'POH Furniture', level:33, xp:480, members:true, outputName:'Oak larder',          output:{id:8988,qty:1},  inputs:[{id:8778,qty:8}], actionsPerHr:1000}, // ~480k xp/hr verified
+
+    // Mounted mythical cape — cheap teak-plank alternative, requires Dragon Slayer II + 50 Construction
+    // Cape itself is returned when the furniture is removed, so it's not consumed — only the 3 teak planks are
+    {name:'Mounted mythical cape', category:'POH Furniture', level:50, xp:370, members:true, outputName:'Mythical cape (mounted)', output:{id:21285,qty:1}, inputs:[{id:8780,qty:3}], actionsPerHr:1162}, // ~430k xp/hr verified, max efficiency
+
+    // Oak dungeon door — cheaper alternative to teak/mahogany at level 74, built in the Dungeon doorspace
+    {name:'Oak dungeon door',   category:'POH Furniture', level:74, xp:600, members:true, outputName:'Oak door',            output:{id:13615,qty:1}, inputs:[{id:8778,qty:10}], actionsPerHr:917}, // ~550k xp/hr verified with demon butler (350-360k without)
+
+    // Teak garden bench — built in the Superior Garden, similar timing to Gnome bench but with teak planks
+    {name:'Teak garden bench',  category:'POH Furniture', level:66, xp:540, members:true, outputName:'Teak garden bench',   output:{id:13674,qty:1}, inputs:[{id:8780,qty:6}], actionsPerHr:1111}, // up to 700k xp/hr perfect execution, 500-600k realistic
+
+    // Mahogany tables are the standard 52-77 method — Wiki confirms up to 900k xp/hr with a demon butler
+    {name:'Mahogany table',     category:'POH Furniture', level:52, xp:840, members:true, outputName:'Mahogany table',      output:{id:8956,qty:1},  inputs:[{id:8782,qty:6}], actionsPerHr:1070}, // ~900k xp/hr verified
+    // Gnome benches are the fastest method 77-99 — Wiki confirms just over 1,100,000 xp/hr
+    {name:'Gnome bench',        category:'POH Furniture', level:77, xp:840, members:true, outputName:'Gnome bench',         output:{id:13393,qty:1}, inputs:[{id:8782,qty:6}], actionsPerHr:1310}, // ~1.1M xp/hr verified, fastest method in game
+
+    // ── SHIPWRIGHT'S WORKBENCH — unlike furniture, these items SELL on the GE ──
+    // Requires Pandemonium quest. Workbench at Deepfin Point / Port Khazard / Red Rock.
+    // sellable:true flags these rows to use the normal profit-mode columns instead of cost-only.
+    // Repair kits: ~1,200/hr at high efficiency. Yield 2 kits per action (3 for ironwood/rosewood).
+    {name:'Wooden repair kit',  category:'Shipwright (sellable)', sellable:true, level:1,  xp:43.5, members:true, outputName:'Wooden repair kit',  output:{id:29460,qty:2}, inputNames:['Plank','Bronze nails','Swamp paste'],  inputs:[{id:960, qty:2},{id:4819, qty:10},{id:4082,qty:5}], actionsPerHr:1200}, // 2 planks + 10 bronze nails + 5 swamp paste
+    {name:'Oak repair kit',     category:'Shipwright (sellable)', sellable:true, level:19, xp:90,   members:true, outputName:'Oak repair kit',      output:{id:29463,qty:2}, inputNames:['Oak plank','Iron nails','Swamp paste'],   inputs:[{id:8778,qty:2},{id:4820, qty:10},{id:4082,qty:5}], actionsPerHr:1200}, // 2 oak planks + 10 iron nails + 5 swamp paste
+    {name:'Teak repair kit',    category:'Shipwright (sellable)', sellable:true, level:30, xp:135,  members:true, outputName:'Teak repair kit',     output:{id:29466,qty:2}, inputNames:['Teak plank','Steel nails','Swamp paste'], inputs:[{id:8780,qty:2},{id:4821, qty:10},{id:4082,qty:5}], actionsPerHr:1200}, // 2 teak planks + 10 steel nails + 5 swamp paste
+    {name:'Mahogany repair kit',category:'Shipwright (sellable)', sellable:true, level:47, xp:210,  members:true, outputName:'Mahogany repair kit', output:{id:29469,qty:2}, inputNames:['Mahogany plank','Mithril nails','Swamp paste'], inputs:[{id:8782,qty:2},{id:4823, qty:10},{id:4082,qty:5}], actionsPerHr:1200}, // 2 mahogany planks + 10 mithril nails + 5 swamp paste
+
+    // Hull parts: ~1,000/hr at high efficiency. 5 planks per action, no nails or paste needed.
+    {name:'Wooden hull parts',  category:'Shipwright (sellable)', sellable:true, level:1,  xp:72.5, members:true, outputName:'Wooden hull parts', output:{id:29490,qty:1}, inputs:[{id:960, qty:5}], actionsPerHr:1000},
+    {name:'Oak hull parts',     category:'Shipwright (sellable)', sellable:true, level:8,  xp:150,  members:true, outputName:'Oak hull parts',     output:{id:29491,qty:1}, inputs:[{id:8778,qty:5}], actionsPerHr:1000},
+    {name:'Teak hull parts',    category:'Shipwright (sellable)', sellable:true, level:23, xp:225,  members:true, outputName:'Teak hull parts',    output:{id:29492,qty:1}, inputs:[{id:8780,qty:5}], actionsPerHr:1000},
+    {name:'Mahogany hull parts',category:'Shipwright (sellable)', sellable:true, level:41, xp:350,  members:true, outputName:'Mahogany hull parts',output:{id:29493,qty:1}, inputs:[{id:8782,qty:5}], actionsPerHr:1000},
+    {name:'Camphor hull parts', category:'Shipwright (sellable)', sellable:true, level:53, xp:400,  members:true, outputName:'Camphor hull parts', output:{id:29494,qty:1}, inputNames:['Camphor plank'], inputs:[{id:29610,qty:5}], actionsPerHr:1000},
+    {name:'Ironwood hull parts',category:'Shipwright (sellable)', sellable:true, level:77, xp:437.5,members:true, outputName:'Ironwood hull parts',output:{id:29495,qty:1}, inputNames:['Ironwood plank'], inputs:[{id:29611,qty:5}], actionsPerHr:1000},
+  ]
+},
+
+};
+// ── BOOT ─────────────────────────────────────────────────
+// Maps item name (lowercase) → item ID, built from the mapping API
+let nameToId = {};
+
+async function boot(){
+  try{
+    const[mapRes,priceRes]=await Promise.all([
+      fetch(WIKI_MAPPING,{headers:H}),
+      fetch(WIKI_LATEST,{headers:H})
+    ]);
+    const mapData=await mapRes.json(),priceData=await priceRes.json();
+    mapData.forEach(i=>{
+      allItems[i.id]=i;
+      nameToId[i.name.toLowerCase()]=String(i.id);
+    });
+    Object.entries(priceData.data).forEach(([id,p])=>{prices[id]=p;});
+    document.getElementById('hUpdated').textContent='Live';
+
+    // Resolve all output IDs by exact item name from the mapping.
+    // This guarantees we always price the correct dose variant.
+    // Each potion entry has an outputName field; we resolve it here.
+    Object.values(SKILLS).forEach(skill=>{
+      skill.items.forEach(item=>{
+        if(item.outputName){
+          const resolvedId = nameToId[item.outputName.toLowerCase()];
+          if(resolvedId) item.output.id = resolvedId;
+          else console.warn('Could not resolve item name:', item.outputName);
+        }
+        // Resolve input IDs by name too, when inputNames is provided (e.g. charged orbs)
+        if(item.inputNames){
+          item.inputNames.forEach((name,idx)=>{
+            if(!item.inputs[idx])return;
+            const resolvedId = nameToId[name.toLowerCase()];
+            if(resolvedId) item.inputs[idx].id = resolvedId;
+            else console.warn('Could not resolve input name:', name);
+          });
+        }
+      });
+    });
+
+    // Fetch initial average prices (1h by default)
+    await fetchAvgPrices('1h');
+    renderSkill(currentSkill);
+  }catch(e){
+    console.error(e);
+    document.getElementById('tableBody').innerHTML='<tr class="loading-row"><td colspan="10">Failed to load prices — check your connection</td></tr>';
+  }
+}
+
+// Fetch volume-weighted average prices from timeseries
+async function fetchAvgPrices(step){
+  if(step==='spot'){avgPrices={};return;}
+  try{
+    // We use the 5m timeseries and take the most recent bucket's avgHighPrice/avgLowPrice
+    // For 1h and beyond we use the appropriate step directly
+    const apiStep = step==='1h'?'5m':step; // 5m gives us the freshest 1h data
+    // Collect all unique item IDs needed across all skills
+    const needed=new Set();
+    Object.values(SKILLS).forEach(skill=>skill.items.forEach(item=>{
+      needed.add(item.output.id);
+      item.inputs.forEach(inp=>needed.add(inp.id));
+    }));
+
+    // Batch fetch — Wiki API supports fetching individual item timeseries
+    // We fetch a small recent slice and average it
+    const cutoffStep = step==='1h'?12:step==='6h'?2:1; // how many 5m/6h/24h buckets
+    // Build a map from latest data — use the mapping endpoint's avgHighPrice/avgLowPrice
+    // which the /latest endpoint actually does provide as weighted averages over recent trades
+    // For better averaging we use the 1h timeseries endpoint with a recent window
+    const res=await fetch(`https://prices.runescape.wiki/api/v1/osrs/timeseries?timestep=${apiStep}&id=2&limit=1`,{headers:H});
+    // If that works, fetch each needed item — but that's too many requests
+    // Instead use the /1h, /6h, /24h summary endpoints which give volume-weighted averages
+    const summaryStep = step==='1h'?'1h':step==='6h'?'6h':'24h';
+    const summaryRes=await fetch(`https://prices.runescape.wiki/api/v1/osrs/${summaryStep}`,{headers:H});
+    if(!summaryRes.ok)throw new Error('avg fetch failed');
+    const summaryData=await summaryRes.json();
+    avgPrices={};
+    Object.entries(summaryData.data||{}).forEach(([id,p])=>{
+      avgPrices[id]={
+        high: p.avgHighPrice||null,
+        low:  p.avgLowPrice||null
+      };
+    });
+  }catch(e){
+    console.warn('Could not fetch avg prices, falling back to spot:',e);
+    avgPrices={};
+  }
+}
+
+// ── PRICE BASIS SELECTOR ──────────────────────────────────
+document.getElementById('priceBasisSelect').addEventListener('change',async e=>{
+  priceBasis=e.target.value;
+  document.getElementById('basisLabel').textContent=BASIS_LABELS[priceBasis];
+  document.getElementById('tableBody').innerHTML='<tr class="loading-row"><td colspan="10"><div class="spinner"></div>Fetching '+priceBasis+' averages…</td></tr>';
+  await fetchAvgPrices(priceBasis);
+  renderTable();
+});
+
+// ── PRICE HELPERS ─────────────────────────────────────────
+function buyPrice(id){
+  // Buy at the low (buy) side
+  if(priceBasis!=='spot'){
+    const a=avgPrices[id];
+    if(a&&a.low!=null) return a.low;
+    if(a&&a.high!=null) return a.high; // fallback to high if no low avg
+  }
+  const p=prices[id];
+  return p?(p.low||p.high||0):0;
+}
+function sellPrice(id){
+  // Sell at the high (sell) side
+  if(priceBasis!=='spot'){
+    const a=avgPrices[id];
+    if(a&&a.high!=null) return a.high;
+    if(a&&a.low!=null) return a.low;
+  }
+  const p=prices[id];
+  return p?(p.high||p.low||0):0;
+}
+function calcItem(item){
+  const inputCost = item.inputs.reduce((s,i)=>s+buyPrice(i.id)*i.qty,0);
+  const outputRev  = sellPrice(item.output.id) * item.output.qty;
+  const profit     = outputRev - inputCost;
+  const gpxp       = item.xp>0 ? profit/item.xp : 0;
+  const actionsHr  = item.actionsPerHr || 1200; // default ~1200 actions/hr if unspecified
+  const xpHr       = item.xp * actionsHr;
+  const gpHr        = profit * actionsHr;
+  return{...item, inputCost, outputRev, profit, gpxp, xpHr, gpHr};
+}
+
+// ── RENDER ────────────────────────────────────────────────
+function renderSkill(skillKey){
+  currentSkill=skillKey;
+  const skill=SKILLS[skillKey];
+  if(!skill)return;
+
+  document.getElementById('skillIconLarge').src=skill.icon;
+  document.getElementById('skillTitle').textContent=skill.name;
+  document.getElementById('skillDesc').textContent=skill.desc;
+
+  document.querySelectorAll('.skill-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.skill===skillKey);
+  });
+
+  // Category filter — only show when skill has categories defined
+  const catGroup=document.getElementById('categoryFilterGroup');
+  const catSelect=document.getElementById('categorySelect');
+  if(skill.categories){
+    catGroup.style.display='';
+    catSelect.innerHTML=skill.categories.map(c=>`<option value="${c}">${c}</option>`).join('');
+  } else {
+    catGroup.style.display='none';
+    catSelect.innerHTML='';
+  }
+
+  renderTable();
+}
+
+function renderTable(){
+  const skill=SKILLS[currentSkill];
+  const sortKey=document.getElementById('sortSelect').value;
+  const memberFilter=document.getElementById('memberSelect').value;
+  const minProfit=parseInt(document.getElementById('minProfitSelect').value)||(-999999);
+  const search=document.getElementById('tableSearch').value.trim().toLowerCase();
+
+  // Compute all items
+  let rows=skill.items.map(calcItem);
+
+  // Filter
+  const selectedCat = document.getElementById('categorySelect').value;
+  rows=rows.filter(r=>{
+    if(memberFilter==='f2p'&&r.members)return false;
+    if(memberFilter==='members'&&!r.members)return false;
+    if(!(skill.isConstructionMode && !r.sellable) && r.profit<minProfit)return false;
+    if(search&&!r.name.toLowerCase().includes(search))return false;
+    if(selectedCat&&selectedCat!=='All'&&r.category&&r.category!==selectedCat)return false;
+    return true;
+  });
+
+  // Sort
+  rows.sort((a,b)=>{
+    let av,bv;
+    if(sortKey==='profit')  {av=a.profit;bv=b.profit;}
+    else if(sortKey==='gpxp'){av=a.gpxp;bv=b.gpxp;}
+    else if(sortKey==='xp')  {av=a.xp;bv=b.xp;}
+    else if(sortKey==='xpHr'){av=a.xpHr;bv=b.xpHr;}
+    else if(sortKey==='gpHr'){av=a.gpHr;bv=b.gpHr;}
+    else if(sortKey==='level'){av=a.level;bv=b.level;return av-bv;}
+    else                      {av=a.name;bv=b.name;return av.localeCompare(bv);}
+    return sortDir*(bv-av);
+  });
+
+  // Header — Construction furniture has no resale revenue, so show Cost/XP and Cost/hr instead of Profit/GP-hr.
+  // Shipwright items DO sell on the GE, so if any row in view is sellable, use the universal profit header.
+  const hasSellableRows = rows.some(r=>r.sellable);
+  const useConstructionHeader = skill.isConstructionMode && !hasSellableRows;
+  const thead=document.getElementById('tableHead');
+  if(useConstructionHeader){
+    thead.innerHTML=`
+      <th data-col="name">Item</th>
+      <th data-col="level">Lvl</th>
+      <th data-col="xp">XP</th>
+      <th data-col="xpHr">XP/hr</th>
+      <th>Planks Used</th>
+      <th data-col="inputCost">Plank Cost</th>
+      <th data-col="gpxp">Cost/XP</th>
+      <th data-col="gpHr">Cost/hr</th>
+    `;
+  } else {
+    thead.innerHTML=`
+      <th data-col="name">Item</th>
+      <th data-col="level">Lvl</th>
+      <th data-col="xp">XP</th>
+      <th data-col="xpHr">XP/hr</th>
+      <th>Ingredients</th>
+      <th data-col="inputCost">Cost</th>
+      <th data-col="outputRev">Revenue</th>
+      <th data-col="profit">Profit</th>
+      <th data-col="gpHr">GP/hr</th>
+      <th data-col="gpxp">GP/XP</th>
+    `;
+  }
+  thead.querySelectorAll('th[data-col]').forEach(th=>{
+    if(th.dataset.col===sortKey) th.className=sortDir>0?'sort-asc':'sort-desc';
+    th.addEventListener('click',()=>{
+      if(sortCol===th.dataset.col) sortDir*=-1;
+      else{sortCol=th.dataset.col;sortDir=-1;}
+      document.getElementById('sortSelect').value=th.dataset.col in {profit:1,gpxp:1,xp:1,xpHr:1,gpHr:1,level:1,name:1}?th.dataset.col:'profit';
+      renderTable();
+    });
+  });
+
+  // Summary
+  document.getElementById('summaryCount').textContent=rows.length;
+  if(rows.length){
+    const bestXpHr=rows.reduce((a,b)=>b.xpHr>a.xpHr?b:a,rows[0]);
+    document.getElementById('summaryXpHr').textContent=fmt(bestXpHr.xpHr)+' xp/hr ('+bestXpHr.name+')';
+    if(useConstructionHeader){
+      const cheapest=rows.reduce((a,b)=>b.gpxp<a.gpxp?b:a,rows[0]); // most negative = least negative cost is "cheapest"
+      const cheapestPerHr=rows.reduce((a,b)=>Math.abs(b.gpHr)<Math.abs(a.gpHr)?b:a,rows[0]);
+      document.getElementById('summaryBest').textContent='—';
+      document.getElementById('summaryGpxp').textContent=fmtGpXp(Math.abs(cheapest.gpxp))+' gp/xp ('+cheapest.name+')';
+      document.getElementById('summaryAvg').textContent='Cheapest/hr: '+fmt(Math.abs(cheapestPerHr.gpHr))+' gp ('+cheapestPerHr.name+')';
+    } else {
+      const best=rows.reduce((a,b)=>b.profit>a.profit?b:a,rows[0]);
+      const bestGpxp=rows.reduce((a,b)=>b.gpxp>a.gpxp?b:a,rows[0]);
+      const avg=rows.reduce((s,r)=>s+r.profit,0)/rows.length;
+      document.getElementById('summaryBest').textContent=fmtGp(best.profit)+' ('+best.name+')';
+      document.getElementById('summaryGpxp').textContent=fmtGpXp(bestGpxp.gpxp)+' gp/xp ('+bestGpxp.name+')';
+      document.getElementById('summaryAvg').textContent=fmtGp(avg);
+    }
+  }
+
+  // Body
+  const tbody=document.getElementById('tableBody');
+  if(!rows.length){
+    tbody.innerHTML='<tr class="loading-row"><td colspan="10">No items match your filters.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML=rows.map(r=>{
+    const profitCls=r.profit>0?'profit-pos':r.profit<0?'profit-neg':'profit-zero';
+    const gpxpCls=r.gpxp>500?'gpxp-great':r.gpxp>0?'gpxp-good':'gpxp-bad';
+    const memberBadge=r.members?'<span class="badge badge-member">M</span>':'<span class="badge badge-f2p">F2P</span>';
+
+    const ings=r.inputs.map(inp=>{
+      const info=allItems[inp.id];
+      const name=info?info.name:`#${inp.id}`;
+      const p=buyPrice(inp.id);
+      const wUrl=`https://oldschool.runescape.wiki/w/${encodeURIComponent(name.replace(/ /g,'_'))}`;
+      return`<a href="${wUrl}" target="_blank" rel="noopener" class="ing-item" style="text-decoration:none;color:inherit;"><img src="${iconUrl(inp.id)}" onerror="this.style.display='none'" alt="" loading="lazy">${inp.qty>1?inp.qty+'×':''} ${name} <span style="color:var(--gold);font-family:'Share Tech Mono',monospace;">(${fmt(p)})</span></a>`;
+    }).join('');
+
+    const itemInfo=allItems[r.output.id];
+    const itemWikiName=itemInfo?itemInfo.name:r.name;
+    const itemWikiUrl=`https://oldschool.runescape.wiki/w/${encodeURIComponent(itemWikiName.replace(/ /g,'_'))}`;
+
+    const itemCell=`<td>
+        <a href="${itemWikiUrl}" target="_blank" rel="noopener" class="item-cell" style="text-decoration:none;color:inherit;">
+          <img src="${iconUrl(r.output.id)}" onerror="this.style.display='none'" alt="" loading="lazy">
+          <div>
+            <div class="item-name" style="transition:color .15s;">${r.name} ${memberBadge}</div>
+            <div class="item-level">Lvl ${r.level} · ${r.output.qty>1?r.output.qty+'× ':''}</div>
+          </div>
+        </a>
+      </td>`;
+
+    if(useConstructionHeader){
+      // Pure furniture table: no resale value, so show cost-per-XP (always negative = cost) and cost-per-hour
+      return`<tr>
+        ${itemCell}
+        <td class="mono">${r.level}</td>
+        <td class="mono">${r.xp}</td>
+        <td class="mono" style="color:var(--gold);">${fmt(r.xpHr)}</td>
+        <td class="ingredients">${ings}</td>
+        <td class="mono">${fmt(r.inputCost)} gp</td>
+        <td class="mono profit-neg">${fmtGpXp(Math.abs(r.gpxp))} gp/xp</td>
+        <td class="mono profit-neg">${fmt(Math.abs(r.gpHr))} gp/hr</td>
+      </tr>`;
+    }
+
+    return`<tr>
+      ${itemCell}
+      <td class="mono">${r.level}</td>
+      <td class="mono">${r.xp}</td>
+      <td class="mono" style="color:var(--gold);">${fmt(r.xpHr)}</td>
+      <td class="ingredients">${ings}</td>
+      <td class="mono">${fmt(r.inputCost)} gp</td>
+      <td class="mono">${fmt(r.outputRev)} gp</td>
+      <td class="mono ${profitCls}">${fmtGp(r.profit)}</td>
+      <td class="mono ${r.gpHr>=0?'profit-pos':'profit-neg'}">${r.gpHr>=0?'+':''}${fmt(r.gpHr)}/hr</td>
+      <td class="mono ${gpxpCls}">${fmtGpXp(r.gpxp)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── SKILL NAV ─────────────────────────────────────────────
+document.querySelectorAll('.skill-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>renderSkill(btn.dataset.skill));
+});
+
+// ── CONTROLS ─────────────────────────────────────────────
+['sortSelect','memberSelect','minProfitSelect','categorySelect'].forEach(id=>{
+  document.getElementById(id).addEventListener('change',renderTable);
+});
+document.getElementById('tableSearch').addEventListener('input',renderTable);
+document.getElementById('refreshBtn').addEventListener('click',async()=>{
+  document.getElementById('hUpdated').textContent='Refreshing…';
+  try{
+    const[priceRes]=await Promise.all([
+      fetch(WIKI_LATEST,{headers:H})
+    ]);
+    const data=await priceRes.json();
+    Object.entries(data.data).forEach(([id,p])=>{prices[id]=p;});
+    await fetchAvgPrices(priceBasis);
+    document.getElementById('hUpdated').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    renderTable();
+  }catch(e){document.getElementById('hUpdated').textContent='Error';}
+});
+
+// ── THEME ─────────────────────────────────────────────────
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+});
+
+boot();
+</script>
+</body>
+</html>

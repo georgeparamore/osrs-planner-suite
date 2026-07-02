@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prayer Training Planner – OSRS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap');
+:root{--bg:#0d0f14;--surface:#141720;--surface2:#1b1f2e;--border:#252a3a;--gold:#c8a84b;--gold-dim:#8a7030;--green:#2ecc71;--red:#e74c3c;--blue:#4a7eff;--purple:#9b6fd6;--text:#dde1ec;--text-dim:#6b7490;}
+[data-theme="light"]{--bg:#f0f2f5;--surface:#ffffff;--surface2:#e8eaf0;--border:#d0d4e0;--gold:#8a6a1a;--gold-dim:#b89030;--green:#1a8a45;--red:#c0392b;--blue:#2255cc;--purple:#7a4fc7;--text:#1a1e2e;--text-dim:#6b7490;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:16px;height:50px;flex-shrink:0;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--gold);letter-spacing:1px;text-decoration:none;}
+.logo span{color:var(--text-dim);font-weight:400;}
+.nav-back{font-size:13px;color:var(--text-dim);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;}
+.nav-back:hover{color:var(--gold);}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.theme-btn{background:none;border:none;cursor:pointer;font-size:17px;color:var(--text-dim);transition:color .2s;}
+.theme-btn:hover{color:var(--gold);}
+.main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px);}
+.skill-nav{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;}
+.skill-nav-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);padding:0 14px;margin-bottom:6px;}
+.skill-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;cursor:pointer;background:none;border:none;color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;text-align:left;transition:all .15s;border-left:3px solid transparent;}
+.skill-btn:hover{background:var(--surface2);color:var(--text);}
+.skill-btn.active{background:var(--surface2);color:var(--gold);border-left-color:var(--gold);}
+.skill-btn .skill-icon-img{width:22px;height:22px;object-fit:contain;flex-shrink:0;}
+.skill-btn.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.skill-btn .soon-badge{margin-left:auto;font-size:8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.3px;}
+.content{flex:1;display:flex;flex-direction:column;overflow-y:auto;min-width:0;}
+.input-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 24px;flex-shrink:0;}
+.input-panel-top{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.skill-icon-large{width:32px;height:32px;object-fit:contain;}
+.skill-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;}
+.skill-desc{font-size:12px;color:var(--text-dim);margin-bottom:14px;}
+.input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.field-group{display:flex;flex-direction:column;gap:4px;}
+.field-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.field-group input,.field-group select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 11px;outline:none;transition:border-color .2s;width:120px;}
+.field-group select{width:auto;min-width:170px;cursor:pointer;}
+.field-group input:focus,.field-group select:focus{border-color:var(--gold-dim);}
+.apply-btn{padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.apply-btn:hover{opacity:.85;}
+.status-card{display:flex;align-items:center;gap:20px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:8px;padding:12px 18px;margin-top:14px;}
+.status-stat{display:flex;flex-direction:column;gap:1px;}
+.status-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.status-stat-value{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--gold);}
+.status-progress-wrap{flex:1;}
+.status-progress-bar{height:8px;background:var(--surface);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.status-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .4s ease;}
+.status-progress-text{font-size:10px;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;}
+.or-divider{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;align-self:center;padding:0 4px;}
+.manual-toggle{padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.manual-toggle:hover{border-color:var(--gold-dim);}
+.manual-toggle.active{border-color:var(--gold);color:var(--gold);}
+#womFields{display:none;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap;}
+#womFields.show{display:flex;}
+.fetch-status{font-size:11px;margin-top:8px;display:none;align-items:center;gap:6px;}
+.fetch-status.show{display:flex;}
+.fetch-status.error{color:var(--red);}
+.fetch-status.success{color:var(--green);}
+.fetch-status.loading{color:var(--text-dim);}
+.spinner-sm{display:inline-block;width:11px;height:11px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.speed-panel{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.speed-panel-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
+.speed-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+.speed-tab{flex:1;min-width:180px;display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .15s;}
+.speed-tab:hover{border-color:var(--gold-dim);}
+.speed-tab.active{border-color:var(--accent,var(--gold));background:rgba(200,168,75,.08);}
+.speed-tab-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.speed-tab-dot{width:9px;height:9px;border-radius:50%;}
+.speed-tab-sub{font-size:11px;color:var(--text-dim);}
+/* METHOD PANEL (altar/burner/bone-offering-method controls) */
+.method-panel{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.method-panel-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
+.method-btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.method-btn{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:var(--text);transition:all .15s;}
+.method-btn:hover{border-color:var(--gold-dim);}
+.method-btn.active{border-color:var(--gold);background:rgba(200,168,75,.1);color:var(--gold);}
+.risk-badge{font-size:9px;font-weight:700;background:var(--red);color:#fff;padding:2px 7px;border-radius:8px;letter-spacing:.4px;text-transform:uppercase;}
+.req-badge{font-size:9px;font-weight:700;background:var(--purple);color:#fff;padding:2px 7px;border-radius:8px;letter-spacing:.4px;text-transform:uppercase;}
+.method-sub-controls{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--border);}
+.method-note{font-size:11px;color:var(--text-dim);line-height:1.6;flex-basis:100%;}
+.plan-area{padding:20px 24px;flex:1;}
+.plan-summary{display:flex;gap:20px;flex-wrap:wrap;align-items:stretch;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:20px;}
+.plan-summary-stat{display:flex;flex-direction:column;gap:2px;min-width:110px;justify-content:center;}
+.plan-summary-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.plan-summary-value{font-family:'Share Tech Mono',monospace;font-size:19px;}
+.plan-summary-value.accent{color:var(--gold);}
+.plan-summary-divider{width:1px;background:var(--border);align-self:stretch;margin:0 2px;}
+.plan-summary-total{display:flex;flex-direction:column;gap:2px;justify-content:center;background:linear-gradient(135deg,rgba(200,168,75,.16),rgba(200,168,75,.04));border:1px solid var(--gold-dim);border-radius:8px;padding:8px 18px;min-width:150px;}
+.plan-summary-total .plan-summary-label{color:var(--gold-dim);}
+.plan-summary-total .plan-summary-value{font-size:24px;font-weight:700;color:var(--gold);}
+.route-stop{position:relative;margin-bottom:18px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;transition:border-color .15s;}
+.route-stop:hover{border-color:var(--gold-dim);}
+.route-stop-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+.route-stop-name{font-size:15px;font-weight:600;flex:1;min-width:140px;}
+.route-stop-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.route-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.route-badge.xp{background:rgba(200,168,75,.15);color:var(--gold);}
+.route-badge.cost{background:rgba(231,76,60,.13);color:var(--red);}
+.route-badge.cost.profit{background:rgba(46,204,113,.13);color:var(--green);}
+.route-badge.time{background:rgba(74,126,255,.13);color:var(--blue);}
+.route-stop-detail{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.route-stat{display:flex;flex-direction:column;gap:1px;}
+.route-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim);}
+.route-stat-value{font-family:'Share Tech Mono',monospace;font-size:13px;}
+.target-estimate-card{background:linear-gradient(135deg,rgba(200,168,75,.08),rgba(200,168,75,.02));border:1px solid var(--gold-dim);border-radius:10px;padding:16px 20px;margin-top:18px;}
+.target-estimate-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--gold);margin-bottom:10px;}
+.target-estimate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;}
+.target-estimate-stat{display:flex;flex-direction:column;gap:2px;}
+.target-estimate-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.target-estimate-value{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;}
+.target-estimate-cost .target-estimate-value{font-size:22px;}
+.target-estimate-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.price-status{font-size:11px;color:var(--text-dim);margin-bottom:10px;}
+/* SHOPPING / REFERENCE TABLE STYLES (shared look for comparison + ensouled heads tables) */
+.shopping-wrap{margin-top:20px;}
+.shopping-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:10px;padding:14px 20px;cursor:pointer;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;transition:background .15s;}
+.shopping-toggle:hover{background:var(--surface);}
+.shopping-toggle-arrow{font-size:14px;color:var(--text-dim);transition:transform .2s;}
+.shopping-toggle-arrow.open{transform:rotate(180deg);}
+.shopping-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:16px 20px;margin-top:-1px;}
+.shopping-body.show{display:block;}
+.shopping-section-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--accent,var(--gold));margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.shopping-table{width:100%;border-collapse:collapse;font-size:13px;}
+.shopping-table th{text-align:left;padding:6px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);border-bottom:2px solid var(--border);}
+.shopping-table th.r{text-align:right;}
+.shopping-table td{padding:8px 10px;border-bottom:1px solid var(--border);}
+.shopping-table td.mono{font-family:'Share Tech Mono',monospace;text-align:right;}
+.shopping-table tr:last-child td{border-bottom:none;}
+.shopping-table tr.clickable-row{cursor:pointer;transition:background .1s;}
+.shopping-table tr.clickable-row:hover{background:rgba(200,168,75,.06);}
+.shopping-table tr.selected-row{background:rgba(200,168,75,.12);}
+.shopping-table tr.locked-row{opacity:.38;}
+.shopping-icon{width:20px;height:20px;object-fit:contain;vertical-align:middle;margin-right:6px;}
+.shopping-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:10px;}
+.sort-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.info-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+.info-card-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;margin-bottom:10px;}
+.info-card-body{font-size:12px;color:var(--text-dim);line-height:1.8;}
+.info-card-body strong{color:var(--text);}
+.lock-note{font-size:11px;color:var(--red);margin-top:4px;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="osrs-ge-tracker.html">GE<span>Tracker</span></a>
+  <span style="color:var(--border);">|</span>
+  <a class="nav-back" href="osrs-skill-profit.html">⚗️ Skill Profits</a>
+  <span style="color:var(--border);">|</span>
+  <a class="nav-back" href="osrs-training-planner.html">🏗️ Construction</a>
+  <span style="color:var(--border);">|</span>
+  <a class="nav-back" href="osrs-farming-planner.html">🌱 Farming</a>
+  <span style="color:var(--border);">|</span>
+  <a class="nav-back" href="osrs-herblore-planner.html">⚗️ Herblore</a>
+  <span style="color:var(--border);">|</span>
+  <span style="font-size:13px;color:var(--gold);">📿 Prayer Planner</span>
+  <div class="header-right">
+    <button class="theme-btn" id="themeBtn">🌙</button>
+  </div>
+</header>
+<div class="main">
+  <nav class="skill-nav">
+    <div class="skill-nav-title">Planners</div>
+    <button class="skill-btn" onclick="location.href='osrs-training-planner.html'">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="">Construction
+    </button>
+    <button class="skill-btn" onclick="location.href='osrs-farming-planner.html'">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="">Farming
+    </button>
+    <button class="skill-btn" onclick="location.href='osrs-herblore-planner.html'">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">Herblore
+    </button>
+    <button class="skill-btn active">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">Prayer
+    </button>
+    <button class="skill-btn disabled">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing<span class="soon-badge">Soon</span>
+    </button>
+    <button class="skill-btn disabled">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">Fletching<span class="soon-badge">Soon</span>
+    </button>
+    <button class="skill-btn disabled">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking<span class="soon-badge">Soon</span>
+    </button>
+    <button class="skill-btn disabled">
+      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">Crafting<span class="soon-badge">Soon</span>
+    </button>
+  </nav>
+  <div class="content">
+    <div class="input-panel">
+      <div class="input-panel-top">
+        <img class="skill-icon-large" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">
+        <div class="skill-title">Prayer Training Planner</div>
+      </div>
+      <div class="skill-desc">Set your current level and target, pick a training method, and get live cost estimates from the Grand Exchange for bone offering, ensouled heads, and more.</div>
+      <div id="priceStatus" class="price-status">⏳ Loading live Grand Exchange prices…</div>
+      <div class="input-row">
+        <div class="field-group">
+          <span class="field-label">OSRS Username</span>
+          <input type="text" id="womUsername" placeholder="e.g. Zezima" autocomplete="off">
+        </div>
+        <button class="apply-btn" id="womFetchBtn">Fetch Stats</button>
+        <div class="field-group">
+          <span class="field-label">Target Level</span>
+          <input type="number" id="targetLevel" min="2" max="99" value="99">
+        </div>
+        <div class="or-divider">or</div>
+        <button class="manual-toggle" id="womToggle">Enter Manually</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">Pulls your live Prayer level/XP from Wise Old Man.</div>
+      <div id="womFields">
+        <div class="field-group">
+          <span class="field-label">Current Level</span>
+          <input type="number" id="manualLevel" min="1" max="99" value="1">
+        </div>
+        <div class="field-group">
+          <span class="field-label">Current XP (optional)</span>
+          <input type="number" id="manualXp" min="0" placeholder="auto from level">
+        </div>
+        <button class="apply-btn" id="applyBtn">Update Plan</button>
+      </div>
+      <div class="fetch-status" id="womStatus"></div>
+      <div class="status-card" id="statusCard" style="margin-top:14px;">
+        <div class="status-stat"><div class="status-stat-label">Current</div><div class="status-stat-value" id="statusLevel">1</div></div>
+        <div class="status-progress-wrap">
+          <div class="status-progress-bar"><div class="status-progress-fill" id="statusProgressFill" style="width:0%"></div></div>
+          <div class="status-progress-text"><span id="statusXpText">0 XP</span><span id="statusTargetText">Target: Level 99</span></div>
+        </div>
+        <div class="status-stat"><div class="status-stat-label">XP Remaining</div><div class="status-stat-value" id="statusXpRemaining">—</div></div>
+      </div>
+    </div>
+    <div class="speed-panel">
+      <div class="speed-panel-label">Training Method</div>
+      <div class="speed-tabs">
+        <div class="speed-tab active" data-mode="bones" style="--accent:#c8a84b;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#c8a84b;"></span>🦴 Bone Offering</div>
+          <div class="speed-tab-sub">Plain burying, POH chapel altars, Chaos Altar, or Ectofuntus</div>
+        </div>
+        <div class="speed-tab" data-mode="heads" style="--accent:#9b6fd6;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#9b6fd6;"></span>💀 Ensouled Heads</div>
+          <div class="speed-tab-sub">Reanimate &amp; kill — all 23 heads, gated by Magic level</div>
+        </div>
+        <div class="speed-tab" data-mode="libation" style="--accent:#4a9eff;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#4a9eff;"></span>🍷 Libation Bowl</div>
+          <div class="speed-tab-sub">Varlamore's safe alternative to the Chaos Altar (30 Prayer)</div>
+        </div>
+        <div class="speed-tab" data-mode="cremation" style="--accent:#2ecc71;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#2ecc71;"></span>🔥 Cremation</div>
+          <div class="speed-tab-sub">Urium remains — profitable, Hard Morytania Diary bonus</div>
+        </div>
+      </div>
+    </div>
+    <div class="method-panel" id="boneMethodPanel">
+      <div class="method-panel-label">Bone Offering Method</div>
+      <div class="method-btn-row">
+        <button class="method-btn active" data-method="plain">🦴 Plain Burying</button>
+        <button class="method-btn" data-method="chapel">⛪ POH Chapel Altar</button>
+        <button class="method-btn" data-method="chaos">☠️ Chaos Altar <span class="risk-badge">Wilderness · PvP</span></button>
+        <button class="method-btn" data-method="ecto">👻 Ectofuntus</button>
+        <button class="method-btn" data-method="sinister">🔮 Sinister Offering <span class="req-badge">92 Magic · Quest</span></button>
+        <button class="method-btn" data-method="demonic">💀 Demonic Offering (Ashes) <span class="req-badge">84 Magic · Quest</span></button>
+      </div>
+      <div class="method-sub-controls" id="chapelSubControls" style="display:none;">
+        <div class="field-group">
+          <span class="field-label">Altar Tier</span>
+          <select id="altarTierSelect"></select>
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);align-self:center;">Both incense burners assumed lit (max XP bonus for the selected tier).</div>
+      </div>
+      <div class="method-note" id="methodDescNote"></div>
+    </div>
+    <div class="method-panel" id="boneSelectPanel">
+      <div class="method-panel-label">Bone Type</div>
+      <div class="input-row" style="align-items:center;">
+        <div class="field-group">
+          <span class="field-label">Bone</span>
+          <select id="boneSelect"></select>
+        </div>
+        <div id="boneLockNote" class="lock-note" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="method-panel" id="ashSelectPanel" style="display:none;">
+      <div class="method-panel-label">Ash Type</div>
+      <div class="input-row" style="align-items:center;">
+        <div class="field-group">
+          <span class="field-label">Demonic Ash</span>
+          <select id="ashSelect"></select>
+        </div>
+      </div>
+    </div>
+    <div class="method-panel" id="libationPanel" style="display:none;">
+      <div class="method-panel-label">Libation Bowl Setup</div>
+      <div class="method-btn-row">
+        <button class="method-btn" data-wine="wine">🍷 Blessed Wine <span style="font-weight:400;">(5 xp/shard)</span></button>
+        <button class="method-btn active" data-wine="sunfire">☀️ Blessed Sunfire Wine <span style="font-weight:400;">(6 xp/shard)</span></button>
+      </div>
+      <div class="input-row" style="align-items:center;margin-top:4px;">
+        <div class="field-group">
+          <span class="field-label">Bone (to bless &amp; shard)</span>
+          <select id="libationBoneSelect"></select>
+        </div>
+        <div id="libationLockNote" class="lock-note" style="display:none;"></div>
+      </div>
+      <div class="method-note">Requires 30 Prayer. Bones are blessed (free) at the Exposed Altar, then chiselled (free, +5 Crafting XP) into blessed bone shards. Each shard gives 5 XP with a jug of blessed wine, or 6 XP with a jug of blessed sunfire wine — 1 jug fills the bowl for 400 shard-sacrifices either way. Sunfire wine additionally needs 2 Sunfire splinters per jug of wine.</div>
+    </div>
+    <div class="plan-area" id="planArea">
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:60px 20px;color:var(--text-dim);text-align:center;flex-direction:column;">
+        <div style="font-size:15px;font-weight:600;color:var(--text);">Set your starting level to generate a plan</div>
+        <div style="font-size:12px;max-width:320px;line-height:1.6;">Enter your current Prayer level and target above, then pick a training method.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// ── EXACT OSRS XP TABLE (verified against Wiki, identical across all skills) ──────
+const XP_TABLE = [0,83,174,276,388,512,650,801,969,1154,1358,1584,1833,2107,2411,2746,3115,3523,3973,4470,5018,5624,6291,7028,7842,8740,9730,10824,12031,13363,14833,16456,18247,20224,22406,24815,27473,30408,33648,37224,41171,45529,50339,55649,61512,67983,75127,83014,91721,101333,111945,123660,136594,150872,166636,184040,203254,224466,247886,273742,302288,333804,368599,407015,449428,496254,547953,605032,668051,737627,814445,899257,992895,1096278,1210421,1336443,1475581,1629200,1798808,1986068,2192818,2421087,2673114,2951373,3258594,3597792,3972294,4385776,4842295,5346332,5902831,6517253,7195629,7944614,8771558,9684577,10692629,11805606,13034431];
+function xpForLevel(l){l=Math.max(1,Math.min(99,l));return XP_TABLE[l-1];}
+function levelForXp(xp){for(let l=99;l>=1;l--){if(xp>=XP_TABLE[l-1])return l;}return 1;}
+
+// ── LIVE GE PRICING ─────────────────────────────────────────────────────────────
+// Identical pattern to the other planners in this suite — RuneScape Wiki prices API,
+// NOT the official Jagex API (which has CORS issues). IDs stored as STRINGS since
+// Object.entries(priceData.data) always returns string keys — mismatching number vs
+// string here was a real bug in an earlier planner that silently zeroed every price.
+const WIKI_MAPPING='https://prices.runescape.wiki/api/v1/osrs/mapping';
+const WIKI_LATEST='https://prices.runescape.wiki/api/v1/osrs/latest';
+let nameToId={}, prices={}, nameToIcon={}, pricesLoaded=false;
+
+function priceOf(name){
+  if(!name) return 0;
+  const id=nameToId[name.toLowerCase()];
+  if(!id||!prices[id]) return 0;
+  return prices[id].high || prices[id].low || 0;
+}
+function sellPriceOf(name){
+  if(!name) return 0;
+  const id=nameToId[name.toLowerCase()];
+  if(!id||!prices[id]) return 0;
+  const raw = prices[id].low || prices[id].high || 0;
+  const tax = Math.min(5000000, Math.max(1, Math.floor(raw * 0.01))); // 1% GE tax, min 1gp, cap 5M
+  return Math.max(0, raw - tax);
+}
+// Icon resolution — uses the wiki mapping's own `icon` filename, with a "(tablet)" name
+// fallback for the handful of items that are GE-listed only under a tablet-suffixed name.
+// Not heavily used in this planner (no teleports) but kept for parity with the other tools.
+function resolveItemIcon(name){
+  const key=name.toLowerCase();
+  if(nameToIcon[key]) return nameToIcon[key];
+  const tabletKey=`${key} (tablet)`;
+  if(nameToIcon[tabletKey]) return nameToIcon[tabletKey];
+  return null;
+}
+function iconUrl(name){
+  const filename=resolveItemIcon(name);
+  if(!filename) return '';
+  return `https://oldschool.runescape.wiki/images/${encodeURIComponent(filename.replace(/ /g,'_'))}`;
+}
+
+async function loadPrices(){
+  try{
+    const [mapRes,priceRes]=await Promise.all([fetch(WIKI_MAPPING),fetch(WIKI_LATEST)]);
+    const mapData=await mapRes.json(), priceData=await priceRes.json();
+    mapData.forEach(i=>{ nameToId[i.name.toLowerCase()]=String(i.id); if(i.icon) nameToIcon[i.name.toLowerCase()]=i.icon; });
+    Object.entries(priceData.data).forEach(([id,p])=>{ prices[id]=p; });
+    pricesLoaded=true;
+    const el=document.getElementById('priceStatus');
+    el.textContent='✓ Live Grand Exchange prices loaded';
+    el.style.color='var(--green)';
+    generatePlan();
+  }catch(e){
+    const el=document.getElementById('priceStatus');
+    el.textContent='⚠ Could not load live prices — cost estimates unavailable';
+    el.style.color='var(--red)';
+  }
+}
+
+// ── STATE ───────────────────────────────────────────────────────────────────────
+let playerLevel=1, playerXp=0, targetLevelVal=99, isDark=true;
+let currentMode='bones';          // bones | heads | libation | cremation
+let boneMethod='plain';           // plain | chapel | chaos | ecto
+let altarTierKey='gilded';
+let selectedBone='Dragon bones';
+let selectedAsh='Malicious ashes';
+let headSortMode='xphr';          // xphr | gpxp
+let libationWine='sunfire';       // wine | sunfire
+let libationBone='Dragon bones';
+
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+});
+
+// ── WISE OLD MAN LOOKUP (copied verbatim from the Herblore planner, skill key 'prayer') ──
+const WOM_API='https://api.wiseoldman.net/v2';
+const WOM_USERNAME_KEY='osrs_wom_username';
+
+async function fetchWomPlayer(username){
+  const url=`${WOM_API}/players/${encodeURIComponent(username)}`;
+  const res=await fetch(url);
+  if(res.status===404){
+    const trackRes=await fetch(url,{method:'POST'});
+    if(!trackRes.ok) throw new Error(`Player "${username}" not found`);
+    return trackRes.json();
+  }
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+
+function womSkill(data,skillKey){
+  const skill=data?.latestSnapshot?.data?.skills?.[skillKey];
+  if(!skill||skill.experience==null||skill.experience<0) return null;
+  return {level:skill.level,xp:skill.experience};
+}
+
+const womToggle=document.getElementById('womToggle');
+const womFields=document.getElementById('womFields');
+womToggle.addEventListener('click',()=>{
+  womFields.classList.toggle('show');
+  womToggle.classList.toggle('active');
+});
+
+const womUsernameInput=document.getElementById('womUsername');
+const womFetchBtn=document.getElementById('womFetchBtn');
+const womStatus=document.getElementById('womStatus');
+
+const savedWomUsername=localStorage.getItem(WOM_USERNAME_KEY);
+if(savedWomUsername) womUsernameInput.value=savedWomUsername;
+
+function setWomStatus(msg,type){
+  womStatus.textContent=msg;
+  womStatus.className='fetch-status show '+type;
+}
+
+async function doWomLookup(){
+  const username=womUsernameInput.value.trim();
+  if(!username){setWomStatus('Enter a username first','error');return;}
+  womFetchBtn.disabled=true;
+  womStatus.innerHTML='<span class="spinner-sm"></span> Looking up stats on Wise Old Man…';
+  womStatus.className='fetch-status show loading';
+  try{
+    const data=await fetchWomPlayer(username);
+    const skillData=womSkill(data,'prayer');
+    if(!skillData){
+      throw new Error('No Prayer data for this player (may be unranked)');
+    }
+    document.getElementById('manualLevel').value=skillData.level;
+    document.getElementById('manualXp').value=skillData.xp;
+    localStorage.setItem(WOM_USERNAME_KEY,username);
+    setWomStatus(`✓ Loaded ${data.displayName}'s stats — Level ${skillData.level} Prayer (${skillData.xp.toLocaleString()} XP)`,'success');
+    document.getElementById('applyBtn').click();
+  }catch(e){
+    console.error(e);
+    setWomStatus(`⚠ ${e.message||'Lookup failed'}`,'error');
+  }finally{
+    womFetchBtn.disabled=false;
+  }
+}
+womFetchBtn.addEventListener('click',doWomLookup);
+womUsernameInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); doWomLookup(); } });
+
+document.getElementById('applyBtn').addEventListener('click',()=>{
+  const lvl=parseInt(document.getElementById('manualLevel').value)||1;
+  const xpInput=document.getElementById('manualXp').value;
+  const tgt=parseInt(document.getElementById('targetLevel').value)||99;
+  playerLevel=Math.max(1,Math.min(99,lvl));
+  playerXp=xpInput?parseInt(xpInput):xpForLevel(playerLevel);
+  targetLevelVal=Math.max(playerLevel+1,Math.min(99,tgt));
+  updateStatusCard(); generatePlan();
+});
+
+function updateStatusCard(){
+  const cur=levelForXp(playerXp);
+  document.getElementById('statusLevel').textContent=cur;
+  const targetXp=xpForLevel(targetLevelVal);
+  const startXp=xpForLevel(cur);
+  const pct=targetLevelVal<=cur?100:Math.max(0,Math.min(100,(playerXp-startXp)/((targetXp-startXp)||1)*100));
+  document.getElementById('statusProgressFill').style.width=pct+'%';
+  document.getElementById('statusXpText').textContent=playerXp.toLocaleString()+' XP';
+  document.getElementById('statusTargetText').textContent='Target: Level '+targetLevelVal;
+  document.getElementById('statusXpRemaining').textContent=Math.max(0,targetXp-playerXp).toLocaleString();
+}
+
+// ── HELPERS ─────────────────────────────────────────────────────────────────────
+function fmt(n){if(!n&&n!==0)return'—';if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
+function fmtGp(n){const abs=Math.abs(n);let s;if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';else s=Math.round(abs).toLocaleString();return(n<0?'-':'')+s+' gp';}
+function fmtHrs(h){if(!isFinite(h)||h<=0)return'—';if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixed(1)+' hrs';return(h/24).toFixed(1)+' days';}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// BONE OFFERING DATA
+// ══════════════════════════════════════════════════════════════════════════════
+// Base burying XP per bone, verified against the OSRS Wiki "Prayer training" and
+// individual bone item pages. This is the XP for a single PLAIN bury/offer — every
+// altar method multiplies this base value.
+const BONES = [
+  {name:'Bones',                 xp:4.5},
+  {name:'Wolf bones',             xp:4.5},
+  {name:'Burnt bones',            xp:4.5},
+  {name:'Monkey bones',           xp:5},
+  {name:'Bat bones',              xp:5.3},
+  {name:'Big bones',              xp:15},
+  {name:'Jogre bones',            xp:15},
+  {name:'Zogre bones',            xp:22.5},
+  {name:'Shaikahan bones',        xp:25},
+  {name:'Babydragon bones',       xp:30},
+  {name:'Wyrmling bones',         xp:21},
+  {name:'Wyrm bones',             xp:50},
+  {name:'Strykewyrm bones',       xp:50},
+  {name:'Wyvern bones',           xp:72},
+  {name:'Dragon bones',           xp:72},
+  {name:'Drake bones',            xp:80},
+  {name:'Fayrg bones',            xp:84},
+  {name:'Lava dragon bones',      xp:85},
+  {name:'Raurg bones',            xp:96},
+  {name:'Frost dragon bones',     xp:100},
+  {name:'Hydra bones',            xp:110},
+  {name:'Dagannoth bones',        xp:125},
+  {name:'Ourg bones',             xp:140},
+  {name:'Superior dragon bones',  xp:150, minPrayerLevel:70},
+];
+
+// POH Chapel altar tiers — Construction level to BUILD it in your own house, and the
+// XP multiplier at 0/1/2 lit incense burners. Burner material (oak/mahogany/marble)
+// is purely cosmetic — every burner tier gives the same flat +50%.
+const ALTAR_TIERS = [
+  {key:'oak',       name:'Oak altar',       constrLevel:45, mult:[100,150,200]},
+  {key:'teak',      name:'Teak altar',      constrLevel:50, mult:[110,160,210]},
+  {key:'cloth',     name:'Cloth altar',     constrLevel:56, mult:[125,175,225]},
+  {key:'mahogany',  name:'Mahogany altar',  constrLevel:60, mult:[150,200,250]},
+  {key:'limestone', name:'Limestone altar', constrLevel:64, mult:[175,225,275]},
+  {key:'marble',    name:'Marble altar',    constrLevel:70, mult:[200,250,300]},
+  {key:'gilded',    name:'Gilded altar',    constrLevel:75, mult:[250,300,350], buildCost:1230000},
+];
+function altarByKey(key){ return ALTAR_TIERS.find(a=>a.key===key) || ALTAR_TIERS[ALTAR_TIERS.length-1]; }
+
+// Approximate offerings-per-hour for manual bone offering at a POH altar (Chapel or Chaos).
+// Not given anywhere in a single authoritative wiki number — this is a commonly-reported
+// community rate for manual (non-tick-manipulated) offering, kept as a single tunable
+// constant and clearly labelled as an approximation in the UI.
+const ALTAR_OFFERINGS_PER_HR = 1200;
+// Flat "effective" xp/hr anchors (on Dragon bones) for the two methods the spec calls out
+// as needing an approximation rather than a derived rate — Plain burying and Ectofuntus.
+// These already bake in real-world overhead (banking, travel, bucket/bonemeal grinding)
+// that a pure actions-per-hour model would miss. We scale relative to Dragon bones for
+// other bone types so cheaper/more expensive bones still compare sensibly against each other.
+const PLAIN_ANCHOR_XPHR = 25000;  // wiki-cited realistic range is ~20,000–30,000 xp/hr — this is the midpoint, footnoted as an estimate
+const ECTO_ANCHOR_XPHR  = 45000;  // wiki-cited realistic range is ~40,000–50,000 xp/hr for Dragon bones — midpoint, footnoted as an estimate
+const ANCHOR_BONE = BONES.find(b=>b.name==='Dragon bones');
+
+function getMethodConfig(){
+  if(boneMethod==='plain'){
+    return {label:'Plain Burying', multiplierPct:100, consumeChance:1, flatAnchorXpHr:PLAIN_ANCHOR_XPHR,
+      note:'No altar, no requirements — the free baseline. Realistic XP/hr is an approximation (~20,000–30,000 xp/hr), since it depends heavily on click speed and banking.'};
+  }
+  if(boneMethod==='chapel'){
+    const altar=altarByKey(altarTierKey);
+    const mult=altar.mult[2]; // both incense burners assumed lit
+    return {label:`${altar.name} (both burners lit)`, multiplierPct:mult, consumeChance:1,
+      offeringsPerHr:ALTAR_OFFERINGS_PER_HR, constrLevel:altar.constrLevel, buildCost:altar.buildCost,
+      note:`Requires Construction level ${altar.constrLevel} to build in your own POH (you can also use a friend's altar of this tier for free). ${mult}% XP multiplier with both incense burners lit. Offering rate (~${ALTAR_OFFERINGS_PER_HR.toLocaleString()}/hr) is an approximation for manual play.`};
+  }
+  if(boneMethod==='chaos'){
+    return {label:'Chaos Altar (Wilderness)', multiplierPct:350, consumeChance:0.5, offeringsPerHr:ALTAR_OFFERINGS_PER_HR, risk:true,
+      note:'Same 350% multiplier as a Gilded altar with 2 burners, plus a 50% chance per offering that the bone is NOT consumed — effectively up to 700% XP per bone owned on average. Located deep Wilderness (level 38, multi-combat) — you WILL be at risk of PKing. Offering rate is approximated the same as a POH altar.'};
+  }
+  if(boneMethod==='ecto'){
+    return {label:'Ectofuntus', multiplierPct:400, consumeChance:1, flatAnchorXpHr:ECTO_ANCHOR_XPHR, needsSlime:true,
+      note:'Flat 4× burying XP, no altar-tier complexity — but requires grinding buckets of slime into bonemeal first (untradeable intermediate step). Realistic XP/hr is noticeably lower than the raw 4× multiplier suggests due to travel/grinding overhead — treated here as an approximation (~40,000–50,000 xp/hr on Dragon bones), NOT a derived hard fact.'};
+  }
+  // sinister — Arceuus spellbook "Sinister Offering" spell. Every number below (300%
+  // multiplier, 3 bones/cast, 1 Blood + 1 Wrath rune/cast, 600 casts/hr reference rate)
+  // is taken directly from the OSRS Wiki's own Sinister Offering page and its XP/hr
+  // table, which is internally consistent (base XP × 3 × 3 bones × 600 casts/hr matches
+  // every row of the wiki's table exactly) — nothing here is estimated.
+  if(boneMethod==='sinister'){
+    return {label:'Sinister Offering', multiplierPct:300, consumeChance:1, offeringsPerHr:1800, sinister:true,
+      runeNames:['Blood rune','Wrath rune'],
+      note:'Arceuus spellbook spell — requires level 92 Magic and completion of A Kingdom Divided. Each cast instantly offers up to 3 bones for 300% burying XP, costs 1 Blood rune + 1 Wrath rune, and has a 9-tick (5.4s) cooldown — modelled at the wiki\'s own reference rate of 600 casts/hr (1,800 bones/hr). Restores 1 Prayer point per cast (2 for Ourg, Dagannoth, Hydra, and Superior dragon bones). Cannot be cast on Wolf bones or Burnt bones.'};
+  }
+  // demonic — Demonic Offering spell, the ashes counterpart to Sinister Offering. A DIFFERENT
+  // spell with its own Magic level (84, not 92) and rune cost (Soul+Wrath, not Blood+Wrath) —
+  // it only works on demonic ashes (Fiendish/Vile/Malicious/Abyssal/Infernal), never bones.
+  return {label:'Demonic Offering', multiplierPct:300, consumeChance:1, offeringsPerHr:1800, demonic:true,
+    runeNames:['Soul rune','Wrath rune'],
+    note:'Arceuus spellbook spell — requires level 84 Magic and completion of A Kingdom Divided. Each cast instantly offers up to 3 demonic ashes for 300% scatter XP, costs 1 Soul rune + 1 Wrath rune, and has a 9-tick (5.4s) cooldown — modelled at the wiki\'s own reference rate of 600 casts/hr (1,800 ashes/hr). Restores 1 Prayer point per cast (2 for Infernal ashes). This is a separate spell from Sinister Offering and only works on ashes, never bones.'};
+}
+const SINISTER_EXCLUDED = ['Wolf bones', 'Burnt bones'];
+const SINISTER_DOUBLE_RESTORE = ['Ourg bones', 'Dagannoth bones', 'Hydra bones', 'Superior dragon bones'];
+
+// Demonic ashes — used with the separate "Demonic Offering" spell (NOT Sinister Offering,
+// which is bones-only). Exact scatter XP from each ash's own OSRS Wiki page, cross-verified
+// against the Demonic Offering spell page's own comparison table (scatterXp*3*3*600/hr matches
+// every row exactly, same formula pattern as Sinister Offering).
+const ASHES = [
+  {name:'Fiendish ashes',  xp:10},
+  {name:'Vile ashes',      xp:25},
+  {name:'Malicious ashes', xp:65},
+  {name:'Abyssal ashes',   xp:85},
+  {name:'Infernal ashes',  xp:110},
+];
+const ANCHOR_ASH = ASHES.find(a=>a.name==='Malicious ashes');
+const DEMONIC_DOUBLE_RESTORE = ['Infernal ashes'];
+
+function xpPerOffering(bone, method){ return bone.xp * (method.multiplierPct/100); }
+
+function xpPerHrFor(bone, method){
+  if(method.offeringsPerHr){
+    return method.offeringsPerHr * xpPerOffering(bone, method);
+  }
+  const anchorXp = xpPerOffering(ANCHOR_BONE, method);
+  const boneXp = xpPerOffering(bone, method);
+  return anchorXp>0 ? method.flatAnchorXpHr * (boneXp/anchorXp) : 0;
+}
+
+// Average GP cost per XP for a given bone+method combo. Chaos Altar's 50% non-consumption
+// chance is modelled by dividing the offering's XP by consumeChance to get "xp per bone
+// owned" — a bone that's only consumed half the time is worth double the XP per bone.
+function boneEconomics(bone, method){
+  const perOffering = xpPerOffering(bone, method);
+  const xpPerBoneOwned = perOffering / method.consumeChance;
+  const bonePrice = priceOf(bone.name);
+  const slimePrice = method.needsSlime ? priceOf('Bucket of slime') : 0;
+  // Sinister Offering: 1 Blood + 1 Wrath rune/cast. Demonic Offering: 1 Soul + 1 Wrath rune/cast.
+  // Either way the cost is split across the up-to-3 bones/ashes that single cast consumes.
+  const runeCostPerCast = method.sinister ? priceOf('Blood rune')+priceOf('Wrath rune')
+                         : method.demonic ? priceOf('Soul rune')+priceOf('Wrath rune')
+                         : 0;
+  const runeCostPerBone = (method.sinister||method.demonic) ? runeCostPerCast/3 : 0;
+  const costPerBone = bonePrice + slimePrice + runeCostPerBone; // Ectofuntus: ~1 bucket of slime per bone, approximated 1:1
+  const gpPerXp = xpPerBoneOwned>0 ? costPerBone/xpPerBoneOwned : 0;
+  const xpPerHr = xpPerHrFor(bone, method);
+  return {perOffering, xpPerBoneOwned, bonePrice, slimePrice, runeCostPerCast, runeCostPerBone, costPerBone, gpPerXp, xpPerHr};
+}
+
+// ── Populate Altar Tier <select> ──────────────────────────────────────────────
+const altarTierSelect=document.getElementById('altarTierSelect');
+ALTAR_TIERS.forEach(a=>{
+  const opt=document.createElement('option');
+  opt.value=a.key;
+  opt.textContent=`${a.name} (Constr ${a.constrLevel})`;
+  if(a.key===altarTierKey) opt.selected=true;
+  altarTierSelect.appendChild(opt);
+});
+altarTierSelect.addEventListener('change',()=>{ altarTierKey=altarTierSelect.value; generatePlan(); });
+
+document.querySelectorAll('.method-btn[data-method]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.method-btn[data-method]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    boneMethod=btn.dataset.method;
+    document.getElementById('chapelSubControls').style.display = boneMethod==='chapel' ? 'flex' : 'none';
+    document.getElementById('boneSelectPanel').style.display = boneMethod==='demonic' ? 'none' : 'block';
+    document.getElementById('ashSelectPanel').style.display = boneMethod==='demonic' ? 'block' : 'none';
+    generatePlan();
+  });
+});
+
+// ── Populate Bone <select> ────────────────────────────────────────────────────
+const boneSelect=document.getElementById('boneSelect');
+BONES.forEach(b=>{
+  const opt=document.createElement('option');
+  opt.value=b.name;
+  opt.textContent=b.name + (b.minPrayerLevel?` (req. ${b.minPrayerLevel} Prayer)`:'');
+  if(b.name===selectedBone) opt.selected=true;
+  boneSelect.appendChild(opt);
+});
+boneSelect.addEventListener('change',()=>{ selectedBone=boneSelect.value; generatePlan(); });
+
+// ── Populate Ash <select> ─────────────────────────────────────────────────────
+const ashSelect=document.getElementById('ashSelect');
+ASHES.forEach(a=>{
+  const opt=document.createElement('option');
+  opt.value=a.name;
+  opt.textContent=a.name;
+  if(a.name===selectedAsh) opt.selected=true;
+  ashSelect.appendChild(opt);
+});
+ashSelect.addEventListener('change',()=>{ selectedAsh=ashSelect.value; generatePlan(); });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LIBATION BOWL DATA (Teomat, Varlamore — 30 Prayer required)
+// ══════════════════════════════════════════════════════════════════════════════
+// Exact shards-yielded-per-bone table, sourced directly from the OSRS Wiki's
+// "Blessed bone shards" page (the wiki's own comparison table). Blessing a bone
+// (free, at the Exposed Altar) then chiselling it (free, +5 Crafting XP, no
+// Prayer XP) yields this many blessed bone shards. Bones NOT listed here cannot
+// be blessed at all: Bleached, Burnt, Jogre, Monkey, Shaikahan, Wolf, Long,
+// Curved, Mangled, and Chewed bones are all excluded from the wiki's own list.
+const LIBATION_SHARDS = {
+  'Bones':4, 'Bat bones':5, 'Big bones':12, 'Zogre bones':18,
+  'Wyrmling bones':21, 'Babydragon bones':24, 'Strykewyrm bones':37, 'Wyrm bones':42,
+  'Wyvern bones':58, 'Dragon bones':58, 'Drake bones':67, 'Fayrg bones':67,
+  'Lava dragon bones':68, 'Raurg bones':77, 'Frost dragon bones':84, 'Hydra bones':93,
+  'Dagannoth bones':100, 'Ourg bones':112, 'Superior dragon bones':121,
+};
+function libationBoneList(){ return BONES.filter(b=>LIBATION_SHARDS[b.name]!=null); }
+
+// 1 jug of blessed (sunfire) wine = 400 shard-sacrifice charges, exact per the wiki.
+const LIBATION_SHARDS_PER_JUG = 400;
+// Jug of blessed wine = 1 Jug of wine, blessed for free at the Exposed Altar.
+// Jug of blessed sunfire wine = 1 Jug of wine + 2 Sunfire splinters (via pestle &
+// mortar), then blessed for free the same way. Both are untradeable/unbankable
+// themselves, so we price the tradeable raw inputs instead — same approach the
+// rest of this suite uses for untradeable intermediate steps (e.g. Ectofuntus bonemeal).
+function libationJugCost(wineType){
+  const wineBase = priceOf('Jug of wine');
+  if(wineType==='sunfire') return wineBase + 2*priceOf('Sunfire splinters');
+  return wineBase;
+}
+// Approximate SUSTAINED shards/hr (accounting for banking + Prayer-point restoration
+// trips to the nearby Shrine of Ralos — each 100-shard action drains 2 Prayer points).
+// The wiki quotes a 65-second BURST rate (10,800 shards from one inventory of 27
+// sunfire wine jugs) which is not sustainable indefinitely, so this is a labelled,
+// more conservative approximation for hourly planning — same treatment as the
+// Plain Burying / Ectofuntus anchors elsewhere in this planner.
+const LIBATION_SHARDS_PER_HR = 150000;
+
+function libationEconomics(bone, wineType){
+  const shards = LIBATION_SHARDS[bone.name] || 0;
+  const xpPerShard = wineType==='sunfire' ? 6 : 5;
+  const xpPerBone = shards * xpPerShard;
+  const boneCost = priceOf(bone.name);
+  const jugCost = libationJugCost(wineType);
+  const costPerShard = jugCost / LIBATION_SHARDS_PER_JUG;
+  const costPerBone = boneCost + shards*costPerShard;
+  const gpPerXp = xpPerBone>0 ? costPerBone/xpPerBone : 0;
+  const xpPerHr = LIBATION_SHARDS_PER_HR * xpPerShard;
+  return {shards, xpPerShard, xpPerBone, boneCost, jugCost, costPerShard, costPerBone, gpPerXp, xpPerHr};
+}
+
+// ── Populate Libation wine-type buttons + bone <select> ──────────────────────
+document.querySelectorAll('.method-btn[data-wine]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.method-btn[data-wine]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    libationWine=btn.dataset.wine;
+    generatePlan();
+  });
+});
+const libationBoneSelect=document.getElementById('libationBoneSelect');
+libationBoneList().forEach(b=>{
+  const opt=document.createElement('option');
+  opt.value=b.name;
+  opt.textContent=b.name + (b.minPrayerLevel?` (req. ${b.minPrayerLevel} Prayer)`:'');
+  if(b.name===libationBone) opt.selected=true;
+  libationBoneSelect.appendChild(opt);
+});
+libationBoneSelect.addEventListener('change',()=>{ libationBone=libationBoneSelect.value; generatePlan(); });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ENSOULED HEADS DATA
+// ══════════════════════════════════════════════════════════════════════════════
+// Exact Magic level, Prayer XP, and wiki-quoted realistic XP/hr from the OSRS Wiki's
+// live "Calculator:Prayer/Ensouled heads" page. XP/hr figures already assume realistic
+// play (banking, running to the reanimated monster, etc.) — not recomputed here.
+const REANIMATION_TIERS = {
+  basic:  {minMagic:16, runes:[{name:'Body rune',qty:4},{name:'Nature rune',qty:2}]},
+  adept:  {minMagic:41, runes:[{name:'Body rune',qty:4},{name:'Nature rune',qty:3},{name:'Soul rune',qty:1}]},
+  expert: {minMagic:72, runes:[{name:'Blood rune',qty:1},{name:'Nature rune',qty:3},{name:'Soul rune',qty:2}]},
+  master: {minMagic:90, runes:[{name:'Blood rune',qty:2},{name:'Nature rune',qty:4},{name:'Soul rune',qty:4}]},
+};
+function tierForMagic(magicLvl){
+  if(magicLvl>=90) return 'master';
+  if(magicLvl>=72) return 'expert';
+  if(magicLvl>=41) return 'adept';
+  return 'basic';
+}
+
+const ENSOULED_HEADS = [
+  {name:'Goblin',      itemName:'Ensouled goblin head',      magic:16, xp:130,  xpHr:28600},
+  {name:'Monkey',      itemName:'Ensouled monkey head',      magic:16, xp:182,  xpHr:40040},
+  {name:'Imp',         itemName:'Ensouled imp head',         magic:16, xp:286,  xpHr:62920},
+  {name:'Minotaur',    itemName:'Ensouled minotaur head',    magic:16, xp:364,  xpHr:80080},
+  {name:'Scorpion',    itemName:'Ensouled scorpion head',    magic:16, xp:454,  xpHr:99880},
+  {name:'Bear',        itemName:'Ensouled bear head',        magic:16, xp:480,  xpHr:105600},
+  {name:'Unicorn',     itemName:'Ensouled unicorn head',     magic:16, xp:494,  xpHr:108680},
+  {name:'Dog',         itemName:'Ensouled dog head',         magic:41, xp:520,  xpHr:114400},
+  {name:'Chaos druid', itemName:'Ensouled chaos druid head', magic:41, xp:584,  xpHr:128480},
+  {name:'Giant',       itemName:'Ensouled giant head',       magic:41, xp:650,  xpHr:143000},
+  {name:'Ogre',        itemName:'Ensouled ogre head',        magic:41, xp:716,  xpHr:157520},
+  {name:'Elf',         itemName:'Ensouled elf head',         magic:41, xp:754,  xpHr:165880},
+  {name:'Troll',       itemName:'Ensouled troll head',       magic:41, xp:780,  xpHr:171600},
+  {name:'Horror',      itemName:'Ensouled horror head',      magic:41, xp:832,  xpHr:183040},
+  {name:'Kalphite',    itemName:'Ensouled kalphite head',    magic:72, xp:884,  xpHr:194480},
+  {name:'Dagannoth',   itemName:'Ensouled dagannoth head',   magic:72, xp:936,  xpHr:205920},
+  {name:'Bloodveld',   itemName:'Ensouled bloodveld head',   magic:72, xp:1040, xpHr:228800},
+  {name:'TzHaar',      itemName:'Ensouled tzhaar head',      magic:72, xp:1104, xpHr:242880},
+  {name:'Demon',       itemName:'Ensouled demon head',       magic:72, xp:1170, xpHr:257400},
+  {name:'Hellhound',   itemName:'Ensouled hellhound head',   magic:72, xp:1200, xpHr:264000},
+  {name:'Aviansie',    itemName:'Ensouled aviansie head',    magic:90, xp:1234, xpHr:271480},
+  {name:'Abyssal',     itemName:'Ensouled abyssal head',     magic:90, xp:1300, xpHr:286000},
+  {name:'Dragon',      itemName:'Ensouled dragon head',      magic:90, xp:1560, xpHr:343200},
+].map(h=>({...h, tier:tierForMagic(h.magic)}));
+
+let playerMagicLevel=99; // Only used to gate the Ensouled Heads table — assumed maxed by default since we only collect Prayer level from WOM/manual input; users can eyeball their own Magic level against the lock icons.
+
+function headRuneCost(head){
+  const tier=REANIMATION_TIERS[head.tier];
+  return tier.runes.reduce((sum,r)=>sum + (priceOf(r.name)||0)*r.qty, 0);
+}
+function headEconomics(head){
+  const headPrice = priceOf(head.itemName);
+  const runeCost = headRuneCost(head);
+  const totalCost = headPrice + runeCost;
+  const gpPerXp = head.xp>0 ? totalCost/head.xp : 0;
+  return {headPrice, runeCost, totalCost, gpPerXp};
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RENDER: BONE OFFERING MODE
+// ══════════════════════════════════════════════════════════════════════════════
+function renderBonesMode(){
+  const accent='#c8a84b';
+  const method=getMethodConfig();
+  const curLevel=levelForXp(playerXp);
+  const xpRemaining=Math.max(0, xpForLevel(targetLevelVal)-playerXp);
+  const isAsh = method.demonic===true;
+  const itemLabel = isAsh ? 'Ash' : 'Bone';
+  const itemList = isAsh ? ASHES : BONES;
+  const selectedItemName = isAsh ? selectedAsh : selectedBone;
+  const anchorItem = isAsh ? ANCHOR_ASH : ANCHOR_BONE;
+
+  // Gate Superior dragon bones behind 70 Prayer (bones only); flag bones Sinister Offering can't touch.
+  // Demonic Offering has no known level-gates or exclusions among the 5 ash types.
+  const boneLockNote=document.getElementById('boneLockNote');
+  const chosenBoneDef=itemList.find(b=>b.name===selectedItemName) || anchorItem;
+  const boneLocked = !isAsh && chosenBoneDef.minPrayerLevel && curLevel < chosenBoneDef.minPrayerLevel;
+  const sinisterExcluded = boneMethod==='sinister' && SINISTER_EXCLUDED.includes(chosenBoneDef.name);
+  if(sinisterExcluded){
+    boneLockNote.style.display='block';
+    boneLockNote.textContent=`🚫 Sinister Offering cannot be cast on ${chosenBoneDef.name} — pick a different bone.`;
+  } else if(boneLocked){
+    boneLockNote.style.display='block';
+    boneLockNote.textContent=`🔒 ${chosenBoneDef.name} requires level ${chosenBoneDef.minPrayerLevel} Prayer to use — you are level ${curLevel}.`;
+  } else {
+    boneLockNote.style.display='none';
+  }
+
+  document.getElementById('methodDescNote').textContent = method.note;
+
+  const econ = boneEconomics(chosenBoneDef, method);
+  const hoursToTarget = econ.xpPerHr>0 ? xpRemaining/econ.xpPerHr : Infinity;
+  // Exact item count — always rounded UP to a whole bone/ash, never abbreviated/rounded for display.
+  // (Chaos Altar's 50% non-consumption chance means this is the mathematically exact EXPECTED
+  // count for that method specifically, since consumption is probabilistic there; every other
+  // method's count is a hard, deterministic exact number.)
+  const itemsNeeded = econ.xpPerBoneOwned>0 ? Math.ceil(xpRemaining/econ.xpPerBoneOwned) : 0;
+  const totalCost = itemsNeeded * econ.costPerBone;
+  // Sinister/Demonic Offering extras — exact, since each cast deterministically consumes up to 3 items.
+  const usesOfferingSpell = method.sinister || method.demonic;
+  const castsNeeded = usesOfferingSpell ? Math.ceil(itemsNeeded/3) : 0;
+  const doubleRestoreList = method.sinister ? SINISTER_DOUBLE_RESTORE : DEMONIC_DOUBLE_RESTORE;
+  const prayerRestorePerCast = doubleRestoreList.includes(chosenBoneDef.name) ? 2 : 1;
+  const prayerPointsRestored = usesOfferingSpell ? castsNeeded*prayerRestorePerCast : 0;
+
+  const finishDate=new Date();
+  if(isFinite(hoursToTarget)) finishDate.setDate(finishDate.getDate()+Math.ceil(hoursToTarget/24));
+  const finishStr=isFinite(hoursToTarget) ? finishDate.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : '—';
+
+  let html = `<div class="plan-summary">
+    <div class="plan-summary-stat"><div class="plan-summary-label">Method</div><div class="plan-summary-value accent">${method.label}${method.risk?' ⚠️':''}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">${itemLabel}</div><div class="plan-summary-value">${chosenBoneDef.name}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">XP / Offering</div><div class="plan-summary-value">${fmt(econ.perOffering)}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">XP/Hr (approx.)</div><div class="plan-summary-value">${fmt(econ.xpPerHr)}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">GP/XP</div><div class="plan-summary-value" style="color:${econ.gpPerXp<=0?'var(--green)':'var(--red)'};">${pricesLoaded?econ.gpPerXp.toFixed(2)+' gp':'—'}</div></div>
+    <div class="plan-summary-divider"></div>
+    <div class="plan-summary-total">
+      <div class="plan-summary-label">Est. Cost to Lvl ${targetLevelVal}</div>
+      <div class="plan-summary-value">${pricesLoaded?fmtGp(totalCost):'—'}</div>
+    </div>
+  </div>`;
+
+  if(method.risk){
+    html += `<div class="route-stop" style="border-color:var(--red);margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:22px;">☠️</span>
+        <div>
+          <div style="font-weight:700;color:var(--red);">Wilderness Risk Warning</div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">The Chaos Altar is located deep in the Wilderness (level 38, multi-combat zone). You can be attacked and skulled by other players there — do NOT bring bones or gear you're not prepared to lose. This is the only non-safe method in this planner.</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  html += `<div class="route-stop" style="--accent:${accent};">
+    <div class="route-stop-header">
+      <div class="route-stop-name">🎯 Reaching Level ${targetLevelVal}</div>
+      <div class="route-stop-badges">
+        <span class="route-badge time">${fmtHrs(hoursToTarget)}</span>
+        ${pricesLoaded?`<span class="route-badge cost">${fmtGp(totalCost)}</span>`:''}
+      </div>
+    </div>
+    <div class="route-stop-detail">
+      <div class="route-stat"><div class="route-stat-label">XP Remaining</div><div class="route-stat-value">${xpRemaining.toLocaleString()}</div></div>
+      <div class="route-stat"><div class="route-stat-label">${itemLabel}s Needed${method.consumeChance<1?' (expected)':''}</div><div class="route-stat-value">${itemsNeeded.toLocaleString()}</div></div>
+      <div class="route-stat"><div class="route-stat-label">${itemLabel} Price</div><div class="route-stat-value">${pricesLoaded?fmtGp(econ.bonePrice):'—'}</div></div>
+      ${method.needsSlime?`<div class="route-stat"><div class="route-stat-label">Bucket of Slime</div><div class="route-stat-value">${pricesLoaded?fmtGp(econ.slimePrice):'—'}</div></div>`:''}
+      ${usesOfferingSpell?`<div class="route-stat"><div class="route-stat-label">Casts Needed</div><div class="route-stat-value">${castsNeeded.toLocaleString()}</div></div>
+      ${method.runeNames.map(rn=>`<div class="route-stat"><div class="route-stat-label">${rn}s Needed</div><div class="route-stat-value">${castsNeeded.toLocaleString()}</div></div>`).join('')}
+      <div class="route-stat"><div class="route-stat-label">Rune Cost / Cast</div><div class="route-stat-value">${pricesLoaded?fmtGp(econ.runeCostPerCast):'—'}</div></div>
+      <div class="route-stat"><div class="route-stat-label">Prayer Pts Restored</div><div class="route-stat-value">${prayerPointsRestored.toLocaleString()}</div></div>`:''}
+      <div class="route-stat"><div class="route-stat-label">Finish By</div><div class="route-stat-value">${finishStr}</div></div>
+    </div>
+  </div>`;
+
+  // ── Comparison table for the current method setup (bones or ashes) ────────
+  const rows = itemList.map(b=>{
+    const e = boneEconomics(b, method);
+    const locked = !isAsh && ((b.minPrayerLevel && curLevel < b.minPrayerLevel) || (boneMethod==='sinister' && SINISTER_EXCLUDED.includes(b.name)));
+    return {...b, ...e, locked};
+  }).sort((a,b)=>{
+    if(a.locked!==b.locked) return a.locked?1:-1;
+    return a.gpPerXp - b.gpPerXp;
+  });
+
+  let tableRows = rows.map(r=>`<tr class="clickable-row${r.locked?' locked-row':''}${r.name===selectedItemName?' selected-row':''}" data-item="${r.name}">
+    <td>${r.name}${r.locked?' 🔒':''}</td>
+    <td class="mono">${r.xp}</td>
+    <td class="mono">${fmt(r.perOffering)}</td>
+    <td class="mono">${fmt(r.xpPerHr)}</td>
+    <td class="mono">${pricesLoaded?fmtGp(r.bonePrice):'—'}</td>
+    <td class="mono" style="color:${r.gpPerXp<=0?'var(--green)':'var(--red)'};">${pricesLoaded?r.gpPerXp.toFixed(2)+' gp':'—'}</td>
+  </tr>`).join('');
+
+  html += `<div class="shopping-wrap">
+    <button class="shopping-toggle" id="boneCompareToggle">
+      <span>📊 Compare All ${itemLabel}s — ${method.label}</span>
+      <span class="shopping-toggle-arrow open" id="boneCompareArrow">▾</span>
+    </button>
+    <div class="shopping-body show" id="boneCompareBody">
+      <table class="shopping-table">
+        <thead><tr><th>${itemLabel}</th><th class="r">Base XP</th><th class="r">XP/Offering</th><th class="r">XP/Hr</th><th class="r">${itemLabel} Price</th><th class="r">GP/XP</th></tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+      <p class="shopping-note">Click a row to select that ${itemLabel.toLowerCase()}. XP/Hr figures for altar-based methods and the offering spells use exact wiki-derived rates (~${ALTAR_OFFERINGS_PER_HR.toLocaleString()} offerings/hr for altars, 1,800/hr for Sinister/Demonic Offering); Plain Burying and Ectofuntus use flat approximated hourly rates (footnoted in the method description above) scaled relative to Dragon bones. Superior dragon bones require level 70 Prayer to use. Sinister Offering cannot be cast on Wolf bones or Burnt bones (shown locked 🔒 when that method is selected). Demonic Offering is a separate spell that only works on ashes, never bones.</p>
+    </div>
+  </div>`;
+
+  document.getElementById('planArea').innerHTML = html;
+
+  document.getElementById('boneCompareToggle').addEventListener('click',()=>{
+    document.getElementById('boneCompareBody').classList.toggle('show');
+    document.getElementById('boneCompareArrow').classList.toggle('open');
+  });
+  document.querySelectorAll('#boneCompareBody tr[data-item]').forEach(tr=>{
+    tr.addEventListener('click',()=>{
+      if(isAsh){
+        selectedAsh=tr.dataset.item;
+        ashSelect.value=selectedAsh;
+      } else {
+        selectedBone=tr.dataset.item;
+        boneSelect.value=selectedBone;
+      }
+      generatePlan();
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RENDER: ENSOULED HEADS MODE
+// ══════════════════════════════════════════════════════════════════════════════
+function renderHeadsMode(){
+  const curLevel=levelForXp(playerXp);
+  const xpRemaining=Math.max(0, xpForLevel(targetLevelVal)-playerXp);
+
+  const rows = ENSOULED_HEADS.map(h=>{
+    const e = headEconomics(h);
+    const locked = playerMagicLevel < h.magic;
+    return {...h, ...e, locked};
+  }).sort((a,b)=>{
+    if(a.locked!==b.locked) return a.locked?1:-1;
+    return headSortMode==='gpxp' ? a.gpPerXp-b.gpPerXp : b.xpHr-a.xpHr;
+  });
+
+  const best = rows.find(r=>!r.locked) || rows[0];
+  const hoursToTarget = best && best.xpHr>0 ? xpRemaining/best.xpHr : Infinity;
+  const headsNeeded = best && best.xp>0 ? Math.ceil(xpRemaining/best.xp) : 0;
+  const totalCost = best ? headsNeeded * best.totalCost : 0;
+
+  let html = `<div class="plan-summary">
+    <div class="plan-summary-stat"><div class="plan-summary-label">Best Available Head</div><div class="plan-summary-value accent">${best?best.name:'—'}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">XP / Head</div><div class="plan-summary-value">${best?best.xp:'—'}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">Wiki XP/Hr</div><div class="plan-summary-value">${best?fmt(best.xpHr):'—'}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">GP/XP</div><div class="plan-summary-value" style="color:${best&&best.gpPerXp<=0?'var(--green)':'var(--red)'};">${pricesLoaded&&best?best.gpPerXp.toFixed(2)+' gp':'—'}</div></div>
+    <div class="plan-summary-divider"></div>
+    <div class="plan-summary-total">
+      <div class="plan-summary-label">Est. Cost to Lvl ${targetLevelVal}</div>
+      <div class="plan-summary-value">${pricesLoaded?fmtGp(totalCost):'—'}</div>
+    </div>
+  </div>`;
+
+  html += `<div class="route-stop" style="--accent:#9b6fd6;">
+    <div class="route-stop-header">
+      <div class="route-stop-name">🎯 Reaching Level ${targetLevelVal} (best available head: ${best?best.name:'—'})</div>
+      <div class="route-stop-badges"><span class="route-badge time">${fmtHrs(hoursToTarget)}</span></div>
+    </div>
+    <div class="route-stop-detail">
+      <div class="route-stat"><div class="route-stat-label">XP Remaining</div><div class="route-stat-value">${xpRemaining.toLocaleString()}</div></div>
+      <div class="route-stat"><div class="route-stat-label">Heads Needed</div><div class="route-stat-value">${headsNeeded.toLocaleString()}</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text-dim);margin-top:8px;">Casting a Reanimation spell requires the head's Magic level shown below. This planner only checks Magic level for gating — the Dragon head realistically also wants decent combat stats to kill the reanimated Dragon safely.</div>
+  </div>`;
+
+  html += `<div class="sort-row">
+    <button class="manual-toggle${headSortMode==='xphr'?' active':''}" data-sort="xphr">Sort by XP/Hr</button>
+    <button class="manual-toggle${headSortMode==='gpxp'?' active':''}" data-sort="gpxp">Sort by GP/XP</button>
+  </div>`;
+
+  const tableRows = rows.map(r=>{
+    const tier=REANIMATION_TIERS[r.tier];
+    const runeStr = tier.runes.map(rn=>`${rn.qty}× ${rn.name}`).join(' + ');
+    return `<tr class="${r.locked?'locked-row':''}">
+      <td>${r.name}${r.locked?' 🔒':''}</td>
+      <td class="mono">${r.magic}</td>
+      <td class="mono">${r.xp}</td>
+      <td class="mono">${fmt(r.xpHr)}</td>
+      <td style="font-size:11px;color:var(--text-dim);">${runeStr}</td>
+      <td class="mono">${pricesLoaded?fmtGp(r.totalCost):'—'}</td>
+      <td class="mono" style="color:${r.gpPerXp<=0?'var(--green)':'var(--red)'};">${pricesLoaded?r.gpPerXp.toFixed(2)+' gp':'—'}</td>
+    </tr>`;
+  }).join('');
+
+  html += `<div class="shopping-wrap" style="margin-top:0;">
+    <div class="shopping-body show" style="border-radius:10px;border-top:1px solid var(--border);">
+      <table class="shopping-table">
+        <thead><tr><th>Head</th><th class="r">Magic Lvl</th><th class="r">Prayer XP</th><th class="r">XP/Hr (wiki)</th><th>Reanimation Runes</th><th class="r">Cost/Head</th><th class="r">GP/XP</th></tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+      <p class="shopping-note">All 23 heads and their Reanimation spell rune costs are fetched from live Grand Exchange prices. Locked rows (🔒) require a higher Magic level than assumed — this planner does not track your Magic level directly, only your Prayer level, so double-check against your own stats.</p>
+    </div>
+  </div>`;
+
+  document.getElementById('planArea').innerHTML = html;
+  document.querySelectorAll('.sort-row .manual-toggle').forEach(btn=>{
+    btn.addEventListener('click',()=>{ headSortMode=btn.dataset.sort; generatePlan(); });
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RENDER: LIBATION BOWL — full calculator (Teomat, Varlamore, 30 Prayer)
+// ══════════════════════════════════════════════════════════════════════════════
+function renderLibationMode(){
+  const curLevel=levelForXp(playerXp);
+  const locked30 = curLevel < 30;
+  const xpRemaining=Math.max(0, xpForLevel(targetLevelVal)-playerXp);
+
+  const boneDef = BONES.find(b=>b.name===libationBone) || ANCHOR_BONE;
+  const boneLocked = boneDef.minPrayerLevel && curLevel < boneDef.minPrayerLevel;
+  const libationLockNote=document.getElementById('libationLockNote');
+  if(boneLocked){
+    libationLockNote.style.display='block';
+    libationLockNote.textContent=`🔒 ${boneDef.name} requires level ${boneDef.minPrayerLevel} Prayer to bless — you are level ${curLevel}.`;
+  } else {
+    libationLockNote.style.display='none';
+  }
+
+  const econ = libationEconomics(boneDef, libationWine);
+  const wineLabel = libationWine==='sunfire' ? 'Jug of blessed sunfire wine' : 'Jug of blessed wine';
+
+  // Exact, deterministic counts — no probabilistic mechanic in this method (unlike Chaos Altar).
+  const bonesNeeded = econ.xpPerBone>0 ? Math.ceil(xpRemaining/econ.xpPerBone) : 0;
+  const shardsNeeded = bonesNeeded * econ.shards;
+  const jugsNeeded = Math.ceil(shardsNeeded/LIBATION_SHARDS_PER_JUG);
+  const actionsNeeded = Math.ceil(shardsNeeded/100);
+  const prayerPointsDrained = actionsNeeded*2;
+  const totalCost = bonesNeeded*econ.boneCost + jugsNeeded*econ.jugCost;
+  const hoursToTarget = econ.xpPerHr>0 ? xpRemaining/econ.xpPerHr : Infinity;
+
+  const finishDate=new Date();
+  if(isFinite(hoursToTarget)) finishDate.setDate(finishDate.getDate()+Math.ceil(hoursToTarget/24));
+  const finishStr=isFinite(hoursToTarget) ? finishDate.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : '—';
+
+  let html = '';
+  if(locked30){
+    html += `<div class="route-stop" style="border-color:var(--red);margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:22px;">🔒</span>
+        <div>
+          <div style="font-weight:700;color:var(--red);">Requires Level 30 Prayer</div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">You are level ${curLevel}. The Libation Bowl at the Teomat only becomes usable at 30 Prayer — figures below are shown for reference.</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  html += `<div class="plan-summary">
+    <div class="plan-summary-stat"><div class="plan-summary-label">Wine</div><div class="plan-summary-value accent">${wineLabel}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">Bone</div><div class="plan-summary-value">${boneDef.name}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">Shards / Bone</div><div class="plan-summary-value">${econ.shards}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">XP / Bone</div><div class="plan-summary-value">${econ.xpPerBone}</div></div>
+    <div class="plan-summary-stat"><div class="plan-summary-label">GP/XP</div><div class="plan-summary-value" style="color:${econ.gpPerXp<=0?'var(--green)':'var(--red)'};">${pricesLoaded?econ.gpPerXp.toFixed(2)+' gp':'—'}</div></div>
+    <div class="plan-summary-divider"></div>
+    <div class="plan-summary-total">
+      <div class="plan-summary-label">Est. Cost to Lvl ${targetLevelVal}</div>
+      <div class="plan-summary-value">${pricesLoaded?fmtGp(totalCost):'—'}</div>
+    </div>
+  </div>`;
+
+  html += `<div class="route-stop" style="--accent:#4a9eff;">
+    <div class="route-stop-header">
+      <div class="route-stop-name">🎯 Reaching Level ${targetLevelVal}</div>
+      <div class="route-stop-badges">
+        <span class="route-badge time">${fmtHrs(hoursToTarget)}</span>
+        ${pricesLoaded?`<span class="route-badge cost">${fmtGp(totalCost)}</span>`:''}
+      </div>
+    </div>
+    <div class="route-stop-detail">
+      <div class="route-stat"><div class="route-stat-label">XP Remaining</div><div class="route-stat-value">${xpRemaining.toLocaleString()}</div></div>
+      <div class="route-stat"><div class="route-stat-label">Bones Needed</div><div class="route-stat-value">${bonesNeeded.toLocaleString()}</div></div>
+      <div class="route-stat"><div class="route-stat-label">Shards Needed</div><div class="route-stat-value">${shardsNeeded.toLocaleString()}</div></div>
+      <div class="route-stat"><div class="route-stat-label">Jugs Needed</div><div class="route-stat-value">${jugsNeeded.toLocaleString()}</div></div>
+      <div class="route-stat"><div class="route-stat-label">Bone Price</div><div class="route-stat-value">${pricesLoaded?fmtGp(econ.boneCost):'—'}</div></div>
+      <div class="route-stat"><div class="route-stat-label">${wineLabel} Cost</div><div class="route-stat-value">${pricesLoaded?fmtGp(econ.jugCost):'—'}</div></div>
+      <div class="route-stat"><div class="route-stat-label">Sacrifice Actions</div><div class="route-stat-value">${actionsNeeded.toLocaleString()}</div></div>
+      <div class="route-stat"><div class="route-stat-label">Prayer Pts Drained</div><div class="route-stat-value">${prayerPointsDrained.toLocaleString()}</div></div>
+      <div class="route-stat"><div class="route-stat-label">Finish By</div><div class="route-stat-value">${finishStr}</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text-dim);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">Bones, shards, and jugs needed above are <strong>exact</strong> (rounded up to the next whole unit) — blessing and chiselling are free actions with no material cost. Each sacrifice action offers up to 100 shards and drains 2 Prayer points, recharged for free at the nearby Shrine of Ralos. Only the <strong>XP/Hr and time-to-target are approximate</strong> (~${LIBATION_SHARDS_PER_HR.toLocaleString()} shards/hr sustained, accounting for banking and Prayer-restoration trips) — the wiki's own 65-second burst rate of 10,800 shards isn't sustainable for a full hour.</div>
+  </div>`;
+
+  // ── Bone comparison table across every blessable bone ──────────────────────
+  const rows = libationBoneList().map(b=>{
+    const e = libationEconomics(b, libationWine);
+    const rowLocked = b.minPrayerLevel && curLevel < b.minPrayerLevel;
+    return {...b, ...e, locked:rowLocked};
+  }).sort((a,b)=>{
+    if(a.locked!==b.locked) return a.locked?1:-1;
+    return a.gpPerXp - b.gpPerXp;
+  });
+
+  let tableRows = rows.map(r=>`<tr class="clickable-row${r.locked?' locked-row':''}${r.name===libationBone?' selected-row':''}" data-bone="${r.name}">
+    <td>${r.name}${r.locked?' 🔒':''}</td>
+    <td class="mono">${r.shards}</td>
+    <td class="mono">${r.xpPerBone}</td>
+    <td class="mono">${pricesLoaded?fmtGp(r.boneCost):'—'}</td>
+    <td class="mono" style="color:${r.gpPerXp<=0?'var(--green)':'var(--red)'};">${pricesLoaded?r.gpPerXp.toFixed(2)+' gp':'—'}</td>
+  </tr>`).join('');
+
+  html += `<div class="shopping-wrap">
+    <button class="shopping-toggle" id="libationCompareToggle">
+      <span>📊 Compare All Blessable Bones — ${wineLabel}</span>
+      <span class="shopping-toggle-arrow open" id="libationCompareArrow">▾</span>
+    </button>
+    <div class="shopping-body show" id="libationCompareBody">
+      <table class="shopping-table">
+        <thead><tr><th>Bone</th><th class="r">Shards/Bone</th><th class="r">XP/Bone</th><th class="r">Bone Price</th><th class="r">GP/XP</th></tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+      <p class="shopping-note">Click a row to select that bone. Shard yields are exact (OSRS Wiki). Bones not listed here (Bleached, Burnt, Jogre, Monkey, Shaikahan, Wolf, Long, Curved, Mangled, Chewed) cannot be blessed. Superior dragon bones require level 70 Prayer to bless.</p>
+    </div>
+  </div>`;
+
+  document.getElementById('planArea').innerHTML = html;
+
+  document.getElementById('libationCompareToggle').addEventListener('click',()=>{
+    document.getElementById('libationCompareBody').classList.toggle('show');
+    document.getElementById('libationCompareArrow').classList.toggle('open');
+  });
+  document.querySelectorAll('#libationCompareBody tr[data-bone]').forEach(tr=>{
+    tr.addEventListener('click',()=>{
+      libationBone=tr.dataset.bone;
+      libationBoneSelect.value=libationBone;
+      generatePlan();
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RENDER: CREMATING URIUM REMAINS (optional, lower priority — informational only)
+// ══════════════════════════════════════════════════════════════════════════════
+function renderCremationMode(){
+  document.getElementById('planArea').innerHTML = `
+  <div class="info-card" style="--accent:#2ecc71;">
+    <div class="info-card-title" style="color:#2ecc71;">🔥 Cremating Urium Remains</div>
+    <div class="info-card-body">
+      <div>👥 <strong>Source:</strong> Shades of Mort'ton minigame — burn the remains dropped by shades on pyres.</div>
+      <div>📈 <strong>Realistic rate:</strong> 35,000–57,000 XP/hr, with the higher end requiring the <strong>Hard Morytania Diary</strong> bonus.</div>
+      <div>💰 <strong>Profitable / self-funding</strong> in most price conditions — one of the few Prayer methods that can pay for itself.</div>
+      <div>👘 <strong>Also the main way to farm Zealot's robes</strong>, a valuable drop from the minigame.</div>
+      <div style="margin-top:8px;font-style:italic;">Not modelled as a live cost calculator here — included as a lower-priority informational card per project scope. See the OSRS Wiki's "Shades of Mort'ton" page for the full remains/pyre-log breakdown.</div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MODE DISPATCH
+// ══════════════════════════════════════════════════════════════════════════════
+function updateModeVisibility(){
+  document.getElementById('boneMethodPanel').style.display = currentMode==='bones' ? 'block' : 'none';
+  // Within Bone Offering mode, show the Bone Type select for every method EXCEPT Demonic
+  // Offering, which uses the separate Ash Type select instead (ashes, never bones).
+  document.getElementById('boneSelectPanel').style.display = (currentMode==='bones' && boneMethod!=='demonic') ? 'block' : 'none';
+  document.getElementById('ashSelectPanel').style.display = (currentMode==='bones' && boneMethod==='demonic') ? 'block' : 'none';
+  document.getElementById('libationPanel').style.display = currentMode==='libation' ? 'block' : 'none';
+}
+
+function generatePlan(){
+  updateModeVisibility();
+  const curLevel=levelForXp(playerXp);
+  if(curLevel>=targetLevelVal){
+    document.getElementById('planArea').innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);"><div style="font-size:18px;color:var(--gold);margin-bottom:8px;">🎉 Already reached Level ${targetLevelVal}!</div><div style="font-size:12px;">Set a higher target level to continue planning.</div></div>`;
+    return;
+  }
+  if(currentMode==='bones') return renderBonesMode();
+  if(currentMode==='heads') return renderHeadsMode();
+  if(currentMode==='libation') return renderLibationMode();
+  if(currentMode==='cremation') return renderCremationMode();
+}
+
+document.querySelectorAll('.speed-tab[data-mode]').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.speed-tab[data-mode]').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentMode=tab.dataset.mode;
+    generatePlan();
+  });
+});
+
+// Boot
+updateStatusCard();
+updateModeVisibility();
+generatePlan();
+loadPrices();
+</script>
+</body>
+</html>
