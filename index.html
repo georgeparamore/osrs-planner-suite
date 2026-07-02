@@ -155,6 +155,16 @@ async function fetchWomPlayer(username){
   return res.json();
 }
 
+// Clans registered as a "group" on Wise Old Man that this player is a tracked member of.
+// Not the same as Jagex's official in-game clan system (no public API exists for that) —
+// this only shows up if the clan itself set up a WOM group and added this player.
+async function fetchWomGroups(username){
+  const url=`${WOM_API}/players/${encodeURIComponent(username)}/groups`;
+  const res=await fetch(url);
+  if(!res.ok) return []; // fail soft — clan info is a bonus, not worth blocking the whole lookup
+  return res.json();
+}
+
 const usernameInput=document.getElementById('statsUsername');
 const lookupBtn=document.getElementById('statsLookupBtn');
 const statusEl=document.getElementById('statsStatus');
@@ -200,7 +210,8 @@ const CLUE_TIERS=['clue_scrolls_beginner','clue_scrolls_easy','clue_scrolls_medi
 const OTHER_ACTIVITIES=['soul_wars_zeal','guardians_of_the_rift','colosseum_glory','collections_logged','last_man_standing','pvp_arena','bounty_hunter_hunter','bounty_hunter_rogue'];
 
 // ── Render ────────────────────────────────────────────────────────────────
-function renderStats(data){
+function renderStats(data,groups){
+  groups=groups||[];
   const skills=data?.latestSnapshot?.data?.skills||{};
   const bosses=data?.latestSnapshot?.data?.bosses||{};
   const activities=data?.latestSnapshot?.data?.activities||{};
@@ -222,6 +233,26 @@ function renderStats(data){
       <div class="player-stat"><div class="player-stat-label">EHB</div><div class="player-stat-value">${data.ehb?data.ehb.toFixed(1):'—'}</div></div>
     </div>
   </div>`;
+
+  // Clan(s) — Wise Old Man "groups" this player is a tracked member of. Not the same as
+  // Jagex's official in-game clan system (no public API for that exists); this only shows
+  // up if the clan itself registered as a WOM group and added this player.
+  html+=`<div class="stats-block"><div class="stats-block-title">🛡️ Clan${groups.length!==1?'s':''}</div>`;
+  if(groups.length===0){
+    html+=`<div class="boss-empty">Not currently in any Wise Old Man-tracked clan. (This only shows clans that have registered as a WOM group — it doesn't mean the player isn't in an in-game clan, just that it isn't tracked here.)</div>`;
+  } else {
+    html+=`<div class="activity-grid">`;
+    groups.forEach(g=>{
+      const grp=g.group||{};
+      const role=(g.role||'member').split('_').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+      html+=`<div class="activity-cell">
+        <div class="activity-cell-label">${grp.name||'Unknown Clan'}${grp.clanChat?` (CC: ${grp.clanChat})`:''}</div>
+        <div class="activity-cell-value" style="font-size:13px;">${role} &middot; ${fmtNum(grp.memberCount||0)} members</div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  html+=`</div>`;
 
   // Skills grid
   html+=`<div class="stats-block"><div class="stats-block-title">⚔️ Skills</div><div class="skills-grid">`;
@@ -288,11 +319,11 @@ async function doLookup(){
   statusEl.innerHTML='<span class="spinner-sm"></span> Looking up stats on Wise Old Man…';
   statusEl.className='lookup-status show loading';
   try{
-    const data=await fetchWomPlayer(username);
+    const [data,groups]=await Promise.all([fetchWomPlayer(username),fetchWomGroups(username)]);
     if(!data.latestSnapshot){ throw new Error('No snapshot data for this player yet — try again in a moment.'); }
     localStorage.setItem(WOM_USERNAME_KEY,username);
     setStatus(`✓ Loaded ${data.displayName||username}`,'success');
-    renderStats(data);
+    renderStats(data,groups);
   }catch(e){
     console.error(e);
     setStatus(`⚠ ${e.message||'Lookup failed'}`,'error');
