@@ -23,13 +23,13 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px);}
 
 .skill-nav{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;}
-.skill-nav-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);padding:0 14px;margin-bottom:6px;}
+.skill-nav-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);padding:0 14px;margin-bottom:6px;}
 .skill-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;cursor:pointer;background:none;border:none;color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;text-align:left;transition:all .15s;border-left:3px solid transparent;}
 .skill-btn:hover{background:var(--surface2);color:var(--text);}
 .skill-btn.active{background:var(--surface2);color:var(--gold);border-left-color:var(--gold);}
 .skill-btn .skill-icon-img{width:22px;height:22px;object-fit:contain;flex-shrink:0;}
 .skill-btn.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
-.skill-btn .soon-badge{margin-left:auto;font-size:10px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.3px;}
+.skill-btn .soon-badge{margin-left:auto;font-size:12px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.3px;}
 
 .content{flex:1;display:flex;flex-direction:column;overflow-y:auto;min-width:0;}
 
@@ -41,7 +41,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 
 .input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
 .field-group{display:flex;flex-direction:column;gap:4px;}
-.field-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.field-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
 .field-group input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 11px;outline:none;transition:border-color .2s;width:120px;}
 .field-group input:focus{border-color:var(--gold-dim);}
 .apply-btn{padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
@@ -49,12 +49,12 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 
 .status-card{display:flex;align-items:center;gap:20px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:8px;padding:12px 18px;margin-top:14px;}
 .status-stat{display:flex;flex-direction:column;gap:1px;}
-.status-stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.status-stat-label{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
 .status-stat-value{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--gold);}
 .status-progress-wrap{flex:1;}
 .status-progress-bar{height:8px;background:var(--surface);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
 .status-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .4s ease;}
-.status-progress-text{font-size:10px;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;}
+.status-progress-text{font-size:12px;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;}
 
 .or-divider{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;align-self:center;padding:0 4px;}
 .manual-toggle{padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap;}
@@ -78,7 +78,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .patch-panel-cog{font-size:18px;flex-shrink:0;transition:transform .4s ease;display:inline-block;}
 .patch-panel-header:hover .patch-panel-cog{transform:rotate(90deg);}
 .patch-panel-label{font-size:13px;font-weight:600;letter-spacing:.2px;color:var(--text);}
-.patch-panel-sub{font-size:10px;color:var(--text-dim);text-transform:none;letter-spacing:0;margin-top:1px;}
+.patch-panel-sub{font-size:12px;color:var(--text-dim);text-transform:none;letter-spacing:0;margin-top:1px;}
 .patch-panel-arrow{font-size:13px;color:var(--gold);transition:transform .2s;flex-shrink:0;}
 .patch-panel-arrow.open{transform:rotate(180deg);}
 
@@ -90,7 +90,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .run-option-toggle{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text);cursor:pointer;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;transition:border-color .15s, background .15s;}
 .run-option-toggle:hover{border-color:var(--gold-dim);background:var(--surface);}
 .run-option-toggle input{cursor:pointer;}
-.run-option-toggle em{color:var(--text-dim);font-style:normal;font-size:10px;}
+.run-option-toggle em{color:var(--text-dim);font-style:normal;font-size:12px;}
 .patch-groups{display:none;margin-top:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
 .patch-groups.show{display:grid;}
 .patch-group{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
@@ -98,13 +98,13 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .patch-toggle{display:flex;align-items:flex-start;gap:8px;padding:5px 0;cursor:pointer;font-size:12px;}
 .patch-toggle input{margin-top:2px;accent-color:var(--gold);cursor:pointer;}
 .patch-toggle-label{flex:1;line-height:1.4;}
-.patch-toggle-level{color:var(--text-dim);font-size:10px;}
+.patch-toggle-level{color:var(--text-dim);font-size:12px;}
 .patch-toggle.locked{opacity:.45;}
 .patch-toggle.locked .patch-toggle-label{text-decoration:line-through;}
 
 /* SPEED SELECTOR */
 .speed-panel{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
-.speed-panel-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
+.speed-panel-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
 .speed-tabs{display:flex;gap:8px;flex-wrap:wrap;}
 .speed-tab{flex:1;min-width:180px;display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .15s;}
 .speed-tab:hover{border-color:var(--gold-dim);}
@@ -130,7 +130,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .plan-area{padding:20px 24px;flex:1;}
 .plan-summary{display:flex;gap:20px;flex-wrap:wrap;align-items:stretch;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:20px;}
 .plan-summary-stat{display:flex;flex-direction:column;gap:2px;min-width:110px;justify-content:center;}
-.plan-summary-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);display:flex;align-items:center;gap:4px;}
+.plan-summary-label{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);display:flex;align-items:center;gap:4px;}
 .plan-summary-value{font-family:'Share Tech Mono',monospace;font-size:19px;}
 .plan-summary-value.accent{color:var(--gold);}
 .summary-icon{width:14px;height:14px;object-fit:contain;flex-shrink:0;}
@@ -145,7 +145,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .target-estimate-done{font-size:13px;color:var(--text-dim);}
 .target-estimate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;}
 .target-estimate-stat{display:flex;flex-direction:column;gap:2px;}
-.target-estimate-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.target-estimate-label{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
 .target-estimate-value{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;}
 .target-estimate-cost .target-estimate-value{font-size:22px;}
 .target-estimate-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
@@ -165,7 +165,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .track-card-patches{margin-left:auto;font-size:11px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:2px 8px;color:var(--text-dim);}
 .track-stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0;}
 .track-stat{display:flex;flex-direction:column;gap:1px;}
-.track-stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim);}
+.track-stat-label{font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim);}
 .track-stat-value{font-family:'Share Tech Mono',monospace;font-size:13px;}
 .track-card-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
 .track-card-empty{color:var(--text-dim);font-size:12px;text-align:center;padding:20px 0;}
@@ -197,7 +197,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .route-inventory-checklist li a{color:var(--text);text-decoration:none;flex:1;}
 .route-inventory-checklist li a:hover{color:var(--blue);text-decoration:underline;}
 .checklist-qty{font-family:'Share Tech Mono',monospace;color:var(--gold);font-weight:600;white-space:nowrap;}
-.checklist-noted-tag{color:var(--text-dim);font-size:10px;font-style:italic;}
+.checklist-noted-tag{color:var(--text-dim);font-size:12px;font-style:italic;}
 .bank-tag-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:6px;padding:8px 12px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:var(--gold);cursor:pointer;transition:background .15s,border-color .15s;}
 .bank-tag-btn:hover{background:var(--surface);border-color:var(--gold);}
 .bank-tag-btn-copied{background:rgba(46,204,113,.12)!important;border-color:var(--green)!important;color:var(--green)!important;}
@@ -211,7 +211,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .inv-slot img{width:82%;height:82%;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.8));}
 .inv-slot-fallback{font-size:6.5px;color:#cfc6ab;text-align:center;text-transform:uppercase;align-items:center;justify-content:center;width:100%;height:100%;display:flex;font-family:'Barlow',sans-serif;font-weight:600;line-height:1.1;padding:2px;}
 .inv-slot-empty{background:transparent;}
-.inv-slot-qty{position:absolute;top:1px;left:2px;font-family:Verdana,Arial,sans-serif;font-size:10px;font-weight:700;color:#ffff00;text-shadow:1px 1px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000;line-height:1;pointer-events:none;z-index:1;}
+.inv-slot-qty{position:absolute;top:1px;left:2px;font-family:Verdana,Arial,sans-serif;font-size:12px;font-weight:700;color:#ffff00;text-shadow:1px 1px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000;line-height:1;pointer-events:none;z-index:1;}
 /* Noted item visual: a tilted parchment/note background sits behind the item icon, matching the
    in-game look for noted bank items used as protection payments — keeps inventory slots compact. */
 .inv-slot-noted::before{content:'';position:absolute;inset:3px;background:linear-gradient(135deg,#e8d9ad,#d4c389);border:1px solid #8a7440;border-radius:1px;transform:rotate(-3deg);box-shadow:1px 1px 2px rgba(0,0,0,.4);z-index:0;}
@@ -223,12 +223,12 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .route-step-body{flex:1;}
 .route-step-patch{font-weight:600;font-size:13px;}
 .route-step-tp{font-size:12px;color:var(--gold);margin-top:2px;}
-.route-step-tp-note{font-size:10px;color:var(--text-dim);}
+.route-step-tp-note{font-size:12px;color:var(--text-dim);}
 .route-step-carry{font-size:11px;color:var(--blue);margin-top:2px;display:block;text-decoration:none;}
 .route-step-carry:hover{text-decoration:underline;}
 .route-step-carry a, a.route-step-carry{color:var(--blue);}
 .route-step-dir{font-size:11px;color:var(--text-dim);margin-top:3px;line-height:1.4;}
-.route-step-items{font-size:10px;color:var(--text-dim);margin-top:3px;}
+.route-step-items{font-size:12px;color:var(--text-dim);margin-top:3px;}
 .route-empty-note{font-size:12px;color:var(--text-dim);font-style:italic;}
 .timeline-track{display:flex;align-items:center;gap:0;overflow-x:auto;padding:14px 4px;}
 .timeline-node{display:flex;flex-direction:column;align-items:center;min-width:90px;position:relative;}
@@ -237,9 +237,9 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .timeline-dot{width:30px;height:30px;border-radius:50%;background:var(--surface);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;z-index:1;font-size:13px;margin-bottom:6px;}
 .timeline-node.unlocked .timeline-dot{border-color:var(--accent,var(--gold));background:var(--accent,var(--gold));}
 .timeline-node.current .timeline-dot{box-shadow:0 0 0 3px rgba(200,168,75,.3);}
-.timeline-label{font-size:10px;text-align:center;color:var(--text-dim);font-weight:600;}
+.timeline-label{font-size:12px;text-align:center;color:var(--text-dim);font-weight:600;}
 .timeline-node.unlocked .timeline-label{color:var(--text);}
-.timeline-sublabel{font-size:10px;color:var(--text-dim);}
+.timeline-sublabel{font-size:12px;color:var(--text-dim);}
 
 /* SHOPPING LIST DROPDOWN */
 .shopping-list-wrap{margin-top:22px;}
@@ -250,7 +250,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .shopping-list-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:16px 20px;margin-top:-1px;}
 .shopping-list-body.show{display:block;}
 .shopping-table{width:100%;border-collapse:collapse;font-size:13px;}
-.shopping-table th{text-align:left;padding:6px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);border-bottom:2px solid var(--border);}
+.shopping-table th{text-align:left;padding:6px 10px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);border-bottom:2px solid var(--border);}
 .shopping-table td{padding:9px 10px;border-bottom:1px solid var(--border);}
 .shopping-table td.mono{font-family:'Share Tech Mono',monospace;text-align:right;}
 .shopping-table th:nth-child(3),.shopping-table th:nth-child(4),.shopping-table th:nth-child(5){text-align:right;}
@@ -1366,7 +1366,7 @@ function renderRouteSection(activeTracks, picks){
             ? `<div style="display:flex;flex-direction:column;gap:6px;">
                 <button class="bank-tag-btn" data-bank-tag-id="${bankTagId}" data-bank-tag-type="plain" title='Right-click a tag tab in RuneLite → "Import tag tab", then paste. Works with the built-in Bank Tags plugin.'>📋 Copy — "Import tag tab"${unresolvedNote}</button>
                 <button class="bank-tag-btn" data-bank-tag-id="${bankTagId}" data-bank-tag-type="layout" style="border-color:var(--purple);color:var(--purple);" title='Right-click a tag tab in RuneLite → "Import tag tab with layout", then paste. Requires the Bank Tag Layouts plugin from Plugin Hub.'>📋 Copy — "Import tag tab with layout"${unresolvedNote}</button>
-                ${unresolvedNote ? `<div style="font-size:10px;color:var(--text-dim);font-style:italic;">${unresolvedForTag.join(', ')} couldn't be resolved</div>` : ''}
+                ${unresolvedNote ? `<div style="font-size:12px;color:var(--text-dim);font-style:italic;">${unresolvedForTag.join(', ')} couldn't be resolved</div>` : ''}
               </div>`
             : `<div class="bank-tag-unavailable">⚠ No items could be resolved — prices may still be loading, try again in a moment</div>`}
         </div>
