@@ -10,29 +10,29 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:48px 20px;}
 .header{text-align:center;margin-bottom:40px;}
-.logo{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:700;color:var(--gold);letter-spacing:1px;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:700;color:var(--gold);letter-spacing:1px;}
 .logo span{color:var(--text-dim);font-weight:400;}
-.subtitle{font-size:14px;color:var(--text-dim);margin-top:8px;}
+.subtitle{font-size:16px;color:var(--text-dim);margin-top:8px;}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;max-width:900px;width:100%;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;text-decoration:none;color:var(--text);display:flex;flex-direction:column;gap:8px;transition:all .15s;}
 .card:hover{border-color:var(--gold-dim);background:var(--surface2);transform:translateY(-2px);}
 .card-top{display:flex;align-items:center;gap:12px;}
 .card-icon{width:32px;height:32px;object-fit:contain;flex-shrink:0;}
-.card-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;}
-.card-desc{font-size:12px;color:var(--text-dim);line-height:1.5;}
-.footer{margin-top:48px;font-size:11px;color:var(--text-dim);text-align:center;}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;}
+.card-desc{font-size:14px;color:var(--text-dim);line-height:1.5;}
+.footer{margin-top:48px;font-size:13px;color:var(--text-dim);text-align:center;}
 
 /* ── STATS DASHBOARD ─────────────────────────────────────────────────── */
 .stats-section{max-width:900px;width:100%;margin-top:48px;}
-.stats-section-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--gold);text-align:center;margin-bottom:6px;}
-.stats-section-sub{font-size:12px;color:var(--text-dim);text-align:center;margin-bottom:20px;line-height:1.6;}
+.stats-section-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--gold);text-align:center;margin-bottom:6px;}
+.stats-section-sub{font-size:14px;color:var(--text-dim);text-align:center;margin-bottom:20px;line-height:1.6;}
 .lookup-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;}
-.lookup-input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;padding:10px 14px;outline:none;width:240px;transition:border-color .2s;}
+.lookup-input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:16px;padding:10px 14px;outline:none;width:240px;transition:border-color .2s;}
 .lookup-input:focus{border-color:var(--gold-dim);}
-.lookup-btn{padding:10px 20px;background:var(--gold);color:#000;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
+.lookup-btn{padding:10px 20px;background:var(--gold);color:#000;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
 .lookup-btn:hover{opacity:.85;}
 .lookup-btn:disabled{opacity:.5;cursor:wait;}
-.lookup-status{font-size:12px;text-align:center;margin-bottom:20px;display:none;align-items:center;justify-content:center;gap:6px;}
+.lookup-status{font-size:14px;text-align:center;margin-bottom:20px;display:none;align-items:center;justify-content:center;gap:6px;}
 .lookup-status.show{display:flex;}
 .lookup-status.error{color:var(--red);}
 .lookup-status.success{color:var(--green);}
@@ -44,46 +44,48 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .stats-result.show{display:block;}
 
 .player-header{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:linear-gradient(135deg,rgba(200,168,75,.1),rgba(200,168,75,.02));border:1px solid var(--gold-dim);border-radius:12px;padding:20px 24px;margin-bottom:20px;}
-.player-name{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--gold);}
-.player-type-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px 10px;margin-left:8px;color:var(--text-dim);vertical-align:middle;}
+.player-name{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;color:var(--gold);}
+.player-type-badge{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px 10px;margin-left:8px;color:var(--text-dim);vertical-align:middle;}
+.runeprofile-link{font-size:12px;color:var(--text-dim);text-decoration:none;margin-left:10px;vertical-align:middle;transition:color .2s;}
+.runeprofile-link:hover{color:var(--gold);text-decoration:underline;}
 .player-stat-grid{display:flex;gap:28px;flex-wrap:wrap;margin-left:auto;}
 .player-stat{display:flex;flex-direction:column;gap:2px;}
-.player-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
-.player-stat-value{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--text);}
+.player-stat-label{font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.player-stat-value{font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--text);}
 
 .stats-block{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:16px;}
-.stats-block-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.stats-block-title{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 
 .skills-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
 .skill-cell{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;}
 .skill-cell img{width:20px;height:20px;object-fit:contain;flex-shrink:0;}
-.skill-cell-name{font-size:11px;color:var(--text-dim);}
-.skill-cell-level{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--gold);margin-left:auto;}
+.skill-cell-name{font-size:13px;color:var(--text-dim);}
+.skill-cell-level{font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--gold);margin-left:auto;}
 
-.boss-table{width:100%;border-collapse:collapse;font-size:13px;}
-.boss-table th{text-align:left;padding:6px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);border-bottom:2px solid var(--border);}
+.boss-table{width:100%;border-collapse:collapse;font-size:15px;}
+.boss-table th{text-align:left;padding:6px 10px;font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);border-bottom:2px solid var(--border);}
 .boss-table th.r{text-align:right;}
 .boss-table td{padding:7px 10px;border-bottom:1px solid var(--border);}
 .boss-table td.r{text-align:right;font-family:'Share Tech Mono',monospace;}
 .boss-table tr:last-child td{border-bottom:none;}
-.boss-empty{font-size:12px;color:var(--text-dim);font-style:italic;padding:8px 0;}
+.boss-empty{font-size:14px;color:var(--text-dim);font-style:italic;padding:8px 0;}
 
 .activity-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
 .activity-cell{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;}
-.activity-cell-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);margin-bottom:4px;}
-.activity-cell-value{font-family:'Share Tech Mono',monospace;font-size:16px;}
+.activity-cell-label{font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);margin-bottom:4px;}
+.activity-cell-value{font-family:'Share Tech Mono',monospace;font-size:18px;}
 .activity-cell-value.dim{color:var(--text-dim);}
 
 .clan-list{display:flex;flex-direction:column;gap:2px;}
 .clan-row{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border);}
 .clan-row:last-child{border-bottom:none;}
 .clan-row-icon{width:26px;height:26px;border-radius:6px;object-fit:cover;background:var(--surface2);flex-shrink:0;}
-.clan-row-icon-placeholder{width:26px;height:26px;border-radius:6px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#000;flex-shrink:0;}
+.clan-row-icon-placeholder{width:26px;height:26px;border-radius:6px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:#000;flex-shrink:0;}
 .clan-row-info{min-width:0;flex:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
-.clan-row-name{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--gold);text-decoration:none;}
+.clan-row-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--gold);text-decoration:none;}
 .clan-row-name:hover{text-decoration:underline;}
-.clan-verified{color:var(--blue);font-size:12px;}
-.clan-row-meta{font-size:11px;color:var(--text-dim);}
+.clan-verified{color:var(--blue);font-size:14px;}
+.clan-row-meta{font-size:13px;color:var(--text-dim);}
 </style>
 </head>
 <body>
@@ -234,6 +236,7 @@ function renderStats(data,groups){
     <div>
       <span class="player-name">${data.displayName||data.username}</span>
       <span class="player-type-badge">${typeLabel}</span>
+      <a class="runeprofile-link" href="https://www.runeprofile.com/${encodeURIComponent(data.username)}" target="_blank" rel="noopener" title="Opens this player's RuneProfile page — only exists if they've set up the RuneLite plugin themselves, so it won't work for everyone.">🔗 RuneProfile ↗</a>
     </div>
     <div class="player-stat-grid">
       <div class="player-stat"><div class="player-stat-label">Combat Level</div><div class="player-stat-value">${data.combatLevel||'—'}</div></div>
@@ -292,7 +295,7 @@ function renderStats(data,groups){
     id, name:humanize(id), kills:bosses[id].kills, rank:bosses[id].rank
   })).filter(b=>b.kills>0).sort((a,b)=>b.kills-a.kills);
 
-  html+=`<div class="stats-block"><div class="stats-block-title">💀 Boss Kill Counts <span style="font-size:11px;color:var(--text-dim);font-weight:400;">(${bossRows.length} tracked)</span></div>`;
+  html+=`<div class="stats-block"><div class="stats-block-title">💀 Boss Kill Counts <span style="font-size:13px;color:var(--text-dim);font-weight:400;">(${bossRows.length} tracked)</span></div>`;
   if(bossRows.length===0){
     html+=`<div class="boss-empty">No boss kills recorded on Wise Old Man for this player.</div>`;
   } else {

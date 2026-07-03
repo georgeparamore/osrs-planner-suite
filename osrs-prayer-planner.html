@@ -11,51 +11,51 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:16px;height:50px;flex-shrink:0;}
-.logo{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--gold);letter-spacing:1px;text-decoration:none;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:23px;font-weight:700;color:var(--gold);letter-spacing:1px;text-decoration:none;}
 .logo span{color:var(--text-dim);font-weight:400;}
-.nav-back{font-size:13px;color:var(--text-dim);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;}
+.nav-back{font-size:15px;color:var(--text-dim);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;}
 .nav-back:hover{color:var(--gold);}
 .header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
-.theme-btn{background:none;border:none;cursor:pointer;font-size:17px;color:var(--text-dim);transition:color .2s;}
+.theme-btn{background:none;border:none;cursor:pointer;font-size:19px;color:var(--text-dim);transition:color .2s;}
 .theme-btn:hover{color:var(--gold);}
 .main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px);}
 .skill-nav{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;}
-.skill-nav-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);padding:0 14px;margin-bottom:6px;}
-.skill-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;cursor:pointer;background:none;border:none;color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;text-align:left;transition:all .15s;border-left:3px solid transparent;}
+.skill-nav-title{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);padding:0 14px;margin-bottom:6px;}
+.skill-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;cursor:pointer;background:none;border:none;color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:15px;font-weight:500;text-align:left;transition:all .15s;border-left:3px solid transparent;}
 .skill-btn:hover{background:var(--surface2);color:var(--text);}
 .skill-btn.active{background:var(--surface2);color:var(--gold);border-left-color:var(--gold);}
 .skill-btn .skill-icon-img{width:22px;height:22px;object-fit:contain;flex-shrink:0;}
 .skill-btn.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
-.skill-btn .soon-badge{margin-left:auto;font-size:8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.3px;}
+.skill-btn .soon-badge{margin-left:auto;font-size:14px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.3px;}
 .content{flex:1;display:flex;flex-direction:column;overflow-y:auto;min-width:0;}
 .input-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 24px;flex-shrink:0;}
 .input-panel-top{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
 .skill-icon-large{width:32px;height:32px;object-fit:contain;}
-.skill-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;}
-.skill-desc{font-size:12px;color:var(--text-dim);margin-bottom:14px;}
+.skill-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;}
+.skill-desc{font-size:14px;color:var(--text-dim);margin-bottom:14px;}
 .input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
 .field-group{display:flex;flex-direction:column;gap:4px;}
-.field-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
-.field-group input,.field-group select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 11px;outline:none;transition:border-color .2s;width:120px;}
+.field-label{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.field-group input,.field-group select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;padding:7px 11px;outline:none;transition:border-color .2s;width:120px;}
 .field-group select{width:auto;min-width:170px;cursor:pointer;}
 .field-group input:focus,.field-group select:focus{border-color:var(--gold-dim);}
-.apply-btn{padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.apply-btn{padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;}
 .apply-btn:hover{opacity:.85;}
 .status-card{display:flex;align-items:center;gap:20px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:8px;padding:12px 18px;margin-top:14px;}
 .status-stat{display:flex;flex-direction:column;gap:1px;}
-.status-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
-.status-stat-value{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--gold);}
+.status-stat-label{font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.status-stat-value{font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--gold);}
 .status-progress-wrap{flex:1;}
 .status-progress-bar{height:8px;background:var(--surface);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
 .status-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .4s ease;}
-.status-progress-text{font-size:10px;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;}
-.or-divider{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;align-self:center;padding:0 4px;}
-.manual-toggle{padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.status-progress-text{font-size:14px;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;}
+.or-divider{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:13px;text-transform:uppercase;letter-spacing:.5px;align-self:center;padding:0 4px;}
+.manual-toggle{padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;cursor:pointer;transition:all .15s;white-space:nowrap;}
 .manual-toggle:hover{border-color:var(--gold-dim);}
 .manual-toggle.active{border-color:var(--gold);color:var(--gold);}
 #womFields{display:none;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap;}
 #womFields.show{display:flex;}
-.fetch-status{font-size:11px;margin-top:8px;display:none;align-items:center;gap:6px;}
+.fetch-status{font-size:13px;margin-top:8px;display:none;align-items:center;gap:6px;}
 .fetch-status.show{display:flex;}
 .fetch-status.error{color:var(--red);}
 .fetch-status.success{color:var(--green);}
@@ -63,69 +63,69 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .spinner-sm{display:inline-block;width:11px;height:11px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .speed-panel{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
-.speed-panel-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
+.speed-panel-label{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
 .speed-tabs{display:flex;gap:8px;flex-wrap:wrap;}
 .speed-tab{flex:1;min-width:180px;display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .15s;}
 .speed-tab:hover{border-color:var(--gold-dim);}
 .speed-tab.active{border-color:var(--accent,var(--gold));background:rgba(200,168,75,.08);}
-.speed-tab-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.speed-tab-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;display:flex;align-items:center;gap:7px;}
 .speed-tab-dot{width:9px;height:9px;border-radius:50%;}
-.speed-tab-sub{font-size:11px;color:var(--text-dim);}
+.speed-tab-sub{font-size:13px;color:var(--text-dim);}
 /* METHOD PANEL (altar/burner/bone-offering-method controls) */
 .method-panel{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
-.method-panel-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
+.method-panel-label{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
 .method-btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
-.method-btn{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:var(--text);transition:all .15s;}
+.method-btn{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;font-family:'Barlow',sans-serif;font-size:15px;font-weight:600;color:var(--text);transition:all .15s;}
 .method-btn:hover{border-color:var(--gold-dim);}
 .method-btn.active{border-color:var(--gold);background:rgba(200,168,75,.1);color:var(--gold);}
-.risk-badge{font-size:9px;font-weight:700;background:var(--red);color:#fff;padding:2px 7px;border-radius:8px;letter-spacing:.4px;text-transform:uppercase;}
-.req-badge{font-size:9px;font-weight:700;background:var(--purple);color:#fff;padding:2px 7px;border-radius:8px;letter-spacing:.4px;text-transform:uppercase;}
+.risk-badge{font-size:14px;font-weight:700;background:var(--red);color:#fff;padding:2px 7px;border-radius:8px;letter-spacing:.4px;text-transform:uppercase;}
+.req-badge{font-size:14px;font-weight:700;background:var(--purple);color:#fff;padding:2px 7px;border-radius:8px;letter-spacing:.4px;text-transform:uppercase;}
 .method-sub-controls{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--border);}
-.method-note{font-size:11px;color:var(--text-dim);line-height:1.6;flex-basis:100%;}
+.method-note{font-size:13px;color:var(--text-dim);line-height:1.6;flex-basis:100%;}
 .plan-area{padding:20px 24px;flex:1;}
 .plan-summary{display:flex;gap:20px;flex-wrap:wrap;align-items:stretch;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:20px;}
 .plan-summary-stat{display:flex;flex-direction:column;gap:2px;min-width:110px;justify-content:center;}
-.plan-summary-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
-.plan-summary-value{font-family:'Share Tech Mono',monospace;font-size:19px;}
+.plan-summary-label{font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.plan-summary-value{font-family:'Share Tech Mono',monospace;font-size:21px;}
 .plan-summary-value.accent{color:var(--gold);}
 .plan-summary-divider{width:1px;background:var(--border);align-self:stretch;margin:0 2px;}
 .plan-summary-total{display:flex;flex-direction:column;gap:2px;justify-content:center;background:linear-gradient(135deg,rgba(200,168,75,.16),rgba(200,168,75,.04));border:1px solid var(--gold-dim);border-radius:8px;padding:8px 18px;min-width:150px;}
 .plan-summary-total .plan-summary-label{color:var(--gold-dim);}
-.plan-summary-total .plan-summary-value{font-size:24px;font-weight:700;color:var(--gold);}
+.plan-summary-total .plan-summary-value{font-size:26px;font-weight:700;color:var(--gold);}
 .route-stop{position:relative;margin-bottom:18px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;transition:border-color .15s;}
 .route-stop:hover{border-color:var(--gold-dim);}
 .route-stop-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
-.route-stop-name{font-size:15px;font-weight:600;flex:1;min-width:140px;}
+.route-stop-name{font-size:17px;font-weight:600;flex:1;min-width:140px;}
 .route-stop-badges{display:flex;gap:6px;flex-wrap:wrap;}
-.route-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.route-badge{font-size:14px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap;}
 .route-badge.xp{background:rgba(200,168,75,.15);color:var(--gold);}
 .route-badge.cost{background:rgba(231,76,60,.13);color:var(--red);}
 .route-badge.cost.profit{background:rgba(46,204,113,.13);color:var(--green);}
 .route-badge.time{background:rgba(74,126,255,.13);color:var(--blue);}
 .route-stop-detail{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
 .route-stat{display:flex;flex-direction:column;gap:1px;}
-.route-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim);}
-.route-stat-value{font-family:'Share Tech Mono',monospace;font-size:13px;}
+.route-stat-label{font-size:14px;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim);}
+.route-stat-value{font-family:'Share Tech Mono',monospace;font-size:15px;}
 .target-estimate-card{background:linear-gradient(135deg,rgba(200,168,75,.08),rgba(200,168,75,.02));border:1px solid var(--gold-dim);border-radius:10px;padding:16px 20px;margin-top:18px;}
-.target-estimate-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--gold);margin-bottom:10px;}
+.target-estimate-title{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;color:var(--gold);margin-bottom:10px;}
 .target-estimate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;}
 .target-estimate-stat{display:flex;flex-direction:column;gap:2px;}
-.target-estimate-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
-.target-estimate-value{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;}
-.target-estimate-cost .target-estimate-value{font-size:22px;}
-.target-estimate-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
-.price-status{font-size:11px;color:var(--text-dim);margin-bottom:10px;}
+.target-estimate-label{font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.target-estimate-value{font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;}
+.target-estimate-cost .target-estimate-value{font-size:24px;}
+.target-estimate-note{font-size:13px;color:var(--text-dim);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.price-status{font-size:13px;color:var(--text-dim);margin-bottom:10px;}
 /* SHOPPING / REFERENCE TABLE STYLES (shared look for comparison + ensouled heads tables) */
 .shopping-wrap{margin-top:20px;}
-.shopping-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:10px;padding:14px 20px;cursor:pointer;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;transition:background .15s;}
+.shopping-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:10px;padding:14px 20px;cursor:pointer;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;transition:background .15s;}
 .shopping-toggle:hover{background:var(--surface);}
-.shopping-toggle-arrow{font-size:14px;color:var(--text-dim);transition:transform .2s;}
+.shopping-toggle-arrow{font-size:16px;color:var(--text-dim);transition:transform .2s;}
 .shopping-toggle-arrow.open{transform:rotate(180deg);}
 .shopping-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:16px 20px;margin-top:-1px;}
 .shopping-body.show{display:block;}
-.shopping-section-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--accent,var(--gold));margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);}
-.shopping-table{width:100%;border-collapse:collapse;font-size:13px;}
-.shopping-table th{text-align:left;padding:6px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);border-bottom:2px solid var(--border);}
+.shopping-section-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--accent,var(--gold));margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.shopping-table{width:100%;border-collapse:collapse;font-size:15px;}
+.shopping-table th{text-align:left;padding:6px 10px;font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);border-bottom:2px solid var(--border);}
 .shopping-table th.r{text-align:right;}
 .shopping-table td{padding:8px 10px;border-bottom:1px solid var(--border);}
 .shopping-table td.mono{font-family:'Share Tech Mono',monospace;text-align:right;}
@@ -135,13 +135,13 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .shopping-table tr.selected-row{background:rgba(200,168,75,.12);}
 .shopping-table tr.locked-row{opacity:.38;}
 .shopping-icon{width:20px;height:20px;object-fit:contain;vertical-align:middle;margin-right:6px;}
-.shopping-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:10px;}
+.shopping-note{font-size:13px;color:var(--text-dim);font-style:italic;margin-top:10px;}
 .sort-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
 .info-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
-.info-card-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;margin-bottom:10px;}
-.info-card-body{font-size:12px;color:var(--text-dim);line-height:1.8;}
+.info-card-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;margin-bottom:10px;}
+.info-card-body{font-size:14px;color:var(--text-dim);line-height:1.8;}
 .info-card-body strong{color:var(--text);}
-.lock-note{font-size:11px;color:var(--red);margin-top:4px;}
+.lock-note{font-size:13px;color:var(--red);margin-top:4px;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
@@ -191,7 +191,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
         <div class="or-divider">or</div>
         <button class="manual-toggle" id="womToggle">Enter Manually</button>
       </div>
-      <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">Pulls your live Prayer level/XP from Wise Old Man.</div>
+      <div style="font-size:13px;color:var(--text-dim);margin-top:6px;">Pulls your live Prayer level/XP from Wise Old Man.</div>
       <div id="womFields">
         <div class="field-group">
           <span class="field-label">Current Level</span>
@@ -249,7 +249,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
           <span class="field-label">Altar Tier</span>
           <select id="altarTierSelect"></select>
         </div>
-        <div style="font-size:11px;color:var(--text-dim);align-self:center;">Both incense burners assumed lit (max XP bonus for the selected tier).</div>
+        <div style="font-size:13px;color:var(--text-dim);align-self:center;">Both incense burners assumed lit (max XP bonus for the selected tier).</div>
       </div>
       <div class="method-note" id="methodDescNote"></div>
     </div>
@@ -289,8 +289,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
     </div>
     <div class="plan-area" id="planArea">
       <div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:60px 20px;color:var(--text-dim);text-align:center;flex-direction:column;">
-        <div style="font-size:15px;font-weight:600;color:var(--text);">Set your starting level to generate a plan</div>
-        <div style="font-size:12px;max-width:320px;line-height:1.6;">Enter your current Prayer level and target above, then pick a training method.</div>
+        <div style="font-size:17px;font-weight:600;color:var(--text);">Set your starting level to generate a plan</div>
+        <div style="font-size:14px;max-width:320px;line-height:1.6;">Enter your current Prayer level and target above, then pick a training method.</div>
       </div>
     </div>
   </div>
@@ -862,10 +862,10 @@ function renderBonesMode(){
   if(method.risk){
     html += `<div class="route-stop" style="border-color:var(--red);margin-bottom:16px;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:22px;">☠️</span>
+        <span style="font-size:24px;">☠️</span>
         <div>
           <div style="font-weight:700;color:var(--red);">Wilderness Risk Warning</div>
-          <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">The Chaos Altar is located deep in the Wilderness (level 38, multi-combat zone). You can be attacked and skulled by other players there — do NOT bring bones or gear you're not prepared to lose. This is the only non-safe method in this planner.</div>
+          <div style="font-size:14px;color:var(--text-dim);margin-top:2px;">The Chaos Altar is located deep in the Wilderness (level 38, multi-combat zone). You can be attacked and skulled by other players there — do NOT bring bones or gear you're not prepared to lose. This is the only non-safe method in this planner.</div>
         </div>
       </div>
     </div>`;
@@ -987,7 +987,7 @@ function renderHeadsMode(){
       <div class="route-stat"><div class="route-stat-label">XP Remaining</div><div class="route-stat-value">${xpRemaining.toLocaleString()}</div></div>
       <div class="route-stat"><div class="route-stat-label">Heads Needed</div><div class="route-stat-value">${headsNeeded.toLocaleString()}</div></div>
     </div>
-    <div style="font-size:11px;color:var(--text-dim);margin-top:8px;">Casting a Reanimation spell requires the head's Magic level shown below. This planner only checks Magic level for gating — the Dragon head realistically also wants decent combat stats to kill the reanimated Dragon safely.</div>
+    <div style="font-size:13px;color:var(--text-dim);margin-top:8px;">Casting a Reanimation spell requires the head's Magic level shown below. This planner only checks Magic level for gating — the Dragon head realistically also wants decent combat stats to kill the reanimated Dragon safely.</div>
   </div>`;
 
   html += `<div class="sort-row">
@@ -1003,7 +1003,7 @@ function renderHeadsMode(){
       <td class="mono">${r.magic}</td>
       <td class="mono">${r.xp}</td>
       <td class="mono">${fmt(r.xpHr)}</td>
-      <td style="font-size:11px;color:var(--text-dim);">${runeStr}</td>
+      <td style="font-size:13px;color:var(--text-dim);">${runeStr}</td>
       <td class="mono">${pricesLoaded?fmtGp(r.totalCost):'—'}</td>
       <td class="mono" style="color:${r.gpPerXp<=0?'var(--green)':'var(--red)'};">${pricesLoaded?r.gpPerXp.toFixed(2)+' gp':'—'}</td>
     </tr>`;
@@ -1063,10 +1063,10 @@ function renderLibationMode(){
   if(locked30){
     html += `<div class="route-stop" style="border-color:var(--red);margin-bottom:16px;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:22px;">🔒</span>
+        <span style="font-size:24px;">🔒</span>
         <div>
           <div style="font-weight:700;color:var(--red);">Requires Level 30 Prayer</div>
-          <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">You are level ${curLevel}. The Libation Bowl at the Teomat only becomes usable at 30 Prayer — figures below are shown for reference.</div>
+          <div style="font-size:14px;color:var(--text-dim);margin-top:2px;">You are level ${curLevel}. The Libation Bowl at the Teomat only becomes usable at 30 Prayer — figures below are shown for reference.</div>
         </div>
       </div>
     </div>`;
@@ -1104,7 +1104,7 @@ function renderLibationMode(){
       <div class="route-stat"><div class="route-stat-label">Prayer Pts Drained</div><div class="route-stat-value">${prayerPointsDrained.toLocaleString()}</div></div>
       <div class="route-stat"><div class="route-stat-label">Finish By</div><div class="route-stat-value">${finishStr}</div></div>
     </div>
-    <div style="font-size:11px;color:var(--text-dim);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">Bones, shards, and jugs needed above are <strong>exact</strong> (rounded up to the next whole unit) — blessing and chiselling are free actions with no material cost. Each sacrifice action offers up to 100 shards and drains 2 Prayer points, recharged for free at the nearby Shrine of Ralos. Only the <strong>XP/Hr and time-to-target are approximate</strong> (~${LIBATION_SHARDS_PER_HR.toLocaleString()} shards/hr sustained, accounting for banking and Prayer-restoration trips) — the wiki's own 65-second burst rate of 10,800 shards isn't sustainable for a full hour.</div>
+    <div style="font-size:13px;color:var(--text-dim);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">Bones, shards, and jugs needed above are <strong>exact</strong> (rounded up to the next whole unit) — blessing and chiselling are free actions with no material cost. Each sacrifice action offers up to 100 shards and drains 2 Prayer points, recharged for free at the nearby Shrine of Ralos. Only the <strong>XP/Hr and time-to-target are approximate</strong> (~${LIBATION_SHARDS_PER_HR.toLocaleString()} shards/hr sustained, accounting for banking and Prayer-restoration trips) — the wiki's own 65-second burst rate of 10,800 shards isn't sustainable for a full hour.</div>
   </div>`;
 
   // ── Bone comparison table across every blessable bone ──────────────────────
@@ -1187,7 +1187,7 @@ function generatePlan(){
   updateModeVisibility();
   const curLevel=levelForXp(playerXp);
   if(curLevel>=targetLevelVal){
-    document.getElementById('planArea').innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);"><div style="font-size:18px;color:var(--gold);margin-bottom:8px;">🎉 Already reached Level ${targetLevelVal}!</div><div style="font-size:12px;">Set a higher target level to continue planning.</div></div>`;
+    document.getElementById('planArea').innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);"><div style="font-size:20px;color:var(--gold);margin-bottom:8px;">🎉 Already reached Level ${targetLevelVal}!</div><div style="font-size:14px;">Set a higher target level to continue planning.</div></div>`;
     return;
   }
   if(currentMode==='bones') return renderBonesMode();
