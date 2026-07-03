@@ -442,6 +442,11 @@ async function doWomLookup(){
 }
 womFetchBtn.addEventListener('click',doWomLookup);
 womUsernameInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); doWomLookup(); } });
+// Auto-fetch on load if we already have a saved username from another page/prior visit — the
+// username persisting via localStorage without also pulling fresh level/XP was confusing: it
+// looked like nothing carried over, since the level fields stayed at their default until the
+// user manually clicked "Fetch Stats" again on every single page.
+if(savedWomUsername) doWomLookup();
 
 document.getElementById('applyBtn').addEventListener('click',()=>{
   const lvl=parseInt(document.getElementById('manualLevel').value)||1;
