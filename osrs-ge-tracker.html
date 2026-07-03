@@ -42,6 +42,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .icon-btn:hover{color:var(--gold);}
 .icon-btn .badge{position:absolute;top:-4px;right:-5px;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:1px 4px;display:none;}
 .icon-btn .badge.show{display:block;}
+.icon-btn:disabled{cursor:wait;opacity:.6;}
+.icon-btn.spinning{display:inline-block;animation:spin .7s linear infinite;}
 
 /* LAYOUT */
 .main{display:flex;flex:1;overflow:hidden;}
@@ -95,6 +97,9 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .price-badge{display:inline-block;font-size:11px;font-weight:600;padding:1px 6px;border-radius:4px;margin-top:2px;}
 .price-badge.pos{background:rgba(46,204,113,.15);color:var(--green);}
 .price-badge.neg{background:rgba(231,76,60,.15);color:var(--red);}
+.trade-age{font-size:10px;margin-top:3px;color:var(--text-dim);}
+.trade-age.fresh{color:var(--green);}
+.trade-age.stale{color:var(--red);}
 .item-star-btn{background:none;border:none;cursor:pointer;font-size:19px;color:var(--text-dim);transition:color .15s;padding:0;}
 .item-star-btn:hover,.item-star-btn.starred{color:var(--gold);}
 
@@ -382,6 +387,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
   <div class="header-right">
     <span class="hide-sm">Items <strong id="hItemCount">—</strong></span>
     <span class="hide-sm">Updated <strong id="hUpdated">—</strong></span>
+    <button class="icon-btn" id="refreshBtn" title="Force refresh prices now">🔄</button>
     <button class="icon-btn" id="themeBtn" title="Toggle theme">🌙</button>
     <button class="icon-btn" id="soundBtn" title="Toggle alert sounds">🔇</button>
     <button class="icon-btn" id="bellBtn" title="Alerts">🔔<span class="badge" id="bellBadge"></span></button>
@@ -451,6 +457,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
         <div class="price-block">
           <div class="current-price" id="itemPrice">—</div>
           <div class="price-badge" id="itemChange">—</div>
+          <div class="trade-age" id="itemTradeAge" title="How old the underlying trade data is — a successful refresh doesn't mean this specific item traded recently.">—</div>
         </div>
         <button class="item-star-btn" id="itemStarBtn">☆</button>
       </div>
@@ -777,6 +784,7 @@ let alertIdSeq=0, currentTab='trending', currentPTab='calc';
 let currentItem=null, currentTf='24h', candles=[], dpr=1;
 let memberFilter='all', showMA=false, showVol=false, showMargin=false;
 let soundEnabled=false;
+let lastUpdated=null, refreshing=false;
 let zoomStart=0, zoomEnd=0;
 let customDateRange=null; // {from, to} in unix seconds
 let activeTool='cursor', drawings=[], drawingInProgress=null;
@@ -799,6 +807,21 @@ const iconUrl=info=>`https://secure.runescape.com/m=itemdb_oldschool/obj_sprite.
 const detailUrl=info=>`https://secure.runescape.com/m=itemdb_oldschool/obj_big.gif?id=${info.id}`;
 const wikiUrl=info=>`https://oldschool.runescape.wiki/w/${encodeURIComponent(info.name.replace(/ /g,'_'))}`;
 const relTime=ts=>{const d=Math.round((Date.now()-ts)/60000);return d<1?'just now':d<60?d+'m ago':Math.round(d/60)+'h ago';};
+// Distinguishes "we successfully polled the API just now" (the header's Updated stamp) from
+// "this specific item actually traded recently" — a low-volume item can go hours between real
+// trades even while every refresh succeeds, so the header alone overstates freshness per-item.
+// highTime/lowTime from the Wiki API are Unix seconds, not ms.
+function renderTradeAge(p){
+  const el=document.getElementById('itemTradeAge');
+  if(!el)return;
+  const times=[p.highTime,p.lowTime].filter(Boolean);
+  if(!times.length){el.textContent='no recent trade data';el.className='trade-age';el.title='';return;}
+  const mostRecentSec=Math.max(...times);
+  const ageMin=(Date.now()/1000-mostRecentSec)/60;
+  el.textContent='last trade '+relTime(mostRecentSec*1000);
+  el.className='trade-age'+(ageMin<5?' fresh':ageMin>60?' stale':'');
+  el.title='Last actual trade: '+new Date(mostRecentSec*1000).toLocaleString();
+}
 
 // ── TOAST ─────────────────────────────────────────────────
 let toastTimer=null;
@@ -849,7 +872,7 @@ async function boot(){
     mapData.forEach(i=>{allItems[i.id]=i;});
     Object.entries(priceData.data).forEach(([id,p])=>{prices[id]=p;});
     document.getElementById('hItemCount').textContent=Object.keys(prices).length.toLocaleString();
-    document.getElementById('hUpdated').textContent='live';
+    stampUpdatedOk();
     const nat=Object.values(allItems).find(i=>i.name==='Nature rune');
     document.getElementById('alchNatCost').value=(nat&&prices[nat.id]?.high)||200;
     renderSidebar();renderDashboard();renderAlchPanel();renderLeaderboard();
@@ -1243,6 +1266,7 @@ async function loadItem(id){
   document.getElementById('itemTitle').textContent=info.name;
   document.getElementById('itemSubtitle').textContent=info.examine||'';
   document.getElementById('itemPrice').textContent=fmtFull(p.high);
+  renderTradeAge(p);
 
   const margin=(p.high||0)-(p.low||0),pct=p.low?margin/p.low*100:0;
   const badge=document.getElementById('itemChange');
@@ -1363,19 +1387,92 @@ document.getElementById('addAlertBtn').addEventListener('click',()=>{
   document.getElementById('alertPrice').value='';renderAlerts();
   showToast('Alert added',`${itemName} ${condition==='above'?'above':'below'} ${target.toLocaleString()} gp`);
 });
+// ── PRICE REFRESH ─────────────────────────────────────────
+// Single source of truth for "is the data on screen actually current". The header's
+// Updated indicator only ever reflects a *successful* fetch's timestamp — on failure it
+// switches to a visible ⚠ state showing the last known-good time, rather than silently
+// leaving stale data indistinguishable from fresh data (the previous behavior).
+function stampUpdatedOk(){
+  lastUpdated=new Date();
+  const el=document.getElementById('hUpdated');
+  el.textContent=lastUpdated.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  el.title='Live Wiki prices as of '+lastUpdated.toLocaleString();
+  el.style.color='';
+}
+function stampUpdatedStale(){
+  const el=document.getElementById('hUpdated');
+  el.textContent=lastUpdated?`⚠ ${lastUpdated.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`:'⚠ —';
+  el.title=lastUpdated
+    ? `Refresh failed — still showing prices from ${lastUpdated.toLocaleString()}`
+    : 'Refresh failed — no successful price fetch yet';
+  el.style.color='var(--red)';
+}
+// Updates only the read-only live-price fields on the open item panel. Deliberately does NOT
+// call loadItem() here — loadItem() resets drawings, overwrites calculator/log input fields the
+// user may have hand-edited, and re-fetches the full candle history, which would make an
+// automatic 60s background refresh actively destructive to whatever the user is doing.
+function refreshCurrentItemPriceDisplay(){
+  if(!currentItem)return;
+  const info=currentItem.info,p=prices[currentItem.id]||{};
+  currentItem.p=p;
+  document.getElementById('itemPrice').textContent=fmtFull(p.high);
+  renderTradeAge(p);
+  const margin=(p.high||0)-(p.low||0),pct=p.low?margin/p.low*100:0;
+  const badge=document.getElementById('itemChange');
+  badge.textContent=`${pct>=0?'+':''}${pct.toFixed(1)}% margin`;
+  badge.className='price-badge '+(pct>=0?'pos':'neg');
+  document.getElementById('statBuy').textContent=fmtFull(p.low);
+  document.getElementById('statSell').textContent=fmtFull(p.high);
+  document.getElementById('statMargin').textContent=fmt(margin)+' gp';
+  const natCost=parseInt(document.getElementById('alchNatCost').value)||200;
+  const alchVal=info.highalch||0;
+  if(alchVal){
+    const alchProfit=alchVal-(p.low||p.high||0)-natCost;
+    const apEl=document.getElementById('statAlchProfit');
+    apEl.textContent=(alchProfit>=0?'+':'')+fmt(alchProfit)+' gp';
+    apEl.style.color=alchProfit>=0?'var(--green)':'var(--red)';
+  }
+}
+function checkAlerts(){
+  let hit=false;
+  alerts.forEach(a=>{if(a.triggered)return;const p=prices[a.itemId];if(!p)return;const cur=p.high||p.low||0;
+    if((a.condition==='above'&&cur>=a.target)||(a.condition==='below'&&cur<=a.target)){a.triggered=true;hit=true;playAlert();showToast('🔔 Alert!',`${a.itemName} hit ${cur.toLocaleString()} gp`);}
+  });
+  if(hit)renderAlerts();
+}
+// Re-fetches live prices and re-renders every view that reads from the `prices` object
+// (dashboard hot/gainers-losers lists, sidebar deltas, the currently open item/chart), so
+// the Updated timestamp and what's actually on screen can never drift apart. `manual`
+// controls whether we surface a toast — the 60s background tick stays silent on success.
+async function refreshPrices(manual){
+  if(refreshing)return;
+  refreshing=true;
+  const btn=document.getElementById('refreshBtn');
+  if(btn){btn.disabled=true;btn.classList.add('spinning');}
+  try{
+    const res=await fetch(WIKI_LATEST,{headers:H});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    Object.entries(data.data).forEach(([id,p])=>{prices[id]=p;});
+    stampUpdatedOk();
+    document.getElementById('hItemCount').textContent=Object.keys(prices).length.toLocaleString();
+    renderDashboard();
+    renderSidebar();
+    refreshCurrentItemPriceDisplay();
+    checkAlerts();
+    if(manual)showToast('Prices refreshed',lastUpdated.toLocaleTimeString());
+  }catch(e){
+    console.error(e);
+    stampUpdatedStale();
+    if(manual)showToast('Refresh failed','Check your connection and try again.');
+  }finally{
+    refreshing=false;
+    if(btn){btn.disabled=false;btn.classList.remove('spinning');}
+  }
+}
+document.getElementById('refreshBtn').addEventListener('click',()=>refreshPrices(true));
 function startAlertChecker(){
-  setInterval(async()=>{
-    try{
-      const res=await fetch(WIKI_LATEST,{headers:H}),data=await res.json();
-      Object.entries(data.data).forEach(([id,p])=>{prices[id]=p;});
-      document.getElementById('hUpdated').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-      let hit=false;
-      alerts.forEach(a=>{if(a.triggered)return;const p=prices[a.itemId];if(!p)return;const cur=p.high||p.low||0;
-        if((a.condition==='above'&&cur>=a.target)||(a.condition==='below'&&cur<=a.target)){a.triggered=true;hit=true;playAlert();showToast('🔔 Alert!',`${a.itemName} hit ${cur.toLocaleString()} gp`);}
-      });
-      if(hit)renderAlerts();
-    }catch(e){}
-  },60_000);
+  setInterval(()=>refreshPrices(false),60_000);
 }
 
 // ── DRAWING TOOLS & CHART ENGINE ─────────────────────────
