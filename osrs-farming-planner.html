@@ -265,11 +265,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 </head>
 <body>
 <header>
-  <a class="logo" href="osrs-ge-tracker.html">GE<span>Tracker</span></a>
-  <span style="color:var(--border);">|</span>
-  <a class="nav-back" href="osrs-skill-profit.html">⚗️ Skill Profits</a>
-  <span style="color:var(--border);">|</span>
-  <a class="nav-back" href="osrs-training-planner.html">🗺️ Training Planner</a>
+  <a class="logo" href="index.html" title="OSRS Tool Suite home">GE<span>Tracker</span></a>
   <div class="header-right">
     <button class="theme-btn" id="themeBtn">🌙</button>
   </div>
@@ -277,27 +273,19 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 
 <div class="main">
   <nav class="skill-nav">
-    <div class="skill-nav-title">Skills</div>
-    <button class="skill-btn" data-skill="construction" onclick="location.href='osrs-training-planner.html'">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="">
-      Construction
-    </button>
-    <button class="skill-btn active" data-skill="farming">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="">
-      Farming
-    </button>
-    <button class="skill-btn" data-skill="herblore" onclick="location.href='osrs-herblore-planner.html'">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">
-      Herblore
-    </button>
-    <button class="skill-btn" data-skill="prayer" onclick="location.href='osrs-prayer-planner.html'">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">
-      Prayer
-    </button>
-    <button class="skill-btn disabled" data-skill="smithing">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">
-      Smithing <span class="soon-badge">Soon</span>
-    </button>
+    <div class="skill-nav-title">OSRS Tools</div>
+    <button class="skill-btn" onclick="location.href='osrs-ge-tracker.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Grand_Exchange_logo.png" alt="">GE Tracker</button>
+    <button class="skill-btn" onclick="location.href='osrs-skill-profit.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Coins_10000.png" alt="">Skill Profits</button>
+    <div class="skill-sep"></div>
+    <button class="skill-btn" onclick="location.href='osrs-training-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="">Construction</button>
+    <button class="skill-btn active"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="">Farming</button>
+    <button class="skill-btn" onclick="location.href='osrs-herblore-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">Herblore</button>
+    <button class="skill-btn" onclick="location.href='osrs-prayer-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">Prayer</button>
+    <div class="skill-sep"></div>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">Fletching<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">Crafting<span class="soon-badge">Soon</span></button>
   </nav>
 
   <div class="content">
@@ -602,6 +590,14 @@ const HARDCODED_ITEM_IDS = {
   'rake': 5341,
   'digsite pendant': 11194, // untradeable — always charge-suffixed as "Digsite pendant (5)" etc, never has a bare-name GE entry
   'teleport crystal': 6102, // GE-listed only with charge suffixes "(1)" through "(5)" — pinned to one fixed variant, charge state shown doesn't matter
+  // Gardener payment items are called "Basket of X" in-game, but the GE only lists the filled basket
+  // under the fruit's own name with a "(5)" quantity suffix (e.g. "Tomatoes(5)") — there is no
+  // "Basket of tomatoes" GE entry at all, so these would otherwise silently fail to price.
+  'basket of tomatoes': 5968,
+  'basket of apples': 5386,
+  'basket of oranges': 5396,
+  'basket of strawberries': 5406,
+  'basket of bananas': 5416,
 };
 function resolveItemId(name){
   const key = name.toLowerCase();
@@ -628,6 +624,11 @@ const HARDCODED_ITEM_ICONS = {
   'rake': 'Rake.png',
   'digsite pendant': 'Digsite_pendant.png', // wiki's general infobox icon, distinct from the per-charge file variants
   'teleport crystal': 'Teleport_crystal_(1).png', // single fixed icon — user confirmed charge state shown doesn't need to be accurate
+  'basket of tomatoes': 'Tomatoes(5).png',
+  'basket of apples': 'Apples(5).png',
+  'basket of oranges': 'Oranges(5).png',
+  'basket of strawberries': 'Strawberries(5).png',
+  'basket of bananas': 'Bananas(5).png',
 };
 function resolveItemIcon(name){
   const key = name.toLowerCase();
@@ -744,14 +745,14 @@ let pricesLoaded=false;
 
 function priceOf(name){
   if(!name) return 0;
-  const id=nameToId[name.toLowerCase()];
+  const id=resolveItemId(name);
   if(!id||!prices[id]) return 0;
   const p=prices[id];
   return p.high || p.low || 0; // buying estimate uses instant-buy ('high') side
 }
 function sellPriceOf(name){
   if(!name) return 0;
-  const id=nameToId[name.toLowerCase()];
+  const id=resolveItemId(name);
   if(!id||!prices[id]) return 0;
   const p=prices[id];
   return p.low || p.high || 0; // selling estimate uses instant-sell ('low') side
@@ -854,6 +855,11 @@ async function doWomLookup(){
 }
 womFetchBtn.addEventListener('click',doWomLookup);
 womUsernameInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); doWomLookup(); } });
+// Auto-fetch on load if we already have a saved username from another page/prior visit — the
+// username persisting via localStorage without also pulling fresh level/XP was confusing: it
+// looked like nothing carried over, since the level fields stayed at their default until the
+// user manually clicked "Fetch Stats" again on every single page.
+if(savedWomUsername) doWomLookup();
 
 // ── APPLY LEVEL/TARGET ────────────────────────────────────
 document.getElementById('applyBtn').addEventListener('click',()=>{

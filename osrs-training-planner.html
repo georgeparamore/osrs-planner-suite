@@ -164,11 +164,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 </head>
 <body>
 <header>
-  <a class="logo" href="osrs-ge-tracker.html">GE<span>Tracker</span></a>
-  <span style="color:var(--border);">|</span>
-  <a class="nav-back" href="osrs-skill-profit.html">⚗️ Skill Profits</a>
-  <span style="color:var(--border);">|</span>
-  <span style="font-size:13px;color:var(--gold);">🗺️ Training Planner</span>
+  <a class="logo" href="index.html" title="OSRS Tool Suite home">GE<span>Tracker</span></a>
   <div class="header-right">
     <button class="theme-btn" id="themeBtn">🌙</button>
   </div>
@@ -176,39 +172,19 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 
 <div class="main">
   <nav class="skill-nav">
-    <div class="skill-nav-title">Skills</div>
-    <button class="skill-btn active" data-skill="construction">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="">
-      Construction
-    </button>
-    <button class="skill-btn" data-skill="farming" onclick="location.href='osrs-farming-planner.html'">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="">
-      Farming
-    </button>
-    <button class="skill-btn" data-skill="herblore" onclick="location.href='osrs-herblore-planner.html'">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">
-      Herblore
-    </button>
-    <button class="skill-btn" data-skill="prayer" onclick="location.href='osrs-prayer-planner.html'">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">
-      Prayer
-    </button>
-    <button class="skill-btn disabled" data-skill="smithing">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">
-      Smithing <span class="soon-badge">Soon</span>
-    </button>
-    <button class="skill-btn disabled" data-skill="fletching">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">
-      Fletching <span class="soon-badge">Soon</span>
-    </button>
-    <button class="skill-btn disabled" data-skill="cooking">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">
-      Cooking <span class="soon-badge">Soon</span>
-    </button>
-    <button class="skill-btn disabled" data-skill="crafting">
-      <img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">
-      Crafting <span class="soon-badge">Soon</span>
-    </button>
+    <div class="skill-nav-title">OSRS Tools</div>
+    <button class="skill-btn" onclick="location.href='osrs-ge-tracker.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Grand_Exchange_logo.png" alt="">GE Tracker</button>
+    <button class="skill-btn" onclick="location.href='osrs-skill-profit.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Coins_10000.png" alt="">Skill Profits</button>
+    <div class="skill-sep"></div>
+    <button class="skill-btn active"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="">Construction</button>
+    <button class="skill-btn" onclick="location.href='osrs-farming-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="">Farming</button>
+    <button class="skill-btn" onclick="location.href='osrs-herblore-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">Herblore</button>
+    <button class="skill-btn" onclick="location.href='osrs-prayer-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">Prayer</button>
+    <div class="skill-sep"></div>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">Fletching<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">Crafting<span class="soon-badge">Soon</span></button>
   </nav>
 
   <div class="content">
@@ -410,6 +386,11 @@ fetchBtn.addEventListener('click',async()=>{
     fetchBtn.disabled=false;
   }
 });
+// Auto-fetch on load if we already have a saved username from another page/prior visit — the
+// username persisting via localStorage without also pulling fresh level/XP was confusing: it
+// looked like nothing carried over, since the level fields stayed at their default until the
+// user manually clicked "Fetch Stats" again on every single page.
+if(savedWomUsername) fetchBtn.click();
 
 // ── MANUAL APPLY ──────────────────────────────────────────
 document.getElementById('applyManualBtn').addEventListener('click',()=>{
