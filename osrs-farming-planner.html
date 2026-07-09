@@ -1345,14 +1345,7 @@ function renderRouteSection(activeTracks, picks){
       ? `${bankTagId},${iconId},${bankTagSlots.map(s=>s.id).join(',')}`
       : null;
 
-    // Layout bank tag format (confirmed from bank-tag-custom-layouts plugin real export example):
-    // "banktaglayoutsplugin:tagname,itemId:slotIndex,itemId:slotIndex,..."
-    // Requires the "Bank Tag Layouts" plugin from RuneLite plugin hub. Use "Import tag tab with layout".
-    const layoutTagString = bankTagSlots.length
-      ? `banktaglayoutsplugin:${bankTagId},${bankTagSlots.map(({id,slot})=>`${id}:${slot}`).join(',')}`
-      : null;
-
-    bankTagData[bankTagId] = {plain: plainTagString, layout: layoutTagString};
+    bankTagData[bankTagId] = {plain: plainTagString};
 
     const unresolvedNote = unresolvedForTag.length ? ` (${unresolvedForTag.length} item${unresolvedForTag.length>1?'s':''} skipped)` : '';
 
@@ -1365,7 +1358,6 @@ function renderRouteSection(activeTracks, picks){
           ${plainTagString
             ? `<div style="display:flex;flex-direction:column;gap:6px;">
                 <button class="bank-tag-btn" data-bank-tag-id="${bankTagId}" data-bank-tag-type="plain" title='Right-click a tag tab in RuneLite → "Import tag tab", then paste. Works with the built-in Bank Tags plugin.'>📋 Copy — "Import tag tab"${unresolvedNote}</button>
-                <button class="bank-tag-btn" data-bank-tag-id="${bankTagId}" data-bank-tag-type="layout" style="border-color:var(--purple);color:var(--purple);" title='Right-click a tag tab in RuneLite → "Import tag tab with layout", then paste. Requires the Bank Tag Layouts plugin from Plugin Hub.'>📋 Copy — "Import tag tab with layout"${unresolvedNote}</button>
                 ${unresolvedNote ? `<div style="font-size:10px;color:var(--text-dim);font-style:italic;">${unresolvedForTag.join(', ')} couldn't be resolved</div>` : ''}
               </div>`
             : `<div class="bank-tag-unavailable">⚠ No items could be resolved — prices may still be loading, try again in a moment</div>`}
