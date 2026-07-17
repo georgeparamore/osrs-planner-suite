@@ -42,6 +42,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .icon-btn:hover{color:var(--gold);}
 .icon-btn .badge{position:absolute;top:-4px;right:-5px;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:1px 4px;display:none;}
 .icon-btn .badge.show{display:block;}
+#acctBadge.show{background:var(--green);width:8px;height:8px;padding:0;border-radius:50%;top:-1px;right:-2px;}
 .icon-btn:disabled{cursor:wait;opacity:.6;}
 .icon-btn.spinning{display:inline-block;animation:spin .7s linear infinite;}
 
@@ -401,6 +402,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
     <button class="icon-btn" id="themeBtn" title="Toggle theme">🌙</button>
     <button class="icon-btn" id="soundBtn" title="Toggle alert sounds">🔇</button>
     <button class="icon-btn" id="bellBtn" title="Alerts">🔔<span class="badge" id="bellBadge"></span></button>
+    <button class="icon-btn" id="acctBtn" title="GE Account">👤<span class="badge" id="acctBadge"></span></button>
   </div>
 </header>
 
@@ -448,6 +450,86 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
       <div class="dash-section">
         <div class="dash-label">📉 Biggest Losers</div>
         <div class="dash-tiles" id="loserTiles"></div>
+      </div>
+    </div>
+
+    <!-- GE ACCOUNT PAGE (Supabase auth + RuneLite plugin sync) -->
+    <div id="accountPage" style="display:none;flex:1;overflow-y:auto;padding:24px;">
+      <div style="max-width:720px;margin:0 auto;">
+        <button class="action-btn secondary" id="acctBackBtn" style="width:auto;padding:5px 12px;font-size:12px;margin-bottom:16px;">← Back</button>
+
+        <!-- Signed-out: auth form -->
+        <div id="acctAuthBox">
+          <h1 style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;margin-bottom:4px;">☁️ GE Account</h1>
+          <p class="hint" style="font-size:13px;margin-bottom:20px;">Sign in to see the GE history synced automatically from the <a href="https://github.com/georgeparamore/ge-trade-logger" target="_blank" rel="noopener" style="color:var(--gold);">GE Trade Logger</a> RuneLite plugin.</p>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;max-width:360px;">
+            <div class="field"><label>Email</label><input type="email" id="acctEmail" placeholder="you@example.com" autocomplete="email"></div>
+            <div class="field"><label>Password</label><input type="password" id="acctPassword" placeholder="••••••••" autocomplete="current-password"></div>
+            <div id="acctError" style="display:none;color:var(--red);font-size:12px;margin-bottom:8px;"></div>
+            <button class="action-btn" id="acctLoginBtn">Log In</button>
+            <button class="action-btn secondary" id="acctSignupBtn" style="margin-top:6px;">Create Account</button>
+          </div>
+        </div>
+
+        <!-- Signed-in: sync token + history/flips dashboard -->
+        <div id="acctDashBox" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h1 style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;">☁️ GE Account</h1>
+            <div style="text-align:right;">
+              <div style="font-size:13px;color:var(--text-dim);" id="acctEmailLabel"></div>
+              <button class="action-btn secondary" id="acctLogoutBtn" style="width:auto;padding:5px 10px;font-size:11px;margin-top:4px;">Log Out</button>
+            </div>
+          </div>
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;margin-bottom:20px;">
+            <div class="section-title" style="margin-bottom:6px;">Plugin Sync Token</div>
+            <p class="hint" style="font-size:12px;">Paste this into the GE Trade Logger plugin's config (Sync Token field) to link it to this account. Treat it like a password — anyone with it can log trades to your account.</p>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="acctSyncToken" readonly style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px 10px;">
+              <button class="action-btn secondary" id="acctCopyTokenBtn" style="width:auto;padding:8px 14px;">Copy</button>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div class="section-title" style="margin-bottom:0;">Summary</div>
+            <select id="acctRange" style="width:auto;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:6px 9px;">
+              <option value="all">All time</option>
+              <option value="today">Today</option>
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+            </select>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:6px;">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;">
+              <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">GP Spent</div>
+              <div id="acctSpent" style="font-family:'Share Tech Mono',monospace;font-size:16px;"></div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;">
+              <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">GP Received (net)</div>
+              <div id="acctRevenue" style="font-family:'Share Tech Mono',monospace;font-size:16px;"></div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;">
+              <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Tax Paid</div>
+              <div id="acctTax" style="font-family:'Share Tech Mono',monospace;font-size:16px;"></div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;">
+              <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Net Cash Flow</div>
+              <div id="acctCashFlow" style="font-family:'Share Tech Mono',monospace;font-size:16px;"></div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;">
+              <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Realized Profit</div>
+              <div id="acctProfit" style="font-family:'Share Tech Mono',monospace;font-size:16px;"></div>
+            </div>
+          </div>
+          <div id="acctNote" style="font-size:11px;color:var(--text-dim);margin-bottom:16px;"></div>
+
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <button class="action-btn secondary" id="acctTabFlips" style="width:auto;padding:6px 16px;">Flips</button>
+            <button class="action-btn secondary" id="acctTabHistory" style="width:auto;padding:6px 16px;">History</button>
+          </div>
+          <div id="acctRows" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px 14px;"><div class="empty-msg">Loading…</div></div>
+        </div>
       </div>
     </div>
 
@@ -604,7 +686,6 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
           <div class="more-item" data-ptab="targets">🎯 Price Targets</div>
           <div class="more-item" data-ptab="portfolio">💼 Portfolio</div>
           <div class="more-item" data-ptab="fliplog">📒 Flip Log</div>
-          <div class="more-item" data-ptab="account">☁️ GE Account</div>
           <div class="more-item" data-ptab="recent">🕐 History & Notes</div>
         </div>
       </div>
@@ -776,59 +857,6 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
       <div style="margin-top:12px;" id="fliplogList"><div class="empty-msg">No flips logged yet.</div></div>
     </div>
 
-    <!-- GE ACCOUNT (Supabase auth + RuneLite plugin sync) -->
-    <div class="panel-body hidden" id="panelAccount">
-      <div class="section-title">☁️ GE Account</div>
-      <p class="hint">Sign in to see the GE history synced automatically from the <a href="https://github.com/georgeparamore/ge-trade-logger" target="_blank" rel="noopener" style="color:var(--gold);">GE Trade Logger</a> RuneLite plugin.</p>
-
-      <!-- Signed-out: auth form -->
-      <div id="acctAuthBox">
-        <div class="field"><label>Email</label><input type="email" id="acctEmail" placeholder="you@example.com" autocomplete="email"></div>
-        <div class="field"><label>Password</label><input type="password" id="acctPassword" placeholder="••••••••" autocomplete="current-password"></div>
-        <div id="acctError" style="display:none;color:var(--red);font-size:12px;margin-bottom:8px;"></div>
-        <button class="action-btn" id="acctLoginBtn">Log In</button>
-        <button class="action-btn secondary" id="acctSignupBtn" style="margin-top:6px;">Create Account</button>
-      </div>
-
-      <!-- Signed-in: sync token + history/flips dashboard -->
-      <div id="acctDashBox" style="display:none;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <span style="font-size:12px;color:var(--text-dim);" id="acctEmailLabel"></span>
-          <button class="action-btn secondary" id="acctLogoutBtn" style="width:auto;padding:5px 10px;font-size:11px;">Log Out</button>
-        </div>
-
-        <div class="section-title" style="margin-bottom:6px;">Plugin Sync Token</div>
-        <p class="hint">Paste this into the GE Trade Logger plugin's config (Sync Token field) to link it to this account. Treat it like a password — anyone with it can log trades to your account.</p>
-        <div style="display:flex;gap:6px;margin-bottom:12px;">
-          <input type="text" id="acctSyncToken" readonly style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 8px;">
-          <button class="action-btn secondary" id="acctCopyTokenBtn" style="width:auto;padding:6px 10px;">Copy</button>
-        </div>
-
-        <div class="field"><label>Range</label>
-          <select id="acctRange">
-            <option value="all">All time</option>
-            <option value="today">Today</option>
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-          </select>
-        </div>
-
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;row-gap:4px;font-size:12px;">
-          <span style="color:var(--text-dim);">GP Spent</span><span id="acctSpent" style="font-family:'Share Tech Mono',monospace;text-align:right;"></span>
-          <span style="color:var(--text-dim);">GP Received (net)</span><span id="acctRevenue" style="font-family:'Share Tech Mono',monospace;text-align:right;"></span>
-          <span style="color:var(--text-dim);">Tax Paid</span><span id="acctTax" style="font-family:'Share Tech Mono',monospace;text-align:right;"></span>
-          <span style="color:var(--text-dim);">Net Cash Flow</span><span id="acctCashFlow" style="font-family:'Share Tech Mono',monospace;text-align:right;"></span>
-          <span style="color:var(--text-dim);">Realized Profit</span><span id="acctProfit" style="font-family:'Share Tech Mono',monospace;text-align:right;"></span>
-        </div>
-        <div id="acctNote" style="font-size:10px;color:var(--text-dim);margin-bottom:10px;"></div>
-
-        <div style="display:flex;gap:6px;margin-bottom:8px;">
-          <button class="action-btn secondary" id="acctTabFlips" style="flex:1;">Flips</button>
-          <button class="action-btn secondary" id="acctTabHistory" style="flex:1;">History</button>
-        </div>
-        <div id="acctRows"><div class="empty-msg">Loading…</div></div>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -1302,7 +1330,7 @@ function drawMarginChart(canvas,series){
 }
 
 // ── PANEL TABS ────────────────────────────────────────────
-const panelMap={calc:'panelCalc',alch:'panelAlch',leaderboard:'panelLeaderboard',watchlist:'panelWatchlist',recent:'panelRecent',alerts:'panelAlerts',targets:'panelTargets',portfolio:'panelPortfolio',fliplog:'panelFliplog',account:'panelAccount'};
+const panelMap={calc:'panelCalc',alch:'panelAlch',leaderboard:'panelLeaderboard',watchlist:'panelWatchlist',recent:'panelRecent',alerts:'panelAlerts',targets:'panelTargets',portfolio:'panelPortfolio',fliplog:'panelFliplog'};
 function switchPanel(p){
   document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
   document.querySelector(`[data-ptab="${p}"]`)?.classList.add('active');
@@ -1316,7 +1344,6 @@ function switchPanel(p){
   if(p==='targets')renderTargets();
   if(p==='portfolio')renderPortfolio();
   if(p==='fliplog')renderFlipLog();
-  if(p==='account'&&window.geAccount)window.geAccount.renderPanel();
 }
 document.querySelectorAll('.ptab:not(.more-tab)').forEach(tab=>tab.addEventListener('click',()=>{
   document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
@@ -2491,9 +2518,10 @@ async function loadTrades(){
   renderDash();
 }
 
-async function renderPanel(){
+async function renderAccountContent(){
   const { data:{ session: s } } = await sb.auth.getSession();
   session = s;
+  updateBadge();
 
   if(!session){
     document.getElementById('acctAuthBox').style.display = '';
@@ -2511,6 +2539,35 @@ async function renderPanel(){
   await loadTrades();
 }
 
+function updateBadge(){
+  document.getElementById('acctBadge').classList.toggle('show', !!session);
+}
+
+// ── Page show/hide - the account page replaces the dashboard/item-view area
+// entirely (rather than living in the cramped 225px right sidebar) so there's
+// room for a real summary + table. "Back" restores whatever was showing before.
+function showAccountPage(){
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('itemView').style.display = 'none';
+  document.getElementById('accountPage').style.display = 'flex';
+  document.getElementById('accountPage').style.flexDirection = 'column';
+  renderAccountContent();
+}
+
+function hideAccountPage(){
+  document.getElementById('accountPage').style.display = 'none';
+  document.getElementById('dashboard').style.display = '';
+  if(typeof currentItem !== 'undefined' && currentItem){
+    document.getElementById('itemView').style.display = 'flex';
+  } else {
+    document.getElementById('emptyState').style.display = '';
+  }
+}
+
+document.getElementById('acctBtn').addEventListener('click', showAccountPage);
+document.getElementById('acctBackBtn').addEventListener('click', hideAccountPage);
+
 function showAuthError(msg){
   const el = document.getElementById('acctError');
   el.textContent = msg;
@@ -2523,7 +2580,7 @@ document.getElementById('acctLoginBtn').addEventListener('click', async ()=>{
   const password = document.getElementById('acctPassword').value;
   const { error } = await sb.auth.signInWithPassword({ email, password });
   if(error){ showAuthError(error.message); return; }
-  renderPanel();
+  renderAccountContent();
 });
 
 document.getElementById('acctSignupBtn').addEventListener('click', async ()=>{
@@ -2538,7 +2595,7 @@ document.getElementById('acctSignupBtn').addEventListener('click', async ()=>{
 
 document.getElementById('acctLogoutBtn').addEventListener('click', async ()=>{
   await sb.auth.signOut();
-  renderPanel();
+  renderAccountContent();
 });
 
 document.getElementById('acctCopyTokenBtn').addEventListener('click', ()=>{
@@ -2550,7 +2607,11 @@ document.getElementById('acctRange').addEventListener('change', renderDash);
 document.getElementById('acctTabFlips').addEventListener('click', ()=>{ activeSubTab='flips'; renderRows(); });
 document.getElementById('acctTabHistory').addEventListener('click', ()=>{ activeSubTab='history'; renderRows(); });
 
-window.geAccount = { renderPanel };
+// Reflect logged-in state in the header badge immediately on page load, without
+// requiring the user to open the account page first.
+sb.auth.getSession().then(({ data:{ session: s } })=>{ session = s; updateBadge(); });
+
+window.geAccount = { showAccountPage };
 </script>
 </body>
 </html>
