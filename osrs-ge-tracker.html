@@ -2295,11 +2295,11 @@ boot();
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// TODO: fill in from the Supabase project's Settings -> API page. The anon
+// From the Supabase project's Settings -> API page. The publishable/anon
 // key is meant to be public in client-side apps like this one - it can only
 // do what Row Level Security in 0001_ge_trade_history.sql allows.
-const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://lrzjopevxnrupddwgked.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_f9NurdkLMR1dnllr6U8c3g_n8NQUVzG';
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
