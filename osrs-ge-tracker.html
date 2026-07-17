@@ -604,6 +604,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
           <div class="more-item" data-ptab="targets">🎯 Price Targets</div>
           <div class="more-item" data-ptab="portfolio">💼 Portfolio</div>
           <div class="more-item" data-ptab="fliplog">📒 Flip Log</div>
+          <div class="more-item" data-ptab="account">☁️ GE Account</div>
           <div class="more-item" data-ptab="recent">🕐 History & Notes</div>
         </div>
       </div>
@@ -773,6 +774,60 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
       <div class="field"><label>Quantity</label><input type="number" id="logQty" placeholder="100" min="1" value="1"></div>
       <button class="action-btn" id="addFlipBtn">Log Flip</button>
       <div style="margin-top:12px;" id="fliplogList"><div class="empty-msg">No flips logged yet.</div></div>
+    </div>
+
+    <!-- GE ACCOUNT (Supabase auth + RuneLite plugin sync) -->
+    <div class="panel-body hidden" id="panelAccount">
+      <div class="section-title">☁️ GE Account</div>
+      <p class="hint">Sign in to see the GE history synced automatically from the <a href="https://github.com/georgeparamore/ge-trade-logger" target="_blank" rel="noopener" style="color:var(--gold);">GE Trade Logger</a> RuneLite plugin.</p>
+
+      <!-- Signed-out: auth form -->
+      <div id="acctAuthBox">
+        <div class="field"><label>Email</label><input type="email" id="acctEmail" placeholder="you@example.com" autocomplete="email"></div>
+        <div class="field"><label>Password</label><input type="password" id="acctPassword" placeholder="••••••••" autocomplete="current-password"></div>
+        <div id="acctError" style="display:none;color:var(--red);font-size:12px;margin-bottom:8px;"></div>
+        <button class="action-btn" id="acctLoginBtn">Log In</button>
+        <button class="action-btn secondary" id="acctSignupBtn" style="margin-top:6px;">Create Account</button>
+      </div>
+
+      <!-- Signed-in: sync token + history/flips dashboard -->
+      <div id="acctDashBox" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span style="font-size:12px;color:var(--text-dim);" id="acctEmailLabel"></span>
+          <button class="action-btn secondary" id="acctLogoutBtn" style="width:auto;padding:5px 10px;font-size:11px;">Log Out</button>
+        </div>
+
+        <div class="section-title" style="margin-bottom:6px;">Plugin Sync Token</div>
+        <p class="hint">Paste this into the GE Trade Logger plugin's config (Sync Token field) to link it to this account. Treat it like a password — anyone with it can log trades to your account.</p>
+        <div style="display:flex;gap:6px;margin-bottom:12px;">
+          <input type="text" id="acctSyncToken" readonly style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 8px;">
+          <button class="action-btn secondary" id="acctCopyTokenBtn" style="width:auto;padding:6px 10px;">Copy</button>
+        </div>
+
+        <div class="field"><label>Range</label>
+          <select id="acctRange">
+            <option value="all">All time</option>
+            <option value="today">Today</option>
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+          </select>
+        </div>
+
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;row-gap:4px;font-size:12px;">
+          <span style="color:var(--text-dim);">GP Spent</span><span id="acctSpent" style="font-family:'Share Tech Mono',monospace;text-align:right;"></span>
+          <span style="color:var(--text-dim);">GP Received (net)</span><span id="acctRevenue" style="font-family:'Share Tech Mono',monospace;text-align:right;"></span>
+          <span style="color:var(--text-dim);">Tax Paid</span><span id="acctTax" style="font-family:'Share Tech Mono',monospace;text-align:right;"></span>
+          <span style="color:var(--text-dim);">Net Cash Flow</span><span id="acctCashFlow" style="font-family:'Share Tech Mono',monospace;text-align:right;"></span>
+          <span style="color:var(--text-dim);">Realized Profit</span><span id="acctProfit" style="font-family:'Share Tech Mono',monospace;text-align:right;"></span>
+        </div>
+        <div id="acctNote" style="font-size:10px;color:var(--text-dim);margin-bottom:10px;"></div>
+
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <button class="action-btn secondary" id="acctTabFlips" style="flex:1;">Flips</button>
+          <button class="action-btn secondary" id="acctTabHistory" style="flex:1;">History</button>
+        </div>
+        <div id="acctRows"><div class="empty-msg">Loading…</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1247,7 +1302,7 @@ function drawMarginChart(canvas,series){
 }
 
 // ── PANEL TABS ────────────────────────────────────────────
-const panelMap={calc:'panelCalc',alch:'panelAlch',leaderboard:'panelLeaderboard',watchlist:'panelWatchlist',recent:'panelRecent',alerts:'panelAlerts',targets:'panelTargets',portfolio:'panelPortfolio',fliplog:'panelFliplog'};
+const panelMap={calc:'panelCalc',alch:'panelAlch',leaderboard:'panelLeaderboard',watchlist:'panelWatchlist',recent:'panelRecent',alerts:'panelAlerts',targets:'panelTargets',portfolio:'panelPortfolio',fliplog:'panelFliplog',account:'panelAccount'};
 function switchPanel(p){
   document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
   document.querySelector(`[data-ptab="${p}"]`)?.classList.add('active');
@@ -1261,6 +1316,7 @@ function switchPanel(p){
   if(p==='targets')renderTargets();
   if(p==='portfolio')renderPortfolio();
   if(p==='fliplog')renderFlipLog();
+  if(p==='account'&&window.geAccount)window.geAccount.renderPanel();
 }
 document.querySelectorAll('.ptab:not(.more-tab)').forEach(tab=>tab.addEventListener('click',()=>{
   document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
@@ -2228,6 +2284,273 @@ function renderFlipLog(){
 
 setTool('cursor');
 boot();
+</script>
+
+<!-- ── GE ACCOUNT: Supabase auth + RuneLite plugin sync ──────────────────
+     Separate module script so it can use ES module imports (Supabase's
+     browser client) without converting the whole page's classic script.
+     Talks to the "ge-trade-logger" Supabase project - see
+     supabase/migrations/0001_ge_trade_history.sql and
+     supabase/functions/sync-trade in this repo for the backend side. -->
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// TODO: fill in from the Supabase project's Settings -> API page. The anon
+// key is meant to be public in client-side apps like this one - it can only
+// do what Row Level Security in 0001_ge_trade_history.sql allows.
+const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── GE tax, ported from GeTax.java in the ge-trade-logger plugin repo.
+// Must stay in sync with that file - the plugin and this page need to agree
+// on tax so synced numbers match what the plugin already showed in-game.
+const TAX_RATE = 0.02;
+const TAX_CAP = 5_000_000;
+const EXEMPT_ITEM_IDS = new Set([
+  13190,
+  3014, 3012, 3010, 3008,
+  882, 806, 884, 807, 558, 886, 808,
+  365, 2309, 1891, 2140, 2142, 347, 379, 355, 2327, 351, 329, 315, 361,
+  8011, 8010, 28824, 8009, 3853, 28790, 8008, 2552, 8013, 8007,
+  1755, 5325, 1785, 2347, 1733, 233, 5341, 8794, 5329, 5343, 1735, 952, 5331,
+]);
+function taxOn(itemId, gross){
+  if(EXEMPT_ITEM_IDS.has(itemId) || gross <= 0) return 0;
+  return Math.min(Math.floor(gross * TAX_RATE), TAX_CAP);
+}
+function netProceeds(itemId, gross){ return gross - taxOn(itemId, gross); }
+
+// ── FIFO flip matching, ported from FlipCalculator.java. Replays the whole
+// trade history on every call rather than persisting matched state - same
+// tradeoff as the plugin makes, and for the same reason (simplicity over a
+// cache that could drift out of sync).
+function computeFlips(trades){
+  const sorted = [...trades].sort((a,b)=>a.ts-b.ts);
+  const openLots = new Map(); // itemId -> [{qty,unitPrice,ts}]
+  const flips = [];
+
+  for(const t of sorted){
+    if(t.buy){
+      if(!openLots.has(t.item_id)) openLots.set(t.item_id, []);
+      openLots.get(t.item_id).push({qty:t.quantity, unitPrice:t.unit_price, ts:t.ts});
+      continue;
+    }
+
+    const lots = openLots.get(t.item_id) || [];
+    if(!openLots.has(t.item_id)) openLots.set(t.item_id, lots);
+    let remaining = t.quantity;
+
+    while(remaining > 0 && lots.length){
+      const lot = lots[0];
+      const matchedQty = Math.min(remaining, lot.qty);
+      const grossSell = matchedQty * t.unit_price;
+      const netSell = netProceeds(t.item_id, grossSell);
+      const costBasis = matchedQty * lot.unitPrice;
+
+      flips.push({
+        itemId:t.item_id, itemName:t.item_name, quantity:matchedQty,
+        buyUnitPrice:lot.unitPrice, sellUnitPriceGross:t.unit_price, sellNetProceeds:netSell,
+        profit:netSell-costBasis, buyTs:lot.ts, sellTs:t.ts, costBasisUnknown:false,
+      });
+
+      lot.qty -= matchedQty;
+      if(lot.qty === 0) lots.shift();
+      remaining -= matchedQty;
+    }
+
+    if(remaining > 0){
+      const grossSell = remaining * t.unit_price;
+      const netSell = netProceeds(t.item_id, grossSell);
+      flips.push({
+        itemId:t.item_id, itemName:t.item_name, quantity:remaining,
+        buyUnitPrice:null, sellUnitPriceGross:t.unit_price, sellNetProceeds:netSell,
+        profit:null, buyTs:null, sellTs:t.ts, costBasisUnknown:true,
+      });
+    }
+  }
+
+  return flips;
+}
+
+function summarize(trades, fromInclusive, toExclusive){
+  const summary = {totalSpent:0, totalRevenueGross:0, totalRevenueNet:0, totalTaxPaid:0,
+    realizedProfit:0, unknownCostBasisFlips:0, completedFlips:0};
+
+  for(const t of trades){
+    if(t.ts < fromInclusive || t.ts >= toExclusive) continue;
+    if(t.buy){
+      summary.totalSpent += t.quantity * t.unit_price;
+    } else {
+      const gross = t.quantity * t.unit_price;
+      const tax = taxOn(t.item_id, gross);
+      summary.totalRevenueGross += gross;
+      summary.totalRevenueNet += gross - tax;
+      summary.totalTaxPaid += tax;
+    }
+  }
+
+  for(const flip of computeFlips(trades)){
+    if(flip.sellTs < fromInclusive || flip.sellTs >= toExclusive) continue;
+    if(flip.costBasisUnknown){ summary.unknownCostBasisFlips++; continue; }
+    summary.realizedProfit += flip.profit;
+    summary.completedFlips++;
+  }
+
+  summary.netCashFlow = summary.totalRevenueNet - summary.totalSpent;
+  return summary;
+}
+
+// ── UI state ──────────────────────────────────────────────────────────
+let allTrades = [];
+let activeSubTab = 'flips';
+let session = null;
+
+function rangeBounds(){
+  const sel = document.getElementById('acctRange').value;
+  if(sel === 'all') return [0, Infinity];
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  if(sel === 'today') return [startOfToday, Infinity];
+  if(sel === '7d') return [startOfToday - 6*86400000, Infinity];
+  if(sel === '30d') return [startOfToday - 29*86400000, Infinity];
+  return [0, Infinity];
+}
+
+function gp(n){ return (n>=0?'':'-') + fmt(Math.abs(n)) + ' gp'; }
+function signedGp(n){ return (n>=0?'+':'') + gp(n).replace(/^-/,'-'); }
+function colorFor(n){ return n>0?'var(--green)':n<0?'var(--red)':'var(--text)'; }
+
+function renderSummary(){
+  const [from, to] = rangeBounds();
+  const s = summarize(allTrades, from, to);
+  document.getElementById('acctSpent').textContent = gp(s.totalSpent);
+  document.getElementById('acctRevenue').textContent = gp(s.totalRevenueNet);
+  document.getElementById('acctTax').textContent = gp(s.totalTaxPaid);
+  const cf = document.getElementById('acctCashFlow');
+  cf.textContent = signedGp(s.netCashFlow); cf.style.color = colorFor(s.netCashFlow);
+  const pr = document.getElementById('acctProfit');
+  pr.textContent = signedGp(s.realizedProfit); pr.style.color = colorFor(s.realizedProfit);
+  document.getElementById('acctNote').textContent = s.unknownCostBasisFlips > 0
+    ? `${s.unknownCostBasisFlips} sale(s) had no matching buy on record and are excluded from profit`
+    : '';
+}
+
+function renderRows(){
+  const [from, to] = rangeBounds();
+  const container = document.getElementById('acctRows');
+
+  if(activeSubTab === 'flips'){
+    const flips = computeFlips(allTrades)
+      .filter(f=>f.sellTs>=from && f.sellTs<to)
+      .sort((a,b)=>b.sellTs-a.sellTs)
+      .slice(0,200);
+    if(!flips.length){ container.innerHTML = '<div class="empty-msg">No completed flips in this range yet.</div>'; return; }
+    container.innerHTML = flips.map(f=>{
+      const detail = f.costBasisUnknown
+        ? `sold @ ${fmt(f.sellUnitPriceGross)} (no buy on record)`
+        : `bought @ ${fmt(f.buyUnitPrice)}, sold @ ${fmt(f.sellUnitPriceGross)}`;
+      const profitHtml = f.costBasisUnknown ? '' :
+        `<span style="font-family:'Share Tech Mono',monospace;color:${colorFor(f.profit)};">${signedGp(f.profit)}</span>`;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);gap:8px;">
+        <div style="min-width:0;">
+          <div style="font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.quantity}x ${f.itemName}</div>
+          <div style="font-size:10px;color:var(--text-dim);">${detail}</div>
+        </div>
+        ${profitHtml}
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  const rows = allTrades.filter(t=>t.ts>=from && t.ts<to).sort((a,b)=>b.ts-a.ts).slice(0,200);
+  if(!rows.length){ container.innerHTML = '<div class="empty-msg">No logged trades in this range yet.</div>'; return; }
+  container.innerHTML = rows.map(t=>{
+    const total = t.quantity * t.unit_price;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);gap:8px;">
+      <div style="min-width:0;">
+        <div style="font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.quantity}x ${t.item_name}</div>
+        <div style="font-size:10px;color:var(--text-dim);">@ ${fmt(t.unit_price)} each = ${fmt(total)}</div>
+      </div>
+      <span style="font-size:10px;font-weight:700;color:${t.buy?'var(--gold)':'var(--green)'};">${t.buy?'BUY':'SELL'}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderDash(){
+  renderSummary();
+  renderRows();
+}
+
+async function loadTrades(){
+  document.getElementById('acctRows').innerHTML = '<div class="empty-msg">Loading…</div>';
+  const { data, error } = await sb.from('trades').select('ts,item_id,item_name,buy,quantity,unit_price').order('ts',{ascending:true});
+  if(error){ console.error('failed to load trades', error); document.getElementById('acctRows').innerHTML = '<div class="empty-msg">Failed to load trade history.</div>'; return; }
+  allTrades = data || [];
+  renderDash();
+}
+
+async function renderPanel(){
+  const { data:{ session: s } } = await sb.auth.getSession();
+  session = s;
+
+  if(!session){
+    document.getElementById('acctAuthBox').style.display = '';
+    document.getElementById('acctDashBox').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('acctAuthBox').style.display = 'none';
+  document.getElementById('acctDashBox').style.display = '';
+  document.getElementById('acctEmailLabel').textContent = session.user.email;
+
+  const { data:profile, error } = await sb.from('profiles').select('sync_token').eq('id', session.user.id).single();
+  document.getElementById('acctSyncToken').value = error ? '(failed to load)' : profile.sync_token;
+
+  await loadTrades();
+}
+
+function showAuthError(msg){
+  const el = document.getElementById('acctError');
+  el.textContent = msg;
+  el.style.display = msg ? '' : 'none';
+}
+
+document.getElementById('acctLoginBtn').addEventListener('click', async ()=>{
+  showAuthError('');
+  const email = document.getElementById('acctEmail').value.trim();
+  const password = document.getElementById('acctPassword').value;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if(error){ showAuthError(error.message); return; }
+  renderPanel();
+});
+
+document.getElementById('acctSignupBtn').addEventListener('click', async ()=>{
+  showAuthError('');
+  const email = document.getElementById('acctEmail').value.trim();
+  const password = document.getElementById('acctPassword').value;
+  if(password.length < 6){ showAuthError('Password must be at least 6 characters.'); return; }
+  const { error } = await sb.auth.signUp({ email, password });
+  if(error){ showAuthError(error.message); return; }
+  showAuthError('Account created — check your email to confirm, then log in.');
+});
+
+document.getElementById('acctLogoutBtn').addEventListener('click', async ()=>{
+  await sb.auth.signOut();
+  renderPanel();
+});
+
+document.getElementById('acctCopyTokenBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('acctSyncToken');
+  navigator.clipboard?.writeText(input.value);
+});
+
+document.getElementById('acctRange').addEventListener('change', renderDash);
+document.getElementById('acctTabFlips').addEventListener('click', ()=>{ activeSubTab='flips'; renderRows(); });
+document.getElementById('acctTabHistory').addEventListener('click', ()=>{ activeSubTab='history'; renderRows(); });
+
+window.geAccount = { renderPanel };
 </script>
 </body>
 </html>
