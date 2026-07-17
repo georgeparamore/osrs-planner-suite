@@ -2481,9 +2481,12 @@ function renderRows(){
       const profitHtml = f.costBasisUnknown ? '' :
         `<span style="font-family:'Share Tech Mono',monospace;color:${colorFor(f.profit)};">${signedGp(f.profit)}</span>`;
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);gap:8px;">
-        <div style="min-width:0;">
-          <div style="font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.quantity}x ${f.itemName}</div>
-          <div style="font-size:10px;color:var(--text-dim);">${detail}</div>
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+          ${itemIconHtml(f.itemId)}
+          <div style="min-width:0;">
+            <div style="font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.quantity}x ${f.itemName}</div>
+            <div style="font-size:10px;color:var(--text-dim);">${detail}</div>
+          </div>
         </div>
         ${profitHtml}
       </div>`;
@@ -2496,13 +2499,24 @@ function renderRows(){
   container.innerHTML = rows.map(t=>{
     const total = t.quantity * t.unit_price;
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);gap:8px;">
-      <div style="min-width:0;">
-        <div style="font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.quantity}x ${t.item_name}</div>
-        <div style="font-size:10px;color:var(--text-dim);">@ ${fmt(t.unit_price)} each = ${fmt(total)}</div>
+      <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+        ${itemIconHtml(t.item_id)}
+        <div style="min-width:0;">
+          <div style="font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.quantity}x ${t.item_name}</div>
+          <div style="font-size:10px;color:var(--text-dim);">@ ${fmt(t.unit_price)} each = ${fmt(total)}</div>
+        </div>
       </div>
       <span style="font-size:10px;font-weight:700;color:${t.buy?'var(--gold)':'var(--green)'};">${t.buy?'BUY':'SELL'}</span>
     </div>`;
   }).join('');
+}
+
+// Legacy Jagex sprite endpoint, keyed purely by item ID - same source the rest of this page
+// uses (see iconUrl() near the top), works even for items not in the currently loaded mapping.
+function itemIconHtml(itemId){
+  return `<img src="https://secure.runescape.com/m=itemdb_oldschool/obj_sprite.gif?id=${itemId}" alt=""
+    style="width:24px;height:24px;object-fit:contain;flex-shrink:0;" loading="lazy"
+    onerror="this.style.visibility='hidden'">`;
 }
 
 function renderDash(){
