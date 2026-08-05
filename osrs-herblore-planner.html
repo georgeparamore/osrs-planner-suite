@@ -139,7 +139,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
-<link rel="stylesheet" href="suite-nav.css?v=13">
+<link rel="stylesheet" href="suite-nav.css?v=14">
 </head>
 <body>
 <header>
@@ -624,7 +624,7 @@ const MIXOLOGY_RESIN_PER_HR_EACH = 3000;
 const MIXOLOGY_RESIN_PER_PASTE = 1.5;
 const MIXOLOGY_POTION_ICONS = ['Alco-augmentator (unf)','Mammoth-might mix (unf)','Liplack liquor (unf)','Mystic mana amalgam (unf)',"Marley's moonlight (unf)",'Azure aura mix (unf)','Aqualux amalgam (unf)','Megalite liquid (unf)','Anti-leech lotion (unf)','Mixalot (unf)'];
 let mixologyMode='level';
-let selectedMixologyReward='goggles';
+let selectedMixologyRewards=new Set(['goggles']);
 const MIXOLOGY_REWARDS = [
   {id:'goggles',name:'Prescription goggles',mox:8600,aga:7000,lye:9350,desc:'10% chance to save secondary ingredients.'},
   {id:'amulet',name:"Alchemist's amulet",mox:6900,aga:5650,lye:7400,desc:'15% chance to create an extra potion dose.'},
@@ -644,17 +644,17 @@ function renderMixologyModeToggle(){
 }
 
 function renderMixologyRewardPlan(curLevel){
-  const reward=MIXOLOGY_REWARDS.find(item=>item.id===selectedMixologyReward)||MIXOLOGY_REWARDS[0];
+  const rewards=MIXOLOGY_REWARDS.filter(item=>selectedMixologyRewards.has(item.id));
   if(curLevel<MIXOLOGY_MIN_LEVEL){
     return `<div class="mixology-reward-panel"><h2>Level 60 required</h2><p>Mastering Mixology requires level 60 Herblore and completion of Children of the Sun.</p></div>`;
   }
-  const hours=Math.max(reward.mox,reward.aga,reward.lye)/MIXOLOGY_RESIN_PER_HR_EACH;
+  const resin=rewards.reduce((totals,reward)=>({mox:totals.mox+reward.mox,aga:totals.aga+reward.aga,lye:totals.lye+reward.lye}),{mox:0,aga:0,lye:0});
+  const hours=Math.max(resin.mox,resin.aga,resin.lye)/MIXOLOGY_RESIN_PER_HR_EACH;
   const best={
     mox:MIXOLOGY_HERBS.mox.reduce((a,b)=>(priceOf(a.name)||a.gp_per_paste*a.paste)/a.paste<(priceOf(b.name)||b.gp_per_paste*b.paste)/b.paste?a:b),
     aga:MIXOLOGY_HERBS.aga.reduce((a,b)=>(priceOf(a.name)||a.gp_per_paste*a.paste)/a.paste<(priceOf(b.name)||b.gp_per_paste*b.paste)/b.paste?a:b),
     lye:MIXOLOGY_HERBS.lye.reduce((a,b)=>(priceOf(a.name)||a.gp_per_paste*a.paste)/a.paste<(priceOf(b.name)||b.gp_per_paste*b.paste)/b.paste?a:b),
   };
-  const resin={mox:reward.mox,aga:reward.aga,lye:reward.lye};
   const supplies=Object.keys(resin).map(type=>{
     const paste=Math.ceil(resin[type]/MIXOLOGY_RESIN_PER_PASTE);
     const herbs=Math.ceil(paste/best[type].paste);
@@ -663,16 +663,17 @@ function renderMixologyRewardPlan(curLevel){
   });
   const totalCost=supplies.reduce((sum,item)=>sum+item.cost,0);
   return `<div class="mixology-reward-panel">
-    <div class="mixology-reward-picker">${wikiItemIcon(reward.icon||reward.name,'mixology-reward-icon')}<label>Reward<select id="mixologyRewardSelect">${MIXOLOGY_REWARDS.map(item=>`<option value="${item.id}"${item.id===reward.id?' selected':''}>${item.name}</option>`).join('')}</select></label><p>${reward.desc}</p></div>
-    <div class="focus-summary mixology-reward-summary">
+    <div class="mixology-reward-picker"><div><span class="mixology-picker-label">Choose rewards</span><strong>${rewards.length} selected</strong></div><p>Select every item you want; totals update together.</p></div>
+    <div class="mixology-reward-grid">${MIXOLOGY_REWARDS.map(item=>`<label class="mixology-reward-option${selectedMixologyRewards.has(item.id)?' selected':''}"><input type="checkbox" value="${item.id}"${selectedMixologyRewards.has(item.id)?' checked':''}>${wikiItemIcon(item.icon||item.name,'mixology-reward-icon')}<span><strong>${item.name}</strong><small>${fmt(item.mox)} Mox · ${fmt(item.aga)} Aga · ${fmt(item.lye)} Lye</small></span></label>`).join('')}</div>
+    ${rewards.length?`<div class="focus-summary mixology-reward-summary">
       <div><span>Estimated time</span><strong>${fmtHrs(hours)}</strong></div>
-      <div><span>Mox resin</span><strong>${fmt(reward.mox)}</strong></div>
-      <div><span>Aga resin</span><strong>${fmt(reward.aga)}</strong></div>
-      <div><span>Lye resin</span><strong>${fmt(reward.lye)}</strong></div>
+      <div><span>Mox resin</span><strong>${fmt(resin.mox)}</strong></div>
+      <div><span>Aga resin</span><strong>${fmt(resin.aga)}</strong></div>
+      <div><span>Lye resin</span><strong>${fmt(resin.lye)}</strong></div>
     </div>
     <div class="mixology-reward-supplies">${supplies.map(item=>`<article><strong>${item.type.toUpperCase()}</strong><span>${fmt(item.paste)} paste</span><span>${fmt(item.herbs)} ${item.herb}</span><span>${fmtGp(item.cost)}</span></article>`).join('')}</div>
     <div class="mixology-reward-total"><span>Estimated herb cost</span><strong>${fmtGp(totalCost)}</strong></div>
-    <p class="mixology-reward-note">Estimate assumes attentive level 81+ play at roughly 3,000 of each resin per hour and about 1.5 resin per paste. Actual results vary with orders and digweed.</p>
+    <p class="mixology-reward-note">Estimate assumes attentive level 81+ play at roughly 3,000 of each resin per hour and about 1.5 resin per paste. Actual results vary with orders and digweed.</p>`:`<div class="mixology-reward-empty">Select at least one reward to calculate the combined requirements.</div>`}
   </div>`;
 }
 
@@ -915,8 +916,10 @@ function generatePlan(){
       mixologyMode=button.dataset.mixologyMode;
       generatePlan();
     }));
-    const rewardSelect=document.getElementById('mixologyRewardSelect');
-    if(rewardSelect)rewardSelect.addEventListener('change',()=>{selectedMixologyReward=rewardSelect.value;generatePlan();});
+    document.querySelectorAll('.mixology-reward-option input').forEach(input=>input.addEventListener('change',()=>{
+      if(input.checked)selectedMixologyRewards.add(input.value);else selectedMixologyRewards.delete(input.value);
+      generatePlan();
+    }));
     // Wire mixology collapsibles immediately — can't use the bottom of generatePlan since we return early
     ['potionTable','rewards'].forEach(id=>{
       const btn=document.getElementById(id+'Toggle');
