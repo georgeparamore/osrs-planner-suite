@@ -139,7 +139,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
-<link rel="stylesheet" href="suite-nav.css?v=10">
+<link rel="stylesheet" href="suite-nav.css?v=11">
 </head>
 <body>
 <header>
@@ -612,6 +612,60 @@ const MIXOLOGY_XP_PER_HR_PASSIVE = 45000;
 const MIXOLOGY_PASTE_PER_HR_EACH = 2000; // 2,000 of each paste type per hour (active, 81+)
 const MIXOLOGY_MIN_LEVEL = 60;
 const MIXOLOGY_FULL_LEVEL = 81; // all potions including Mixalot
+const MIXOLOGY_RESIN_PER_HR_EACH = 3000;
+const MIXOLOGY_RESIN_PER_PASTE = 1.5;
+let mixologyMode='level';
+let selectedMixologyReward='goggles';
+const MIXOLOGY_REWARDS = [
+  {id:'goggles',name:'Prescription goggles',mox:8600,aga:7000,lye:9350,desc:'10% chance to save secondary ingredients.'},
+  {id:'amulet',name:"Alchemist's amulet",mox:6900,aga:5650,lye:7400,desc:'15% chance to create an extra potion dose.'},
+  {id:'storage',name:'Potion storage',mox:7750,aga:6300,lye:8950,desc:'Unlocks dedicated potion storage in your bank.'},
+  {id:'pouch',name:'Reagent pouch',mox:13800,aga:11200,lye:15100,desc:'Stores 26 of each supported secondary ingredient.'},
+  {id:'barrel',name:'Chugging barrel',mox:17250,aga:14000,lye:18600,desc:'Stores and drinks up to five banked potions together.'},
+  {id:'labcoat',name:'Alchemist labcoat',mox:2250,aga:2800,lye:3700,desc:'A piece of the cosmetic alchemist outfit.'},
+  {id:'pants',name:'Alchemist pants',mox:2250,aga:2800,lye:3700,desc:'A piece of the cosmetic alchemist outfit.'},
+  {id:'gloves',name:'Alchemist gloves',mox:2250,aga:2800,lye:3700,desc:'A piece of the cosmetic alchemist outfit.'},
+];
+
+function renderMixologyModeToggle(){
+  return `<div class="mixology-mode-bar" aria-label="Mixology goal">
+    <button class="mixology-mode-btn${mixologyMode==='level'?' active':''}" data-mixology-mode="level">Train to level</button>
+    <button class="mixology-mode-btn${mixologyMode==='reward'?' active':''}" data-mixology-mode="reward">Earn a reward</button>
+  </div>`;
+}
+
+function renderMixologyRewardPlan(curLevel){
+  const reward=MIXOLOGY_REWARDS.find(item=>item.id===selectedMixologyReward)||MIXOLOGY_REWARDS[0];
+  if(curLevel<MIXOLOGY_MIN_LEVEL){
+    return `<div class="mixology-reward-panel"><h2>Level 60 required</h2><p>Mastering Mixology requires level 60 Herblore and completion of Children of the Sun.</p></div>`;
+  }
+  const hours=Math.max(reward.mox,reward.aga,reward.lye)/MIXOLOGY_RESIN_PER_HR_EACH;
+  const best={
+    mox:MIXOLOGY_HERBS.mox.reduce((a,b)=>(priceOf(a.name)||a.gp_per_paste*a.paste)/a.paste<(priceOf(b.name)||b.gp_per_paste*b.paste)/b.paste?a:b),
+    aga:MIXOLOGY_HERBS.aga.reduce((a,b)=>(priceOf(a.name)||a.gp_per_paste*a.paste)/a.paste<(priceOf(b.name)||b.gp_per_paste*b.paste)/b.paste?a:b),
+    lye:MIXOLOGY_HERBS.lye.reduce((a,b)=>(priceOf(a.name)||a.gp_per_paste*a.paste)/a.paste<(priceOf(b.name)||b.gp_per_paste*b.paste)/b.paste?a:b),
+  };
+  const resin={mox:reward.mox,aga:reward.aga,lye:reward.lye};
+  const supplies=Object.keys(resin).map(type=>{
+    const paste=Math.ceil(resin[type]/MIXOLOGY_RESIN_PER_PASTE);
+    const herbs=Math.ceil(paste/best[type].paste);
+    const unitPrice=priceOf(best[type].name)||best[type].gp_per_paste*best[type].paste;
+    return {type,paste,herbs,herb:best[type].name,cost:herbs*unitPrice};
+  });
+  const totalCost=supplies.reduce((sum,item)=>sum+item.cost,0);
+  return `<div class="mixology-reward-panel">
+    <div class="mixology-reward-picker"><label>Reward<select id="mixologyRewardSelect">${MIXOLOGY_REWARDS.map(item=>`<option value="${item.id}"${item.id===reward.id?' selected':''}>${item.name}</option>`).join('')}</select></label><p>${reward.desc}</p></div>
+    <div class="focus-summary mixology-reward-summary">
+      <div><span>Estimated time</span><strong>${fmtHrs(hours)}</strong></div>
+      <div><span>Mox resin</span><strong>${fmt(reward.mox)}</strong></div>
+      <div><span>Aga resin</span><strong>${fmt(reward.aga)}</strong></div>
+      <div><span>Lye resin</span><strong>${fmt(reward.lye)}</strong></div>
+    </div>
+    <div class="mixology-reward-supplies">${supplies.map(item=>`<article><strong>${item.type.toUpperCase()}</strong><span>${fmt(item.paste)} paste</span><span>${fmt(item.herbs)} ${item.herb}</span><span>${fmtGp(item.cost)}</span></article>`).join('')}</div>
+    <div class="mixology-reward-total"><span>Estimated herb cost</span><strong>${fmtGp(totalCost)}</strong></div>
+    <p class="mixology-reward-note">Estimate assumes attentive level 81+ play at roughly 3,000 of each resin per hour and about 1.5 resin per paste. Actual results vary with orders and digweed.</p>
+  </div>`;
+}
 
 function renderMixologyPlan(curLevel, targetLevel){
   const accent = '#4a9eff';
@@ -840,7 +894,13 @@ function generatePlan(){
   const accent=accentMap[currentSpeed]||'#c8a84b';
 
   if(currentSpeed==='mixology'){
-    planArea.innerHTML=renderMixologyPlan(curLevel, targetLevelVal);
+    planArea.innerHTML=renderMixologyModeToggle()+(mixologyMode==='reward'?renderMixologyRewardPlan(curLevel):renderMixologyPlan(curLevel, targetLevelVal));
+    document.querySelectorAll('.mixology-mode-btn').forEach(button=>button.addEventListener('click',()=>{
+      mixologyMode=button.dataset.mixologyMode;
+      generatePlan();
+    }));
+    const rewardSelect=document.getElementById('mixologyRewardSelect');
+    if(rewardSelect)rewardSelect.addEventListener('change',()=>{selectedMixologyReward=rewardSelect.value;generatePlan();});
     // Wire mixology collapsibles immediately — can't use the bottom of generatePlan since we return early
     ['potionTable','rewards'].forEach(id=>{
       const btn=document.getElementById(id+'Toggle');
@@ -1057,6 +1117,6 @@ updateStatusCard();
 generatePlan();
 loadPrices();
 </script>
-<script src="suite-nav.js?v=10"></script>
+<script src="suite-nav.js?v=11"></script>
 </body>
 </html>
