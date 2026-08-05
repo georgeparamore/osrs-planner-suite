@@ -139,7 +139,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
-<link rel="stylesheet" href="suite-nav.css?v=8">
+<link rel="stylesheet" href="suite-nav.css?v=9">
 </head>
 <body>
 <header>
@@ -211,15 +211,15 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
       <div class="speed-panel-label">Route</div>
       <div class="speed-tabs">
         <div class="speed-tab" data-speed="nuclear" style="--accent:#e74c3c;">
-          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#e74c3c;"></span>Nuclear</div>
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#e74c3c;"></span>Fastest</div>
           <div class="speed-tab-sub">Max XP/hr, money no object — ends on Menaphite remedy (200 xp, fastest potion in game)</div>
         </div>
         <div class="speed-tab active" data-speed="standard" style="--accent:#c8a84b;">
-          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#c8a84b;"></span>Standard</div>
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#c8a84b;"></span>Simple</div>
           <div class="speed-tab-sub">Straightforward training — prayer potions → super restores → Saradomin brews through 99</div>
         </div>
         <div class="speed-tab" data-speed="budget" style="--accent:#2ecc71;">
-          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#2ecc71;"></span>Budget</div>
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#2ecc71;"></span>Cheapest</div>
           <div class="speed-tab-sub">Cost-first route — herb cleaning early, extended antifire 84, super combat 90</div>
         </div>
         <div class="speed-tab" data-speed="mixology" style="--accent:#4a9eff;">
@@ -485,8 +485,10 @@ function updateStatusCard(){
 
 // ── ROUTE GENERATION ────────────────────────────────────────────────────────────
 function buildRoute(startLevel, endLevel, speed){
-  const methods=HERBLORE_METHODS[speed];
-  const isLiveValue=speed==='value';
+  const methods=speed==='budget'
+    ? [...HERBLORE_METHODS.value,...HERBLORE_METHODS.budget]
+    : HERBLORE_METHODS[speed];
+  const isLiveValue=speed==='budget';
   const stops=[];
   let lvl=startLevel;
   while(lvl<endLevel){
@@ -520,7 +522,7 @@ function buildRoute(startLevel, endLevel, speed){
       previous.totalCost=netCostPerAction(method)*previous.actionsNeeded;
     }else{
       const liveValueNote=isLiveValue
-        ? `Selected automatically at ${netGpPerXp(method).toFixed(2)} net GP/XP using the latest loaded GE prices. This choice can change as prices move.`
+        ? `Cheapest eligible method at ${netGpPerXp(method).toFixed(2)} net GP/XP using the latest loaded GE prices. This choice can change as prices move.`
         : method.note;
       stops.push({...method,note:liveValueNote,levelStart:lvl,levelEnd:stopEnd,xpNeeded,actionsNeeded,hoursNeeded,totalCost});
     }
@@ -547,6 +549,17 @@ function netGpPerXp(method){
 function fmt(n){if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
 function fmtGp(n){const abs=Math.abs(n);let s;if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';else s=Math.round(abs).toLocaleString();return(n<0?'-':'')+s+' gp';}
 function fmtHrs(h){if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixed(1)+' hrs';return(h/24).toFixed(1)+' days';}
+
+function updateRouteTabMetrics(startLevel,endLevel){
+  if(!pricesLoaded||startLevel>=endLevel)return;
+  ['nuclear','standard','budget'].forEach(speed=>{
+    const route=buildRoute(startLevel,endLevel,speed);
+    const cost=route.reduce((sum,stop)=>sum+stop.totalCost,0);
+    const hours=route.reduce((sum,stop)=>sum+stop.hoursNeeded,0);
+    const subtitle=document.querySelector(`.speed-tab[data-speed="${speed}"] .speed-tab-sub`);
+    if(subtitle)subtitle.dataset.liveSummary=`${fmtGp(Math.abs(cost)).replace(' gp','')} · ${fmtHrs(hours)}`;
+  });
+}
 
 // ── MASTERING MIXOLOGY PLAN ──────────────────────────────────────────────────────
 // Completely different cost/XP model from standard potion making:
@@ -822,6 +835,7 @@ function renderMixologyPlan(curLevel, targetLevel){
 function generatePlan(){
   const planArea=document.getElementById('planArea');
   const curLevel=levelForXp(playerXp);
+  updateRouteTabMetrics(curLevel,targetLevelVal);
   const accentMap={nuclear:'#e74c3c', standard:'#c8a84b', value:'#9b6fd6', budget:'#2ecc71', mixology:'#4a9eff'};
   const accent=accentMap[currentSpeed]||'#c8a84b';
 
@@ -843,7 +857,7 @@ function generatePlan(){
     return;
   }
 
-  if(currentSpeed==='value'&&!pricesLoaded){
+  if(currentSpeed==='budget'&&!pricesLoaded){
     planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);"><div class="spinner" style="margin:0 auto 14px;"></div><div>Waiting for live Grand Exchange prices to choose the best-value methods…</div></div>`;
     return;
   }
@@ -1042,6 +1056,6 @@ updateStatusCard();
 generatePlan();
 loadPrices();
 </script>
-<script src="suite-nav.js?v=8"></script>
+<script src="suite-nav.js?v=9"></script>
 </body>
 </html>

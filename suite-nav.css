@@ -92,9 +92,9 @@ body[data-suite-page="herblore"] .speed-tab-name{justify-content:center;font-siz
 body[data-suite-page="herblore"] .speed-tab-dot{display:none}
 body[data-suite-page="herblore"] .speed-tab-sub{font-size:0;line-height:1;margin-top:5px}
 body[data-suite-page="herblore"] .speed-tab-sub:after{font-size:10px;color:var(--text-dim)}
-body[data-suite-page="herblore"] .speed-tab[data-speed="nuclear"] .speed-tab-sub:after{content:'Fastest'}
-body[data-suite-page="herblore"] .speed-tab[data-speed="standard"] .speed-tab-sub:after{content:'Simple'}
-body[data-suite-page="herblore"] .speed-tab[data-speed="budget"] .speed-tab-sub:after{content:'Low spend'}
+body[data-suite-page="herblore"] .speed-tab[data-speed="nuclear"] .speed-tab-sub:after{content:attr(data-live-summary)}
+body[data-suite-page="herblore"] .speed-tab[data-speed="standard"] .speed-tab-sub:after{content:attr(data-live-summary)}
+body[data-suite-page="herblore"] .speed-tab[data-speed="budget"] .speed-tab-sub:after{content:attr(data-live-summary)}
 body[data-suite-page="herblore"] .speed-tab[data-speed="mixology"] .speed-tab-sub:after{content:'Minigame'}
 body[data-suite-page="herblore"] .plan-area{border:1px solid var(--border);border-top:0;border-radius:0;background:transparent;padding:16px 24px 28px;min-height:0}
 body[data-suite-page="herblore"] .focus-summary{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:16px}
