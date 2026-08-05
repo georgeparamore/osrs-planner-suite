@@ -276,9 +276,9 @@ bankTagData[tagId] = { plain: plainTagString, layout: layoutTagString };
 ```
 nuclear   — max XP/hr: Attack→Prayer→Super att→Super energy→Super str→
             Super restore→Sara brew 81→Ancient brew 85→Menaphite remedy 88→99
-standard  — what most players do: Attack→Prayer→Super restore→Sara brew 81→Super combat 90
-midroad   — Theoatrix "cheap & fast": Attack→Energy→Prayer→Super restore→
-            Ranging potion 72→Stamina 81→Super combat 90
+standard  — simple inventories: Attack→Prayer→Super restore→Sara brew 81→99
+midroad   — balanced cost/speed: Attack→Energy→Prayer→Super restore→
+            Ranging potion 72→Stamina 81→Forgotten brew 91
 budget    — herb cleaning→Prayer→Super restore→Extended antifire 84→Super combat 90
 ```
 
@@ -289,7 +289,7 @@ Plus a 5th special tab: **⚗️ Mastering Mixology** — renders via `renderMix
 Attack: 25          Prayer: 87.5        Super attack: 100     Super energy: 117.5
 Super strength: 125  Super restore: 142.5  Saradomin brew: 180  Ancient brew: 190
 Menaphite remedy: 200  (level 88, dwarf weed unf + lily of the sands)
-Extended antifire: 110  Stamina: 102  Ranging: 162.5  Super combat: 150
+Extended antifire: 110  Stamina: 25.5/dose (76.5 for 3-dose)  Ranging: 162.5  Super combat: 150
 ```
 
 ### Verified actions per hour (from OSRS Wiki XP/hr column)
@@ -307,7 +307,7 @@ Herb cleaning:                     5,000/hr
 // Support both plain string and {name, qty} object:
 inputNames: ['Toadflax potion (unf)', 'Crushed nest']           // 1 each
 inputNames: ['Antifire potion(4)', {name:'Lava scale shard', qty:4}]  // 4 shards
-inputNames: ['Super energy(3)',    {name:'Amylase crystal',   qty:4}]  // 4 crystals
+inputNames: ['Super energy(3)',    {name:'Amylase crystal',   qty:3}]  // 3 crystals (one per dose)
 
 // Cost formula handles both:
 const inCost = (method.inputNames||[]).reduce((sum,n) => {
@@ -322,7 +322,7 @@ const inCost = (method.inputNames||[]).reduce((sum,n) => {
 Upfront Capital = gross ingredient cost (what you need in bank before starting)
 Net Cost        = upfront - sell credit after GE tax (what you actually spend)
 ```
-For routes like Standard 81→99, upfront is ~750M but net is only ~42M because super combat ingredients cost ~620M but the finished potions sell for ~610M. Always show both or players will be confused.
+For long routes, upfront capital can be hundreds of millions even when the net cost is much lower because finished potions are sold back. Always show both or players will be confused.
 
 ### Super combat special notes
 - Torstol is NOT stackable — each takes its own inventory slot
