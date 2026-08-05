@@ -79,6 +79,7 @@ body[data-suite-page="herblore"] .focused-exact-xp{display:none;width:150px;heig
 body[data-suite-page="herblore"] .focused-level-strip.show-exact .focused-exact-xp{display:block}
 body[data-suite-page="herblore"] .focused-meta{min-height:24px;padding:6px 2px;display:flex;align-items:center;gap:12px}
 body[data-suite-page="herblore"] .focused-meta .price-status,body[data-suite-page="herblore"] .focused-meta .fetch-status{margin:0;font-size:10px}
+body[data-suite-page="herblore"] .focused-status-engine{display:none!important}
 body[data-suite-page="herblore"] .speed-panel{border:1px solid var(--border);border-top:0;background:var(--surface);padding:0}
 body[data-suite-page="herblore"] .speed-panel-label{display:none}
 body[data-suite-page="herblore"] .speed-tabs{gap:0}

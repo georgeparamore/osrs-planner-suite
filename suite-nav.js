@@ -42,6 +42,7 @@
     const exactButton=document.getElementById('womToggle');
     const priceStatus=document.getElementById('priceStatus');
     const fetchStatus=document.getElementById('womStatus');
+    const statusCard=document.getElementById('statusCard');
     if(content&&oldPanel&&speedPanel&&username&&fetchButton&&fromInput&&toInput&&updateButton){
       const focusedHead=document.createElement('section');
       focusedHead.className='focused-page-head';
@@ -64,6 +65,7 @@
       meta.className='focused-meta';
       if(priceStatus)meta.append(priceStatus);
       if(fetchStatus)meta.append(fetchStatus);
+      if(statusCard){statusCard.classList.add('focused-status-engine');meta.append(statusCard)}
 
       content.insertBefore(focusedHead,oldPanel);
       focusedHead.insertAdjacentElement('afterend',levelStrip);
