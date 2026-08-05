@@ -139,7 +139,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
-<link rel="stylesheet" href="suite-nav.css?v=11">
+<link rel="stylesheet" href="suite-nav.css?v=12">
 </head>
 <body>
 <header>
@@ -335,6 +335,14 @@ function sellPriceOf(name){
   // Apply 1% GE tax on all sales (minimum 1gp, cap 5,000,000gp) — confirmed from wiki
   const tax = Math.min(5000000, Math.max(1, Math.floor(raw * 0.01)));
   return Math.max(0, raw - tax);
+}
+function wikiItemIcon(name,className='mixology-item-icon'){
+  const mapped=nameToIcon[name.toLowerCase()];
+  const filename=mapped||`${name.replace(/ /g,'_')}.png`;
+  const src=mapped
+    ? `https://oldschool.runescape.wiki/images/${encodeURIComponent(filename.replace(/ /g,'_'))}`
+    : `https://oldschool.runescape.wiki/w/Special:Redirect/file/${encodeURIComponent(filename)}`;
+  return `<img class="${className}" src="${src}" alt="${name}" onerror="this.style.display='none'">`;
 }
 
 async function loadPrices(){
@@ -614,6 +622,7 @@ const MIXOLOGY_MIN_LEVEL = 60;
 const MIXOLOGY_FULL_LEVEL = 81; // all potions including Mixalot
 const MIXOLOGY_RESIN_PER_HR_EACH = 3000;
 const MIXOLOGY_RESIN_PER_PASTE = 1.5;
+const MIXOLOGY_POTION_ICONS = ['Alco-augmentator (unf)','Mammoth-might mix (unf)','Liplack liquor (unf)','Mystic mana amalgam (unf)',"Marley's moonlight (unf)",'Azure aura mix (unf)','Aqualux amalgam (unf)','Megalite liquid (unf)','Anti-leech lotion (unf)','Mixalot (unf)'];
 let mixologyMode='level';
 let selectedMixologyReward='goggles';
 const MIXOLOGY_REWARDS = [
@@ -621,9 +630,9 @@ const MIXOLOGY_REWARDS = [
   {id:'amulet',name:"Alchemist's amulet",mox:6900,aga:5650,lye:7400,desc:'15% chance to create an extra potion dose.'},
   {id:'storage',name:'Potion storage',mox:7750,aga:6300,lye:8950,desc:'Unlocks dedicated potion storage in your bank.'},
   {id:'pouch',name:'Reagent pouch',mox:13800,aga:11200,lye:15100,desc:'Stores 26 of each supported secondary ingredient.'},
-  {id:'barrel',name:'Chugging barrel',mox:17250,aga:14000,lye:18600,desc:'Stores and drinks up to five banked potions together.'},
-  {id:'labcoat',name:'Alchemist labcoat',mox:2250,aga:2800,lye:3700,desc:'A piece of the cosmetic alchemist outfit.'},
-  {id:'pants',name:'Alchemist pants',mox:2250,aga:2800,lye:3700,desc:'A piece of the cosmetic alchemist outfit.'},
+  {id:'barrel',name:'Chugging barrel',icon:'Chugging barrel (disassembled)',mox:17250,aga:14000,lye:18600,desc:'Stores and drinks up to five banked potions together.'},
+  {id:'labcoat',name:'Alchemist labcoat',icon:"Alchemist's labcoat",mox:2250,aga:2800,lye:3700,desc:'A piece of the cosmetic alchemist outfit.'},
+  {id:'pants',name:'Alchemist pants',icon:"Alchemist's pants",mox:2250,aga:2800,lye:3700,desc:'A piece of the cosmetic alchemist outfit.'},
   {id:'gloves',name:'Alchemist gloves',mox:2250,aga:2800,lye:3700,desc:'A piece of the cosmetic alchemist outfit.'},
 ];
 
@@ -654,7 +663,7 @@ function renderMixologyRewardPlan(curLevel){
   });
   const totalCost=supplies.reduce((sum,item)=>sum+item.cost,0);
   return `<div class="mixology-reward-panel">
-    <div class="mixology-reward-picker"><label>Reward<select id="mixologyRewardSelect">${MIXOLOGY_REWARDS.map(item=>`<option value="${item.id}"${item.id===reward.id?' selected':''}>${item.name}</option>`).join('')}</select></label><p>${reward.desc}</p></div>
+    <div class="mixology-reward-picker">${wikiItemIcon(reward.icon||reward.name,'mixology-reward-icon')}<label>Reward<select id="mixologyRewardSelect">${MIXOLOGY_REWARDS.map(item=>`<option value="${item.id}"${item.id===reward.id?' selected':''}>${item.name}</option>`).join('')}</select></label><p>${reward.desc}</p></div>
     <div class="focus-summary mixology-reward-summary">
       <div><span>Estimated time</span><strong>${fmtHrs(hours)}</strong></div>
       <div><span>Mox resin</span><strong>${fmt(reward.mox)}</strong></div>
@@ -895,6 +904,13 @@ function generatePlan(){
 
   if(currentSpeed==='mixology'){
     planArea.innerHTML=renderMixologyModeToggle()+(mixologyMode==='reward'?renderMixologyRewardPlan(curLevel):renderMixologyPlan(curLevel, targetLevelVal));
+    document.querySelectorAll('#potionTableBody tbody tr').forEach((row,index)=>{
+      const cell=row.cells[0];
+      if(cell&&MIXOLOGY_POTION_ICONS[index]){
+        cell.classList.add('mixology-potion-cell');
+        cell.insertAdjacentHTML('afterbegin',wikiItemIcon(MIXOLOGY_POTION_ICONS[index]));
+      }
+    });
     document.querySelectorAll('.mixology-mode-btn').forEach(button=>button.addEventListener('click',()=>{
       mixologyMode=button.dataset.mixologyMode;
       generatePlan();
@@ -1117,6 +1133,6 @@ updateStatusCard();
 generatePlan();
 loadPrices();
 </script>
-<script src="suite-nav.js?v=11"></script>
+<script src="suite-nav.js?v=12"></script>
 </body>
 </html>
