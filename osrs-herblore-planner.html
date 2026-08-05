@@ -139,7 +139,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
-<link rel="stylesheet" href="suite-nav.css?v=14">
+<link rel="stylesheet" href="suite-nav.css?v=15">
 </head>
 <body>
 <header>
@@ -984,7 +984,7 @@ function generatePlan(){
         <p>${ingList || '—'}</p>
         <small>${fmt(stop.xpPerAction*stop.actionsPerHr)} xp/hr · ${fmtHrs(stop.hoursNeeded)}</small>
       </div>
-      <div class="focus-route-stat"><strong>${fmt(stop.actionsNeeded)}</strong><span>potions</span></div>
+      <div class="focus-route-stat"><strong>${stop.actionsNeeded.toLocaleString()}</strong><span>potions</span></div>
       <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded?fmtGp(Math.abs(stop.totalCost)).replace(' gp',''):'—'}</strong><span>${stop.totalCost<0?'net profit':'net cost'}</span></div>
       <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded&&stop.xpNeeded>0?(stop.totalCost/stop.xpNeeded).toFixed(2):'—'}</strong><span>gp/xp</span></div>
     </article>`;

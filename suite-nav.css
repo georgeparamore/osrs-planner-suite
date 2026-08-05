@@ -22,6 +22,7 @@ header{height:58px!important;padding:0 18px!important;gap:14px!important;overflo
 .suite-menu-link strong{font-size:12px;font-weight:600}
 .suite-menu-link small{color:var(--text-dim);font-size:10px;margin-top:2px}
 .content{width:100%}
+:is(body[data-suite-page="skill-profits"],body[data-suite-page="construction"],body[data-suite-page="farming"],body[data-suite-page="prayer"]) .content{flex:0 1 940px;width:calc(100% - 20px);max-width:940px;margin:0 auto}
 body[data-suite-page="herblore"] .content{background:var(--bg)}
 body[data-suite-page="herblore"] .input-panel{max-width:1120px;width:calc(100% - 36px);margin:18px auto 0;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-sizing:border-box}
 body[data-suite-page="herblore"] .speed-panel,body[data-suite-page="herblore"] .plan-area{max-width:1120px;width:calc(100% - 36px);margin-left:auto;margin-right:auto;box-sizing:border-box}
