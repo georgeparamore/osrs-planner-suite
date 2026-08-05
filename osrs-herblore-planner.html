@@ -139,7 +139,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
-<link rel="stylesheet" href="suite-nav.css?v=15">
+<link rel="stylesheet" href="suite-nav.css?v=16">
 </head>
 <body>
 <header>
@@ -492,7 +492,7 @@ function updateStatusCard(){
 }
 
 // ── ROUTE GENERATION ────────────────────────────────────────────────────────────
-function buildRoute(startLevel, endLevel, speed){
+function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel)){
   const methods=speed==='budget'
     ? [...HERBLORE_METHODS.value,...HERBLORE_METHODS.budget]
     : HERBLORE_METHODS[speed];
@@ -515,7 +515,7 @@ function buildRoute(startLevel, endLevel, speed){
     const stopEnd=isLiveValue
       ? Math.min(nextUnlock,endLevel)
       : Math.min(method.maxLevel,endLevel);
-    const xpStart=xpForLevel(lvl), xpEnd=xpForLevel(stopEnd);
+    const xpStart=lvl===startLevel?Math.max(xpForLevel(lvl),startXp):xpForLevel(lvl), xpEnd=xpForLevel(stopEnd);
     const xpNeeded=xpEnd-xpStart;
     const actionsNeeded=Math.ceil(xpNeeded/method.xpPerAction);
     const hoursNeeded=actionsNeeded/method.actionsPerHr;
@@ -561,7 +561,7 @@ function fmtHrs(h){if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixe
 function updateRouteTabMetrics(startLevel,endLevel){
   if(!pricesLoaded||startLevel>=endLevel)return;
   ['nuclear','standard','budget'].forEach(speed=>{
-    const route=buildRoute(startLevel,endLevel,speed);
+    const route=buildRoute(startLevel,endLevel,speed,playerXp);
     const cost=route.reduce((sum,stop)=>sum+stop.totalCost,0);
     const hours=route.reduce((sum,stop)=>sum+stop.hoursNeeded,0);
     const subtitle=document.querySelector(`.speed-tab[data-speed="${speed}"] .speed-tab-sub`);
@@ -941,7 +941,7 @@ function generatePlan(){
     return;
   }
 
-  const stops=buildRoute(curLevel,targetLevelVal,currentSpeed);
+  const stops=buildRoute(curLevel,targetLevelVal,currentSpeed,playerXp);
   if(!stops.length){
     planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);">No route available for this level range and speed setting.</div>`;
     return;
@@ -1136,6 +1136,6 @@ updateStatusCard();
 generatePlan();
 loadPrices();
 </script>
-<script src="suite-nav.js?v=12"></script>
+<script src="suite-nav.js?v=16"></script>
 </body>
 </html>

@@ -65,7 +65,16 @@
       xpLabel.innerHTML='<input type="checkbox" aria-label="Use exact XP"><span>Use exact XP</span>';
       const xpToggle=xpLabel.querySelector('input');
       xpControls.append(xpLabel);
-      if(xpInput){xpInput.classList.add('focused-exact-xp');xpInput.disabled=true;xpControls.append(xpInput)}
+      let xpApply=null;
+      if(xpInput){
+        xpInput.classList.add('focused-exact-xp');
+        xpInput.disabled=true;
+        xpApply=document.createElement('button');
+        xpApply.type='button';
+        xpApply.className='focused-exact-apply';
+        xpApply.textContent='Apply XP';
+        xpControls.append(xpInput,xpApply);
+      }
       levelStrip.append(xpControls);
       if(exactButton)exactButton.remove();
 
@@ -93,6 +102,8 @@
         levelStrip.classList.toggle('show-exact',xpToggle.checked);
         if(xpInput){xpInput.disabled=!xpToggle.checked;if(xpToggle.checked)xpInput.focus()}
       });
+      xpApply?.addEventListener('click',()=>updateButton.click());
+      xpInput?.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();updateButton.click()}});
     }
   }
 })();
