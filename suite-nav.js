@@ -15,6 +15,7 @@
   const header=document.querySelector('header');
   const logo=header?.querySelector('.logo');
   if(!header||!logo) return;
+  logo.textContent='OSRS Tools';
   const groups=['Market tool','Training planner'];
   const menuHtml=groups.map(group=>`<div class="suite-menu-group"><div class="suite-menu-title">${group==='Market tool'?'Market tools':'Training planners'}</div>${tools.filter(tool=>tool.group===group).map(tool=>`<a class="suite-menu-link${tool.file===currentFile?' current':''}" href="${tool.file}"><img src="${tool.icon}" alt=""><strong>${tool.name}</strong><small>${tool.description}</small></a>`).join('')}</div>`).join('');
   const host=document.createElement('div');
