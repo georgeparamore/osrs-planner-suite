@@ -246,7 +246,10 @@ const fmtGp = n => (n>=0?'+':'')+fmt(n)+' gp';
 let prices = {}, allItems = {}, avgPrices = {};
 let currentSkill = 'herblore';
 let sortCol = 'profit', sortDir = -1;
-let isDark = true;
+const SUITE_THEME_KEY='osrs-suite-theme';
+let isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
+document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
 let priceBasis = '1h'; // 'spot' | '1h' | '6h' | '24h'
 
 // Basis label text
@@ -903,6 +906,7 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
   isDark=!isDark;
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
   document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  localStorage.setItem(SUITE_THEME_KEY,isDark?'dark':'light');
 });
 
 boot();

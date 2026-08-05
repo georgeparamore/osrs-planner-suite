@@ -577,7 +577,10 @@ const HERB_YIELD_PER_PATCH = 8.7; // average with ultracompost + magic secateurs
 // ── STATE ─────────────────────────────────────────────────
 let playerLevel=15, playerXp=xpForLevel(15), targetLevelVal=99;
 let currentSpeed='expensive';
-let isDark=true;
+const SUITE_THEME_KEY='osrs-suite-theme';
+let isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
+document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
 // Patch unlock state — keyed by category, each holding a count of EXTRA patches the player has unlocked (booleans per item)
 let unlockedExtras={regularTree:{}, fruitTree:{}, hardwood:{}, herb:{}};
 let herbsEnabledGlobal = true; // controls herb runs across ALL tiers (Expensive/Balanced/Cheap), not just Custom
@@ -785,6 +788,7 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
   isDark=!isDark;
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
   document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  localStorage.setItem(SUITE_THEME_KEY,isDark?'dark':'light');
 });
 
 // ── WISE OLD MAN LOOKUP ───────────────────────────────────

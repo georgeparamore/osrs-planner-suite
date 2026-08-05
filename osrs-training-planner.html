@@ -328,13 +328,17 @@ function womSkill(data,skillKey){
 let currentSkillKey='construction';
 let playerLevel=1, playerXp=0, targetLevelVal=99;
 let currentSpeed='fastest';
-let isDark=true;
+const SUITE_THEME_KEY='osrs-suite-theme';
+let isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
+document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
 
 // ── THEME ─────────────────────────────────────────────────
 document.getElementById('themeBtn').addEventListener('click',()=>{
   isDark=!isDark;
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
   document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  localStorage.setItem(SUITE_THEME_KEY,isDark?'dark':'light');
 });
 
 // ── MANUAL TOGGLE ─────────────────────────────────────────

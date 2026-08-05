@@ -360,7 +360,10 @@ async function loadPrices(){
 }
 
 // ── STATE ───────────────────────────────────────────────────────────────────────
-let playerLevel=1, playerXp=0, targetLevelVal=99, isDark=true;
+const SUITE_THEME_KEY='osrs-suite-theme';
+let playerLevel=1, playerXp=0, targetLevelVal=99, isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
+document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
 let currentMode='bones';          // bones | heads | libation | cremation
 let boneMethod='plain';           // plain | chapel | chaos | ecto
 let altarTierKey='gilded';
@@ -374,6 +377,7 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
   isDark=!isDark;
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
   document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  localStorage.setItem(SUITE_THEME_KEY,isDark?'dark':'light');
 });
 
 // ── WISE OLD MAN LOOKUP (copied verbatim from the Herblore planner, skill key 'prayer') ──

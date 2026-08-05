@@ -365,12 +365,16 @@ async function loadPrices(){
 }
 
 // ── STATE ───────────────────────────────────────────────────────────────────────
-let playerLevel=3, playerXp=0, targetLevelVal=99, currentSpeed='standard', isDark=true;
+const SUITE_THEME_KEY='osrs-suite-theme';
+let playerLevel=3, playerXp=0, targetLevelVal=99, currentSpeed='standard', isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
+document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
 
 document.getElementById('themeBtn').addEventListener('click',()=>{
   isDark=!isDark;
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
   document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  localStorage.setItem(SUITE_THEME_KEY,isDark?'dark':'light');
 });
 
 // ── WISE OLD MAN LOOKUP ───────────────────────────────────────────────────────
