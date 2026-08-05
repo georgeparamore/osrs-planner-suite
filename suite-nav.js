@@ -5,7 +5,8 @@
     {name:'Construction',group:'Training planner',description:'Levels, materials, cost',file:'osrs-training-planner.html',icon:'https://oldschool.runescape.wiki/images/Construction_icon.png'},
     {name:'Farming',group:'Training planner',description:'Runs, patches, inventory',file:'osrs-farming-planner.html',icon:'https://oldschool.runescape.wiki/images/Farming_icon.png'},
     {name:'Herblore',group:'Training planner',description:'Routes and live costs',file:'osrs-herblore-planner.html',icon:'https://oldschool.runescape.wiki/images/Herblore_icon.png'},
-    {name:'Prayer',group:'Training planner',description:'Methods and bone costs',file:'osrs-prayer-planner.html',icon:'https://oldschool.runescape.wiki/images/Prayer_icon.png'}
+    {name:'Prayer',group:'Training planner',description:'Methods and bone costs',file:'osrs-prayer-planner.html',icon:'https://oldschool.runescape.wiki/images/Prayer_icon.png'},
+    {name:'Crafting',group:'Training planner',description:'Gems, dragonhide, and more',file:'osrs-crafting-planner.html',icon:'https://oldschool.runescape.wiki/images/Crafting_icon.png'}
   ];
   const currentFile=(location.pathname.split('/').pop()||'index.html').toLowerCase();
   const currentIndex=tools.findIndex(tool=>tool.file===currentFile);
@@ -29,7 +30,7 @@
   document.addEventListener('click',event=>{if(!host.contains(event.target))close()});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'){close();button.focus()}});
 
-  if(current.name==='Herblore'){
+  if(current.name==='Herblore'||current.name==='Crafting'){
     const content=document.querySelector('.content');
     const oldPanel=document.querySelector('.input-panel');
     const speedPanel=document.querySelector('.speed-panel');
@@ -46,7 +47,7 @@
     if(content&&oldPanel&&speedPanel&&username&&fetchButton&&fromInput&&toInput&&updateButton){
       const focusedHead=document.createElement('section');
       focusedHead.className='focused-page-head';
-      focusedHead.innerHTML=`<div class="focused-title"><span>Training planner</span><h1>Herblore <b>&middot; <span data-focus-current></span> &rarr; <span data-focus-target></span></b></h1></div><div class="focused-account"></div>`;
+      focusedHead.innerHTML=`<div class="focused-title"><span>Training planner</span><h1>${current.name} <b>&middot; <span data-focus-current></span> &rarr; <span data-focus-target></span></b></h1></div><div class="focused-account"></div>`;
       const account=focusedHead.querySelector('.focused-account');
       fetchButton.textContent='Load character';
       account.append(username,fetchButton);

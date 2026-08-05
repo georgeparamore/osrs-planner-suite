@@ -2,10 +2,10 @@
 
 This is the first file both **Claude Code and Codex must read before making changes**. It is the living handoff for switching agents, including when George continues from mobile.
 
-Last updated: 2026-08-05 by Codex  
+Last updated: 2026-08-05 by Claude Code  
 Repository: https://github.com/georgeparamore/osrs-planner-suite.git  
 Live site: https://georgeparamore.github.io/osrs-planner-suite/  
-Active branch: `main`
+Active branch: `main` (built on `claude/osrs-tool-suite-ap8t4k`, which tracks `main` and is pushed after every session)
 
 ## Agent handoff protocol
 
@@ -29,28 +29,43 @@ Do not delete previous dated handoffs. They provide history. Older `PROJECT_HAND
 
 ## Current task
 
-**Owner:** Claude Code (next)  
-**Status:** Ready to begin  
-**Assignment:** Build a focused Crafting Training Planner.
+**Owner:** Codex (next) — or Claude Code, whichever George opens next  
+**Status:** Crafting Training Planner built and locally verified; not yet pushed/deployed from this session's sandbox (no outbound internet to GitHub here — see "How this session verified it" below). Push and watch GitHub Pages before treating it as live.  
+**Assignment for whoever picks this up:** Push the branch, confirm GitHub Pages deploys cleanly, and spot-check the live page with real GE prices (this session could only test against mocked prices).
 
-Full build specification and today’s history:
+Full original build specification: `CLAUDE_HANDOFF_2026-08-05.md`. Note that a few implementation choices below **intentionally deviate** from that spec's suggested routes, because the real Wiki-sourced XP/hr numbers didn't support the originally-assumed breakpoints. Treat this README as authoritative over the original spec for those points.
 
-- `CLAUDE_HANDOFF_2026-08-05.md`
+### What was built
 
-Expected first implementation steps:
+- `osrs-crafting-planner.html` — new focused planner, same architecture/visual language as `osrs-herblore-planner.html` (`suite-nav.js` now generalizes the Herblore-only focused-layout transform to `current.name==='Herblore'||current.name==='Crafting'`, and `suite-nav.css`'s `body[data-suite-page="herblore"]` rules were changed to `:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"])` throughout so both pages share the layout without duplicating ~126 CSS rules).
+- Added to `suite-nav.js`'s tools list (previous/next cycling + dropdown) and to the `index.html` landing-page grid.
+- Four routes — **Fastest**, **Simple**, **Cheapest**, **Low Attention** — built with the same live-value/pool pattern as Herblore's Cheapest route (`buildRoute()` in the file), reevaluated at every level unlock.
+- Controls: Members/F2P segmented toggle (filters `membersOnly` methods from every route and shows a clear "no F2P methods" message rather than a silently wrong route), Costume needle toggle (dragonhide throughput only — 1,685 → 1,705 bodies/hr, does not touch XP or leather quantity), Output handling select (GE sell, or High Alchemy for dragonhide bodies/battlestaves only — those are the only families with a high alch value modeled), and a "skip methods slower than 15k xp/hr" floor toggle for Cheapest.
+- Method data (leather, gem cutting, gold/silver jewellery, battlestaves, dragonhide bodies, molten glass, drift nets, amethyst tips) was pulled live from the OSRS Wiki during this session (Crafting, Pay-to-play/Free-to-play Crafting training, Leather, Dragonhide, Molten glass pages, plus individual item pages for High Alchemy values) rather than from memory — see inline code comments for the exact figures used.
 
-1. Create `osrs-crafting-planner.html` using the focused Herblore planner as the UI/architecture reference.
-2. Add Crafting to `suite-nav.js` and the landing-page tool grid.
-3. Implement verified Crafting method data and live-price calculations.
-4. Implement Fastest, Simple, Cheapest, and Low Attention routes.
-5. Add Members/F2P, costume needle, output handling, and requirement controls.
-6. Verify locally, publish, watch GitHub Pages, and verify publicly.
+### Deviations from the original spec worth knowing about
+
+- **Fastest does not include battlestaves or blue/green dragonhide.** The real Wiki xp/hr numbers (Dragonstone cutting: 382,250 xp/hr from level 55) dominate every battlestaff and blue dragonhide body until Red dragonhide overtakes it at level 77. The route is Leather → Gems (through Dragonstone) → Red dragonhide (77) → Black dragonhide (84). This is mathematically correct given verified data, not a bug — the original spec's suggested "gems → battlestaves → d'hide" Fastest shape assumed battlestaves would be competitive, and the numbers don't support that once Dragonstone is in the pool. Fastest's candidate pool is intentionally narrower than Cheapest's (leather/gems/battlestaves/dragonhide only — no glass/jewellery/drift nets), matching the original spec's family list for that route specifically.
+- **Simple was hand-curated** to be genuinely different from Fastest per the spec: it uses all four dragonhide tiers (skips Air battlestaff) instead of Fastest's XP-optimal crossover, and consolidates a couple of the shortest early leather tiers.
+- **Self-tanned dragonhide alching was not implemented** (only plain GE-sell and plain High-Alch). Modeling it accurately needs tanning-fee data this session couldn't verify confidently; flagged rather than guessed.
+- **Leather crafting's actions/hour (1,750/hr) is an estimate**, applied consistently with the same assumption used for glassblowing — the Wiki confirms leather's 3-tick (1.8s) crafting animation but not a banked items/hour rate. This matters because Fastest/Cheapest choose between families purely on the numbers; an unverified low estimate here previously caused Fastest to wrongly skip leather in favor of glass. Worth re-verifying against real play if precision matters.
+- **Amethyst tip output quantities are flagged, not asserted** — the per-amethyst output multiplier wasn't independently verified.
+
+### How this session verified it
+
+This sandbox has no outbound internet access to `prices.runescape.wiki` or GitHub, so full end-to-end testing with live prices and a real push/deploy wasn't possible. What *was* verified locally with Playwright + Chromium:
+- No console/page errors across all four routes, F2P/Members toggle, needle toggle, output-handling selector, and the shopping-list toggle.
+- No horizontal overflow at a 390px mobile viewport.
+- Cost-engine arithmetic hand-checked against mocked GE prices (input cost, GE tax, net cost, shopping-list aggregation, upfront vs net-profit totals) — all matched expected values exactly.
+- F2P mode correctly excludes members-only methods and shows a clear message when a route has none available (Low Attention is all-glass, so F2P shows "no F2P methods" there).
+
+**Next agent: push this branch, let GitHub Pages deploy, then hit the live page with real prices to confirm the Cheapest route's live-price selection behaves as expected — that path could only be code-reviewed here, not exercised against real data.**
 
 ## Current production state
 
-Last deployed feature commit before these documentation files: `385eaa2` — landing-page theme toggle.
+Last deployed feature commit before this session: `4d64880` — shared agent handoff and Crafting plan docs (no code changes).
 
-The public suite currently includes:
+The public suite currently includes (once this session's branch is deployed):
 
 - Landing page/player lookup
 - GE Tracker
@@ -59,6 +74,7 @@ The public suite currently includes:
 - Farming Planner
 - Herblore Planner
 - Prayer Planner
+- Crafting Planner (new this session)
 
 Important current behavior:
 
