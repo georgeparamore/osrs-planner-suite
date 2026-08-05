@@ -48,7 +48,7 @@
       focusedHead.className='focused-page-head';
       focusedHead.innerHTML=`<div class="focused-title"><span>Training planner</span><h1>Herblore <b>&middot; <span data-focus-current></span> &rarr; <span data-focus-target></span></b></h1></div><div class="focused-account"></div>`;
       const account=focusedHead.querySelector('.focused-account');
-      fetchButton.textContent='Update account';
+      fetchButton.textContent='Load character';
       account.append(username,fetchButton);
 
       const levelStrip=document.createElement('section');
@@ -58,8 +58,16 @@
       levelStrip.querySelector('label:last-of-type').append(toInput);
       updateButton.textContent='Update';
       levelStrip.append(updateButton);
-      if(xpInput){xpInput.classList.add('focused-exact-xp');levelStrip.append(xpInput)}
-      if(exactButton){exactButton.textContent='Use exact XP';exactButton.classList.add('focused-exact-toggle');levelStrip.append(exactButton)}
+      const xpControls=document.createElement('div');
+      xpControls.className='focused-xp-controls';
+      const xpLabel=document.createElement('label');
+      xpLabel.className='focused-xp-check';
+      xpLabel.innerHTML='<input type="checkbox" aria-label="Use exact XP"><span>Use exact XP</span>';
+      const xpToggle=xpLabel.querySelector('input');
+      xpControls.append(xpLabel);
+      if(xpInput){xpInput.classList.add('focused-exact-xp');xpInput.disabled=true;xpControls.append(xpInput)}
+      levelStrip.append(xpControls);
+      if(exactButton)exactButton.remove();
 
       const meta=document.createElement('div');
       meta.className='focused-meta';
@@ -81,7 +89,10 @@
       toInput.addEventListener('input',syncHeading);
       updateButton.addEventListener('click',syncHeading);
       fetchButton.addEventListener('click',()=>setTimeout(syncHeading,700));
-      exactButton?.addEventListener('click',()=>levelStrip.classList.toggle('show-exact'));
+      xpToggle.addEventListener('change',()=>{
+        levelStrip.classList.toggle('show-exact',xpToggle.checked);
+        if(xpInput){xpInput.disabled=!xpToggle.checked;if(xpToggle.checked)xpInput.focus()}
+      });
     }
   }
 })();
