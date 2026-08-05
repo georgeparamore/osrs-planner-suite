@@ -139,7 +139,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
-<link rel="stylesheet" href="suite-nav.css?v=2">
+<link rel="stylesheet" href="suite-nav.css?v=3">
 </head>
 <body>
 <header>
@@ -878,94 +878,31 @@ function generatePlan(){
     });
   }
 
-  const gpPerXp = totalXp>0 && pricesLoaded ? (totalCost/totalXp).toFixed(2) : null;
-  let html=`<div class="plan-summary">
-    <div class="plan-summary-stat"><div class="plan-summary-label">Route</div><div class="plan-summary-value accent">Lvl ${curLevel} → ${targetLevelVal}</div></div>
-    <div class="plan-summary-stat"><div class="plan-summary-label">Total XP</div><div class="plan-summary-value">${fmt(totalXp)}</div></div>
-    <div class="plan-summary-stat"><div class="plan-summary-label">Est. Time</div><div class="plan-summary-value">${fmtHrs(totalHrs)}</div></div>
-    <div class="plan-summary-stat"><div class="plan-summary-label">Total Potions</div><div class="plan-summary-value">${fmt(totalPotions)}</div></div>
-    ${gpPerXp!==null?`<div class="plan-summary-stat"><div class="plan-summary-label">Avg GP/XP</div><div class="plan-summary-value" style="color:${parseFloat(gpPerXp)<=0?'#2ecc71':'#e74c3c'};">${gpPerXp} gp</div></div>`:''}
-    <div class="plan-summary-divider"></div>
-    ${pricesLoaded?`
-    <div class="plan-summary-stat" title="Total GP you need in your bank before starting — you'll recover most of this by selling the finished potions">
-      <div class="plan-summary-label">💰 Upfront Capital</div>
-      <div class="plan-summary-value" style="color:#e74c3c;">${fmtGp(grossIngredientCost)}</div>
-    </div>
-    <div class="plan-summary-total" title="What you actually spend after selling all finished potions — can be much lower than upfront capital if potions are valuable">
-      <div class="plan-summary-label">${totalCost>=0?'Net Cost (after selling)':'Net Profit (after selling)'}</div>
-      <div class="plan-summary-value" style="color:${totalCost>=0?'#e74c3c':'#2ecc71'};">${fmtGp(Math.abs(totalCost))}</div>
-    </div>`:`
-    <div class="plan-summary-total">
-      <div class="plan-summary-label">Est. Cost</div>
-      <div class="plan-summary-value" style="color:var(--text-dim);">Loading prices…</div>
-    </div>`}
+  let html=`<div class="focus-summary">
+    <div><span>${totalCost>=0?'Net cost':'Net profit'}</span><strong style="color:${totalCost>=0?'#e74c3c':'#2ecc71'};">${pricesLoaded?fmtGp(Math.abs(totalCost)):'Loading…'}</strong></div>
+    <div><span>Time</span><strong>${fmtHrs(totalHrs)}</strong></div>
+    <div><span>Potions</span><strong>${fmt(totalPotions)}</strong></div>
+    <div><span>Upfront</span><strong>${pricesLoaded?fmtGp(grossIngredientCost):'Loading…'}</strong></div>
   </div>`;
 
-  if(pricesLoaded) html+=`<div style="font-size:11px;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:14px;line-height:1.5;">
-    💡 <strong style="color:var(--text);">Net cost = ingredients bought minus potions sold.</strong>
-    Upfront Capital is how much GP you need in your bank before starting.
-    Net Cost is what you actually spend after selling everything back.
-    GP/XP is the fairest comparison between methods.
-  </div>`;
-
-  html+=`<div class="route-line" style="--accent:${accent};">`;
+  html+=`<div class="focus-route-list" style="--accent:${accent};">`;
   stops.forEach(stop=>{
-    const netCostLabel=stop.totalCost<0?'Net Profit':'Net Cost';
-    const costBadgeCls=stop.totalCost<0?'cost profit':'cost';
-    const costStr=pricesLoaded?fmtGp(Math.abs(stop.totalCost)):'—';
-    // Compute gross ingredient cost for this stop for display
-    const grossStopCost = pricesLoaded ? (stop.inputNames||[]).reduce((s,n)=>{
-      const nm=typeof n==='string'?n:n.name; const q=typeof n==='object'&&n.qty?n.qty:1;
-      return s+(priceOf(nm)||0)*q;
-    },0)*stop.actionsNeeded : 0;
     const ingList=(stop.inputNames||[]).map(n=>typeof n==='string'?n:`${n.name}${n.qty>1?` ×${n.qty}`:''}`).join(' + ');
-    html+=`<div class="route-stop" style="--accent:${accent};">
-      <div class="route-stop-header">
-        <div class="route-stop-levels">${stop.levelStart} → ${stop.levelEnd}</div>
-        <div class="route-stop-name">${stop.name}</div>
-        <div class="route-stop-badges">
-          <span class="route-badge xp">${fmt(stop.xpPerAction)} xp/potion</span>
-          <span class="route-badge xp">${fmt(stop.xpPerAction*stop.actionsPerHr/1000)}k xp/hr</span>
-          <span class="route-badge time">${fmtHrs(stop.hoursNeeded)}</span>
-          ${pricesLoaded?`<span class="route-badge ${costBadgeCls}">${netCostLabel}: ${costStr}</span>`:''}
-        </div>
+    html+=`<article class="focus-route-row">
+      <div class="focus-levels"><span>${stop.levelStart}</span><span>→</span><span>${stop.levelEnd}</span></div>
+      <div class="focus-method">
+        <h3>${stop.name}</h3>
+        <p>${ingList || '—'}</p>
+        <small>${fmt(stop.xpPerAction*stop.actionsPerHr)} xp/hr · ${fmtHrs(stop.hoursNeeded)}</small>
       </div>
-      <div class="route-stop-detail">
-        <div class="route-stat"><div class="route-stat-label">XP Needed</div><div class="route-stat-value">${stop.xpNeeded.toLocaleString()}</div></div>
-        <div class="route-stat"><div class="route-stat-label">Potions to Make</div><div class="route-stat-value">${fmt(stop.actionsNeeded)}</div></div>
-        <div class="route-stat"><div class="route-stat-label">XP/Hr</div><div class="route-stat-value">${fmt(stop.xpPerAction*stop.actionsPerHr)}</div></div>
-        ${pricesLoaded?`
-        <div class="route-stat"><div class="route-stat-label">Upfront Cost</div><div class="route-stat-value" style="color:#e74c3c;">${fmtGp(grossStopCost)}</div></div>
-        <div class="route-stat"><div class="route-stat-label">GP/XP (net)</div><div class="route-stat-value" style="color:${stop.totalCost<=0?'#2ecc71':'#e74c3c'};">${stop.xpNeeded>0?(stop.totalCost/stop.xpNeeded).toFixed(2)+' gp':'—'}</div></div>`:''}
-      </div>
-      <div class="route-stop-ing">🌿 <strong>Ingredients:</strong> ${ingList || '—'}</div>
-      ${stop.note?`<div class="route-stop-ing" style="margin-top:4px;">💡 ${stop.note}</div>`:''}
-    </div>`;
+      <div class="focus-route-stat"><strong>${fmt(stop.actionsNeeded)}</strong><span>potions</span></div>
+      <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded&&stop.xpNeeded>0?(stop.totalCost/stop.xpNeeded).toFixed(2):'—'}</strong><span>gp/xp</span></div>
+    </article>`;
   });
   html+=`</div>`;
 
-  // Target level cost estimate
-  const finishDate=new Date();
-  finishDate.setDate(finishDate.getDate()+Math.ceil(totalHrs/24));
-  const finishStr=finishDate.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
-  html+=`<div class="route-finish" style="margin-left:34px;">
-    <div class="route-finish-title">🏁 Level ${targetLevelVal} reached</div>
-    <div class="route-finish-sub">${fmt(totalXp)} XP · ${fmtHrs(totalHrs)} · ${fmt(totalPotions)} potions · finish by ${finishStr}</div>
-  </div>`;
-
   if(pricesLoaded){
-    const hourlyRate=totalHrs>0?totalXp/totalHrs:0;
-    html+=`<div class="target-estimate-card">
-      <div class="target-estimate-title">🎯 Summary to Level ${targetLevelVal}</div>
-      <div class="target-estimate-grid">
-        <div class="target-estimate-stat"><div class="target-estimate-label">XP Remaining</div><div class="target-estimate-value">${fmt(Math.max(0,xpForLevel(targetLevelVal)-playerXp))}</div></div>
-        <div class="target-estimate-stat"><div class="target-estimate-label">Est. Time</div><div class="target-estimate-value">${fmtHrs(totalHrs)}</div></div>
-        <div class="target-estimate-stat"><div class="target-estimate-label">Finish By</div><div class="target-estimate-value" style="font-size:14px;">${finishStr}</div></div>
-        <div class="target-estimate-stat"><div class="target-estimate-label">💰 Upfront Capital</div><div class="target-estimate-value" style="color:#e74c3c;font-size:15px;">${fmtGp(grossIngredientCost)}</div></div>
-        <div class="target-estimate-stat target-estimate-cost"><div class="target-estimate-label">${totalCost>=0?'Net Cost (after selling)':'Net Profit (after selling)'}</div><div class="target-estimate-value" style="color:${totalCost>=0?'#e74c3c':'#2ecc71'};">${fmtGp(Math.abs(totalCost))}</div></div>
-      </div>
-      <div class="target-estimate-note">Cost estimates use live Grand Exchange prices for ingredients vs. finished potion sell price. Actual cost depends on your banking speed and market fluctuations — check prices before bulk buying.</div>
-    </div>`;
+    html+=`<div class="focus-market-note">Prices use current Grand Exchange buy costs, estimated sell revenue, and GE tax.</div>`;
 
     // ── SHOPPING LIST ─────────────────────────────────────────
     // Per-stop breakdown of exactly what to buy and how many, plus a grand-total aggregation
@@ -1109,6 +1046,6 @@ updateStatusCard();
 generatePlan();
 loadPrices();
 </script>
-<script src="suite-nav.js?v=2"></script>
+<script src="suite-nav.js?v=3"></script>
 </body>
 </html>
