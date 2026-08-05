@@ -28,4 +28,58 @@
   button.addEventListener('click',event=>{event.stopPropagation();const open=menu.classList.toggle('open');button.setAttribute('aria-expanded',String(open))});
   document.addEventListener('click',event=>{if(!host.contains(event.target))close()});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'){close();button.focus()}});
+
+  if(current.name==='Herblore'){
+    const content=document.querySelector('.content');
+    const oldPanel=document.querySelector('.input-panel');
+    const speedPanel=document.querySelector('.speed-panel');
+    const username=document.getElementById('womUsername');
+    const fetchButton=document.getElementById('womFetchBtn');
+    const fromInput=document.getElementById('manualLevel');
+    const toInput=document.getElementById('targetLevel');
+    const xpInput=document.getElementById('manualXp');
+    const updateButton=document.getElementById('applyBtn');
+    const exactButton=document.getElementById('womToggle');
+    const priceStatus=document.getElementById('priceStatus');
+    const fetchStatus=document.getElementById('womStatus');
+    if(content&&oldPanel&&speedPanel&&username&&fetchButton&&fromInput&&toInput&&updateButton){
+      const focusedHead=document.createElement('section');
+      focusedHead.className='focused-page-head';
+      focusedHead.innerHTML=`<div class="focused-title"><span>Training planner</span><h1>Herblore <b>&middot; <span data-focus-current></span> &rarr; <span data-focus-target></span></b></h1></div><div class="focused-account"></div>`;
+      const account=focusedHead.querySelector('.focused-account');
+      fetchButton.textContent='Update account';
+      account.append(username,fetchButton);
+
+      const levelStrip=document.createElement('section');
+      levelStrip.className='focused-level-strip';
+      levelStrip.innerHTML='<label><span>From</span></label><i>&rarr;</i><label><span>To</span></label>';
+      levelStrip.querySelector('label:first-child').append(fromInput);
+      levelStrip.querySelector('label:last-of-type').append(toInput);
+      updateButton.textContent='Update';
+      levelStrip.append(updateButton);
+      if(xpInput){xpInput.classList.add('focused-exact-xp');levelStrip.append(xpInput)}
+      if(exactButton){exactButton.textContent='Use exact XP';exactButton.classList.add('focused-exact-toggle');levelStrip.append(exactButton)}
+
+      const meta=document.createElement('div');
+      meta.className='focused-meta';
+      if(priceStatus)meta.append(priceStatus);
+      if(fetchStatus)meta.append(fetchStatus);
+
+      content.insertBefore(focusedHead,oldPanel);
+      focusedHead.insertAdjacentElement('afterend',levelStrip);
+      levelStrip.insertAdjacentElement('afterend',meta);
+      oldPanel.remove();
+
+      const syncHeading=()=>{
+        focusedHead.querySelector('[data-focus-current]').textContent=fromInput.value||'3';
+        focusedHead.querySelector('[data-focus-target]').textContent=toInput.value||'99';
+      };
+      syncHeading();
+      fromInput.addEventListener('input',syncHeading);
+      toInput.addEventListener('input',syncHeading);
+      updateButton.addEventListener('click',syncHeading);
+      fetchButton.addEventListener('click',()=>setTimeout(syncHeading,700));
+      exactButton?.addEventListener('click',()=>levelStrip.classList.toggle('show-exact'));
+    }
+  }
 })();
