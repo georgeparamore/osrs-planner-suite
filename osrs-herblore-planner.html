@@ -139,7 +139,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
-<link rel="stylesheet" href="suite-nav.css?v=9">
+<link rel="stylesheet" href="suite-nav.css?v=10">
 </head>
 <body>
 <header>
@@ -906,6 +906,7 @@ function generatePlan(){
         <small>${fmt(stop.xpPerAction*stop.actionsPerHr)} xp/hr · ${fmtHrs(stop.hoursNeeded)}</small>
       </div>
       <div class="focus-route-stat"><strong>${fmt(stop.actionsNeeded)}</strong><span>potions</span></div>
+      <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded?fmtGp(Math.abs(stop.totalCost)).replace(' gp',''):'—'}</strong><span>${stop.totalCost<0?'net profit':'net cost'}</span></div>
       <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded&&stop.xpNeeded>0?(stop.totalCost/stop.xpNeeded).toFixed(2):'—'}</strong><span>gp/xp</span></div>
     </article>`;
   });
@@ -1056,6 +1057,6 @@ updateStatusCard();
 generatePlan();
 loadPrices();
 </script>
-<script src="suite-nav.js?v=9"></script>
+<script src="suite-nav.js?v=10"></script>
 </body>
 </html>
