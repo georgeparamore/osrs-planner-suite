@@ -139,7 +139,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
-<link rel="stylesheet" href="suite-nav.css?v=16">
+<link rel="stylesheet" href="suite-nav.css?v=17">
 </head>
 <body>
 <header>
@@ -430,6 +430,7 @@ async function doWomLookup(){
     }
     document.getElementById('manualLevel').value=skillData.level;
     document.getElementById('manualXp').value=skillData.xp;
+    document.dispatchEvent(new CustomEvent('herblore:exact-xp'));
     localStorage.setItem(WOM_USERNAME_KEY,username);
     setWomStatus(`✓ Loaded ${data.displayName}'s stats — Level ${skillData.level} Herblore (${skillData.xp.toLocaleString()} XP)`,'success');
     document.getElementById('applyBtn').click();
@@ -459,13 +460,18 @@ document.getElementById('applyBtn').addEventListener('click',()=>{
   const lvl=parseInt(manualLevelInput.value)||3;
   const xpInput=manualXpInput.value.trim();
   const tgt=parseInt(document.getElementById('targetLevel').value)||99;
-  playerLevel=Math.max(3,Math.min(99,lvl));
   const parsedXp=xpInput===''?NaN:parseInt(xpInput);
-  const levelStartXp=xpForLevel(playerLevel);
-  const nextLevelXp=playerLevel<99?xpForLevel(playerLevel+1):Infinity;
-  const xpMatchesLevel=Number.isFinite(parsedXp)&&parsedXp>=levelStartXp&&parsedXp<nextLevelXp;
-  playerXp=xpMatchesLevel?parsedXp:levelStartXp;
-  if(xpInput!==''&&!xpMatchesLevel) manualXpInput.value='';
+  const exactMode=!manualXpInput.disabled;
+  if(exactMode&&Number.isFinite(parsedXp)){
+    playerXp=Math.max(xpForLevel(3),Math.min(200000000,parsedXp));
+    playerLevel=levelForXp(playerXp);
+    manualLevelInput.value=playerLevel;
+    manualXpInput.value=playerXp;
+  }else{
+    playerLevel=Math.max(3,Math.min(99,lvl));
+    playerXp=xpForLevel(playerLevel);
+    if(exactMode) manualXpInput.value=playerXp;
+  }
   targetLevelVal=playerLevel>=99?99:Math.max(playerLevel+1,Math.min(99,tgt));
   updateStatusCard(); generatePlan();
 });
@@ -1136,6 +1142,6 @@ updateStatusCard();
 generatePlan();
 loadPrices();
 </script>
-<script src="suite-nav.js?v=16"></script>
+<script src="suite-nav.js?v=17"></script>
 </body>
 </html>

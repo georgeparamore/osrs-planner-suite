@@ -53,28 +53,19 @@
 
       const levelStrip=document.createElement('section');
       levelStrip.className='focused-level-strip';
-      levelStrip.innerHTML='<label><span>From</span></label><i>&rarr;</i><label><span>To</span></label>';
-      levelStrip.querySelector('label:first-child').append(fromInput);
+      levelStrip.innerHTML='<label class="focused-level-start"><span>From level</span></label><label class="focused-xp-start"><span>Current Herblore XP</span></label><i>&rarr;</i><label><span>To level</span></label>';
+      levelStrip.querySelector('.focused-level-start').append(fromInput);
       levelStrip.querySelector('label:last-of-type').append(toInput);
-      updateButton.textContent='Update';
-      levelStrip.append(updateButton);
-      const xpControls=document.createElement('div');
-      xpControls.className='focused-xp-controls';
-      const xpLabel=document.createElement('label');
-      xpLabel.className='focused-xp-check';
-      xpLabel.innerHTML='<input type="checkbox" aria-label="Use exact XP"><span>Use exact XP</span>';
-      const xpToggle=xpLabel.querySelector('input');
-      xpControls.append(xpLabel);
-      let xpApply=null;
+      updateButton.textContent='Update plan';
       if(xpInput){
         xpInput.classList.add('focused-exact-xp');
         xpInput.disabled=true;
-        xpApply=document.createElement('button');
-        xpApply.type='button';
-        xpApply.className='focused-exact-apply';
-        xpApply.textContent='Apply XP';
-        xpControls.append(xpInput,xpApply);
+        levelStrip.querySelector('.focused-xp-start').append(xpInput);
       }
+      levelStrip.append(updateButton);
+      const xpControls=document.createElement('div');
+      xpControls.className='focused-xp-controls';
+      xpControls.innerHTML='<span>Starting point</span><div class="focused-mode-toggle" role="group" aria-label="Choose starting point"><button type="button" class="active" data-start-mode="level">Level</button><button type="button" data-start-mode="xp">Exact XP</button></div>';
       levelStrip.append(xpControls);
       if(exactButton)exactButton.remove();
 
@@ -96,13 +87,17 @@
       syncHeading();
       fromInput.addEventListener('input',syncHeading);
       toInput.addEventListener('input',syncHeading);
-      updateButton.addEventListener('click',syncHeading);
+      updateButton.addEventListener('click',()=>setTimeout(syncHeading,0));
       fetchButton.addEventListener('click',()=>setTimeout(syncHeading,700));
-      xpToggle.addEventListener('change',()=>{
-        levelStrip.classList.toggle('show-exact',xpToggle.checked);
-        if(xpInput){xpInput.disabled=!xpToggle.checked;if(xpToggle.checked)xpInput.focus()}
-      });
-      xpApply?.addEventListener('click',()=>updateButton.click());
+      const setStartMode=mode=>{
+        const exact=mode==='xp';
+        xpControls.querySelectorAll('[data-start-mode]').forEach(button=>button.classList.toggle('active',button.dataset.startMode===mode));
+        levelStrip.classList.toggle('show-exact',exact);
+        fromInput.disabled=exact;
+        if(xpInput){xpInput.disabled=!exact;if(exact)xpInput.focus()}
+      };
+      xpControls.querySelectorAll('[data-start-mode]').forEach(modeButton=>modeButton.addEventListener('click',()=>setStartMode(modeButton.dataset.startMode)));
+      document.addEventListener('herblore:exact-xp',()=>setStartMode('xp'));
       xpInput?.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();updateButton.click()}});
     }
   }
