@@ -32,7 +32,7 @@ body[data-suite-page="herblore"] .skill-icon-large{width:28px;height:28px}
 body[data-suite-page="herblore"] .skill-title{font-size:22px}
 body[data-suite-page="herblore"] .speed-panel{padding:0}
 body[data-suite-page="herblore"] .speed-panel-label{display:none}
-body[data-suite-page="herblore"] .speed-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:0}
+body[data-suite-page="herblore"] .speed-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
 body[data-suite-page="herblore"] .speed-tab{min-width:0;border:0;border-right:1px solid var(--border);border-radius:0;background:var(--surface);padding:12px 13px}
 body[data-suite-page="herblore"] .speed-tab:last-child{border-right:0}
 body[data-suite-page="herblore"] .speed-tab:hover{background:var(--surface2)}
@@ -94,7 +94,6 @@ body[data-suite-page="herblore"] .speed-tab-sub{font-size:0;line-height:1;margin
 body[data-suite-page="herblore"] .speed-tab-sub:after{font-size:10px;color:var(--text-dim)}
 body[data-suite-page="herblore"] .speed-tab[data-speed="nuclear"] .speed-tab-sub:after{content:'Fastest'}
 body[data-suite-page="herblore"] .speed-tab[data-speed="standard"] .speed-tab-sub:after{content:'Simple'}
-body[data-suite-page="herblore"] .speed-tab[data-speed="value"] .speed-tab-sub:after{content:'Live prices'}
 body[data-suite-page="herblore"] .speed-tab[data-speed="budget"] .speed-tab-sub:after{content:'Low spend'}
 body[data-suite-page="herblore"] .speed-tab[data-speed="mixology"] .speed-tab-sub:after{content:'Minigame'}
 body[data-suite-page="herblore"] .plan-area{border:1px solid var(--border);border-top:0;border-radius:0;background:transparent;padding:16px 24px 28px;min-height:0}

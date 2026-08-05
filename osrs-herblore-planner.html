@@ -139,7 +139,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
-<link rel="stylesheet" href="suite-nav.css?v=7">
+<link rel="stylesheet" href="suite-nav.css?v=8">
 </head>
 <body>
 <header>
@@ -217,10 +217,6 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
         <div class="speed-tab active" data-speed="standard" style="--accent:#c8a84b;">
           <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#c8a84b;"></span>Standard</div>
           <div class="speed-tab-sub">Straightforward training — prayer potions → super restores → Saradomin brews through 99</div>
-        </div>
-        <div class="speed-tab" data-speed="value" style="--accent:#9b6fd6;">
-          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#9b6fd6;"></span>Live Value</div>
-          <div class="speed-tab-sub">Automatically picks the lowest net GP/XP from practical methods at current GE prices</div>
         </div>
         <div class="speed-tab" data-speed="budget" style="--accent:#2ecc71;">
           <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#2ecc71;"></span>Budget</div>
@@ -316,7 +312,7 @@ const HERBLORE_METHODS = {
     {name:'Prayer potion',      minLevel:38, maxLevel:63, xpPerAction:87.5,  actionsPerHr:2500, outputName:'Prayer potion(3)',       inputNames:['Ranarr potion (unf)','Snape grass'], note:'~4 gp/xp historically, often the cheapest potion method. Switch here once herb cleaning margins dry up.'},
     {name:'Super restore',      minLevel:63, maxLevel:84, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)',       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"], note:'Stay on these until level 84 — cheaper per xp than Saradomin brews across this entire range.'},
     {name:'Extended antifire',  minLevel:84, maxLevel:90, xpPerAction:110,   actionsPerHr:2750, outputName:'Extended antifire(4)',   inputNames:['Antifire potion(4)',{name:'Lava scale shard',qty:4}], note:'Lava scale shards are stackable: 27 antifires plus one shard stack fills the inventory. Check the live GP/XP before buying in bulk.'},
-    {name:'Super combat',       minLevel:90, maxLevel:99, xpPerAction:150,   actionsPerHr:2166, outputName:'Super combat potion(4)', inputNames:['Super attack(4)','Super strength(4)','Super defence(4)','Torstol'], note:'Usually attractive on GP/XP, but inventory-heavy: only 7 potions per inventory because all four ingredients are unstackable. Use Standard or Live Value if you prefer simpler banking.'},
+    {name:'Super combat',       minLevel:90, maxLevel:99, xpPerAction:150,   actionsPerHr:2166, outputName:'Super combat potion(4)', inputNames:['Super attack(4)','Super strength(4)','Super defence(4)','Torstol'], note:'Usually attractive on GP/XP, but inventory-heavy: only 7 potions per inventory because all four ingredients are unstackable. Use Standard if you prefer simpler banking.'},
   ],
 };
 
@@ -1046,6 +1042,6 @@ updateStatusCard();
 generatePlan();
 loadPrices();
 </script>
-<script src="suite-nav.js?v=7"></script>
+<script src="suite-nav.js?v=8"></script>
 </body>
 </html>
