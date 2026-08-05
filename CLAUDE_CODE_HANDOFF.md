@@ -277,8 +277,8 @@ bankTagData[tagId] = { plain: plainTagString, layout: layoutTagString };
 nuclear   — max XP/hr: Attack→Prayer→Super att→Super energy→Super str→
             Super restore→Sara brew 81→Ancient brew 85→Menaphite remedy 88→99
 standard  — simple inventories: Attack→Prayer→Super restore→Sara brew 81→99
-midroad   — balanced cost/speed: Attack→Energy→Prayer→Super restore→
-            Ranging potion 72→Stamina 81→Forgotten brew 91
+value     — dynamic: selects the lowest net GP/XP among practical unlocked potion
+            methods using the currently loaded Wiki GE prices; reevaluates at unlock levels
 budget    — herb cleaning→Prayer→Super restore→Extended antifire 84→Super combat 90
 ```
 

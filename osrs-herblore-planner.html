@@ -217,9 +217,9 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
           <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#c8a84b;"></span>Standard</div>
           <div class="speed-tab-sub">Straightforward training — prayer potions → super restores → Saradomin brews through 99</div>
         </div>
-        <div class="speed-tab" data-speed="midroad" style="--accent:#9b6fd6;">
-          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#9b6fd6;"></span>Mid-road</div>
-          <div class="speed-tab-sub">Balanced cost and speed — ranging potions 72, staminas 81, forgotten brews 91</div>
+        <div class="speed-tab" data-speed="value" style="--accent:#9b6fd6;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#9b6fd6;"></span>Live Value</div>
+          <div class="speed-tab-sub">Automatically picks the lowest net GP/XP from practical methods at current GE prices</div>
         </div>
         <div class="speed-tab" data-speed="budget" style="--accent:#2ecc71;">
           <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#2ecc71;"></span>Budget</div>
@@ -281,16 +281,26 @@ const HERBLORE_METHODS = {
     {name:'Super restore',      minLevel:63, maxLevel:81, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)',       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"], note:'~355k xp/hr. High demand in raids makes these easy to sell.'},
     {name:'Saradomin brew',     minLevel:81, maxLevel:99, xpPerAction:180,   actionsPerHr:2500, outputName:'Saradomin brew(3)',      inputNames:['Toadflax potion (unf)','Crushed nest'], note:'~450k xp/hr with a simple 14+14 inventory. High demand makes the finished potions easy to sell, but check the live GP/XP before buying in bulk.'},
   ],
-  midroad: [
-    // A middle ground between speed, cost, and inventory simplicity.
-    // Ranging potions lead into stackable-secondary stamina potions, followed by forgotten brews at 91.
-    {name:'Attack potion',      minLevel:3,  maxLevel:26, xpPerAction:25,    actionsPerHr:2500, outputName:'Attack potion(3)',       inputNames:['Guam potion (unf)','Eye of newt']},
-    {name:'Energy potion',      minLevel:26, maxLevel:38, xpPerAction:67.5,  actionsPerHr:2500, outputName:'Energy potion(3)',       inputNames:['Harralander potion (unf)','Chocolate dust']},
-    {name:'Prayer potion',      minLevel:38, maxLevel:63, xpPerAction:87.5,  actionsPerHr:2500, outputName:'Prayer potion(3)',       inputNames:['Ranarr potion (unf)','Snape grass'], note:'~220k xp/hr. Often close to break-even. Popular because potions sell instantly.'},
-    {name:'Super restore',      minLevel:63, maxLevel:72, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)',       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"]},
-    {name:'Ranging potion',     minLevel:72, maxLevel:81, xpPerAction:162.5, actionsPerHr:2500, outputName:'Ranging potion(3)',      inputNames:['Dwarf weed potion (unf)','Wine of zamorak'], note:'162.5 xp (~406k xp/hr). Always in demand by pures and PvM accounts. Usually cheaper per xp than Saradomin brews.'},
-    {name:'Stamina potion',     minLevel:81, maxLevel:91, xpPerAction:76.5,  actionsPerHr:2750, outputName:'Stamina potion(3)',      inputNames:['Super energy(3)',{name:'Amylase crystal',qty:3}], note:'Each dose requires one amylase crystal: a 3-dose super energy plus 3 crystals makes a 3-dose stamina potion for 76.5 xp. Crystals are stackable, so 27 potions + one crystal stack fills the inventory.'},
-    {name:'Forgotten brew',     minLevel:91, maxLevel:99, xpPerAction:108,   actionsPerHr:1833, outputName:'Forgotten brew(3)',      inputNames:['Ancient brew(3)',{name:'Ancient essence',qty:60}], note:'A 3-dose ancient brew requires 60 ancient essence and gives 108 xp. This avoids the four-way super combat inventory, but prices can shift quickly.'},
+  value: [
+    // Unlike the fixed routes, every unlocked method remains eligible through 99.
+    // buildRoute() reevaluates these at each unlock using the current net GE cost per XP.
+    {name:'Attack potion',       minLevel:3,  maxLevel:99, xpPerAction:25,    actionsPerHr:2500, outputName:'Attack potion(3)',       inputNames:['Guam potion (unf)','Eye of newt']},
+    {name:'Energy potion',       minLevel:26, maxLevel:99, xpPerAction:67.5,  actionsPerHr:2500, outputName:'Energy potion(3)',       inputNames:['Harralander potion (unf)','Chocolate dust']},
+    {name:'Prayer potion',       minLevel:38, maxLevel:99, xpPerAction:87.5,  actionsPerHr:2500, outputName:'Prayer potion(3)',       inputNames:['Ranarr potion (unf)','Snape grass']},
+    {name:'Super attack',        minLevel:45, maxLevel:99, xpPerAction:100,   actionsPerHr:2500, outputName:'Super attack(3)',        inputNames:['Irit potion (unf)','Eye of newt']},
+    {name:'Super energy',        minLevel:52, maxLevel:99, xpPerAction:117.5, actionsPerHr:2500, outputName:'Super energy(3)',        inputNames:['Avantoe potion (unf)','Mort myre fungus']},
+    {name:'Super strength',      minLevel:55, maxLevel:99, xpPerAction:125,   actionsPerHr:2500, outputName:'Super strength(3)',      inputNames:['Kwuarm potion (unf)','Limpwurt root']},
+    {name:'Goading potion',      minLevel:54, maxLevel:99, xpPerAction:132,   actionsPerHr:2500, outputName:'Goading potion(3)',      inputNames:['Harralander potion (unf)','Aldarium']},
+    {name:'Prayer regeneration', minLevel:58, maxLevel:99, xpPerAction:132,   actionsPerHr:2500, outputName:'Prayer regeneration potion(3)', inputNames:['Huasca potion (unf)','Aldarium']},
+    {name:'Super restore',       minLevel:63, maxLevel:99, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)',       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"]},
+    {name:'Ranging potion',      minLevel:72, maxLevel:99, xpPerAction:162.5, actionsPerHr:2500, outputName:'Ranging potion(3)',      inputNames:['Dwarf weed potion (unf)','Wine of zamorak']},
+    {name:'Stamina potion',      minLevel:77, maxLevel:99, xpPerAction:76.5,  actionsPerHr:2750, outputName:'Stamina potion(3)',      inputNames:['Super energy(3)',{name:'Amylase crystal',qty:3}]},
+    {name:'Saradomin brew',      minLevel:81, maxLevel:99, xpPerAction:180,   actionsPerHr:2500, outputName:'Saradomin brew(3)',      inputNames:['Toadflax potion (unf)','Crushed nest']},
+    {name:'Extended antifire',   minLevel:84, maxLevel:99, xpPerAction:110,   actionsPerHr:2750, outputName:'Extended antifire(4)',   inputNames:['Antifire potion(4)',{name:'Lava scale shard',qty:4}]},
+    {name:'Ancient brew',        minLevel:85, maxLevel:99, xpPerAction:190,   actionsPerHr:2500, outputName:'Ancient brew(3)',        inputNames:['Dwarf weed potion (unf)','Nihil dust']},
+    {name:'Menaphite remedy',    minLevel:88, maxLevel:99, xpPerAction:200,   actionsPerHr:2500, outputName:'Menaphite remedy(3)',    inputNames:['Dwarf weed potion (unf)','Lily of the sands']},
+    {name:'Forgotten brew',      minLevel:91, maxLevel:99, xpPerAction:108,   actionsPerHr:1833, outputName:'Forgotten brew(3)',      inputNames:['Ancient brew(3)',{name:'Ancient essence',qty:60}]},
+    {name:'Anti-venom+',         minLevel:94, maxLevel:99, xpPerAction:125,   actionsPerHr:1833, outputName:'Anti-venom+(4)',         inputNames:['Anti-venom(4)','Torstol']},
   ],
   budget: [
     // Minimum spend. Herb cleaning early (profitable), prayer potions, super restores,
@@ -305,7 +315,7 @@ const HERBLORE_METHODS = {
     {name:'Prayer potion',      minLevel:38, maxLevel:63, xpPerAction:87.5,  actionsPerHr:2500, outputName:'Prayer potion(3)',       inputNames:['Ranarr potion (unf)','Snape grass'], note:'~4 gp/xp historically, often the cheapest potion method. Switch here once herb cleaning margins dry up.'},
     {name:'Super restore',      minLevel:63, maxLevel:84, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)',       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"], note:'Stay on these until level 84 — cheaper per xp than Saradomin brews across this entire range.'},
     {name:'Extended antifire',  minLevel:84, maxLevel:90, xpPerAction:110,   actionsPerHr:2750, outputName:'Extended antifire(4)',   inputNames:['Antifire potion(4)',{name:'Lava scale shard',qty:4}], note:'Lava scale shards are stackable: 27 antifires plus one shard stack fills the inventory. Check the live GP/XP before buying in bulk.'},
-    {name:'Super combat',       minLevel:90, maxLevel:99, xpPerAction:150,   actionsPerHr:2166, outputName:'Super combat potion(4)', inputNames:['Super attack(4)','Super strength(4)','Super defence(4)','Torstol'], note:'Usually attractive on GP/XP, but inventory-heavy: only 7 potions per inventory because all four ingredients are unstackable. Use Standard or Mid-road if you prefer simpler banking.'},
+    {name:'Super combat',       minLevel:90, maxLevel:99, xpPerAction:150,   actionsPerHr:2166, outputName:'Super combat potion(4)', inputNames:['Super attack(4)','Super strength(4)','Super defence(4)','Torstol'], note:'Usually attractive on GP/XP, but inventory-heavy: only 7 potions per inventory because all four ingredients are unstackable. Use Standard or Live Value if you prefer simpler banking.'},
   ],
 };
 
@@ -479,6 +489,7 @@ function updateStatusCard(){
 // ── ROUTE GENERATION ────────────────────────────────────────────────────────────
 function buildRoute(startLevel, endLevel, speed){
   const methods=HERBLORE_METHODS[speed];
+  const isLiveValue=speed==='value';
   const stops=[];
   let lvl=startLevel;
   while(lvl<endLevel){
@@ -488,30 +499,52 @@ function buildRoute(startLevel, endLevel, speed){
       if(!next) break;
       lvl=next.minLevel; continue;
     }
-    const method=candidates.sort((a,b)=>b.maxLevel-a.maxLevel)[0];
-    const stopEnd=Math.min(method.maxLevel,endLevel);
+    const method=isLiveValue
+      ? candidates.sort((a,b)=>netGpPerXp(a)-netGpPerXp(b))[0]
+      : candidates.sort((a,b)=>b.maxLevel-a.maxLevel)[0];
+    const nextUnlock=isLiveValue
+      ? methods.filter(m=>m.minLevel>lvl).reduce((next,m)=>Math.min(next,m.minLevel),Infinity)
+      : Infinity;
+    const stopEnd=isLiveValue
+      ? Math.min(nextUnlock,endLevel)
+      : Math.min(method.maxLevel,endLevel);
     const xpStart=xpForLevel(lvl), xpEnd=xpForLevel(stopEnd);
     const xpNeeded=xpEnd-xpStart;
     const actionsNeeded=Math.ceil(xpNeeded/method.xpPerAction);
     const hoursNeeded=actionsNeeded/method.actionsPerHr;
 
-    // Live cost calculation
-    let totalCost=0;
-    if(pricesLoaded){
-      const outPrice=sellPriceOf(method.outputName)||0;
-      const inCost=(method.inputNames||[]).reduce((sum,n)=>{
-        // Support both plain string "Item name" and object {name:"Item name", qty:4}
-        const itemName = typeof n === 'string' ? n : n.name;
-        const qty = typeof n === 'object' && n.qty ? n.qty : 1;
-        return sum + (priceOf(itemName)||0) * qty;
-      },0);
-      const profitPerAction=outPrice-inCost;
-      totalCost=-profitPerAction*actionsNeeded; // positive = cost, negative = profit
+    const totalCost=pricesLoaded?netCostPerAction(method)*actionsNeeded:0;
+    const previous=stops[stops.length-1];
+    if(isLiveValue&&previous&&previous.name===method.name){
+      previous.levelEnd=stopEnd;
+      previous.xpNeeded+=xpNeeded;
+      previous.actionsNeeded=Math.ceil(previous.xpNeeded/method.xpPerAction);
+      previous.hoursNeeded=previous.actionsNeeded/method.actionsPerHr;
+      previous.totalCost=netCostPerAction(method)*previous.actionsNeeded;
+    }else{
+      const liveValueNote=isLiveValue
+        ? `Selected automatically at ${netGpPerXp(method).toFixed(2)} net GP/XP using the latest loaded GE prices. This choice can change as prices move.`
+        : method.note;
+      stops.push({...method,note:liveValueNote,levelStart:lvl,levelEnd:stopEnd,xpNeeded,actionsNeeded,hoursNeeded,totalCost});
     }
-    stops.push({...method,levelStart:lvl,levelEnd:stopEnd,xpNeeded,actionsNeeded,hoursNeeded,totalCost});
     lvl=stopEnd;
   }
   return stops;
+}
+
+function netCostPerAction(method){
+  const inputCost=(method.inputNames||[]).reduce((sum,n)=>{
+    const itemName=typeof n==='string'?n:n.name;
+    const qty=typeof n==='object'&&n.qty?n.qty:1;
+    return sum+priceOf(itemName)*qty;
+  },0);
+  return inputCost-sellPriceOf(method.outputName);
+}
+
+function netGpPerXp(method){
+  const hasOutput=sellPriceOf(method.outputName)>0;
+  const hasAllInputs=(method.inputNames||[]).every(n=>priceOf(typeof n==='string'?n:n.name)>0);
+  return hasOutput&&hasAllInputs?netCostPerAction(method)/method.xpPerAction:Infinity;
 }
 
 function fmt(n){if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
@@ -792,7 +825,7 @@ function renderMixologyPlan(curLevel, targetLevel){
 function generatePlan(){
   const planArea=document.getElementById('planArea');
   const curLevel=levelForXp(playerXp);
-  const accentMap={nuclear:'#e74c3c', standard:'#c8a84b', midroad:'#9b6fd6', budget:'#2ecc71', mixology:'#4a9eff'};
+  const accentMap={nuclear:'#e74c3c', standard:'#c8a84b', value:'#9b6fd6', budget:'#2ecc71', mixology:'#4a9eff'};
   const accent=accentMap[currentSpeed]||'#c8a84b';
 
   if(currentSpeed==='mixology'){
@@ -810,6 +843,11 @@ function generatePlan(){
 
   if(curLevel>=targetLevelVal){
     planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);"><div style="font-size:18px;color:var(--gold);margin-bottom:8px;">🎉 Already reached Level ${targetLevelVal}!</div><div style="font-size:12px;">Set a higher target level to continue planning.</div></div>`;
+    return;
+  }
+
+  if(currentSpeed==='value'&&!pricesLoaded){
+    planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);"><div class="spinner" style="margin:0 auto 14px;"></div><div>Waiting for live Grand Exchange prices to choose the best-value methods…</div></div>`;
     return;
   }
 

@@ -201,7 +201,7 @@ Note: `seedName` is the sapling name (e.g. "Magic sapling"), NOT the seed name. 
 1. **4 Named Routes** (not just "fast/medium/slow"):
    - **Nuclear** — max XP/hr, ends on Menaphite remedy (200 XP each, level 88, highest XP standard potion in game)
    - **Standard** — prayer potions → super restores → Saradomin brews through 99; simple 14+14 inventories
-   - **Mid-road** — balanced cost/speed route with ranging potions 72-81, staminas 81-91, forgotten brews 91-99
+   - **Live Value** — dynamically compares practical unlocked potion methods using current GE prices and selects the lowest net GP/XP at each unlock point
    - **Budget** — herb cleaning → prayer potions → super restores → extended antifire 84 → super combat 90; super combats live only here because their low GP/XP can justify the inventory-heavy method
 
 2. **Mastering Mixology tab** — completely separate mode (not a standard route):
