@@ -104,6 +104,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .craft-seg button:last-child{border-right:0;}
 .craft-seg button.active{background:var(--gold);color:#000;font-weight:700;}
 .craft-toggle-group select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 10px;}
+.control-help{max-width:220px;color:var(--text-dim);font-size:9px;line-height:1.35;}
 .smith-item-check{display:grid;grid-template-columns:auto 28px 1fr;align-items:center;gap:8px;min-width:170px;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--text);font-size:12px;}
 .smith-item-check:has(input:checked){border-color:var(--gold-dim);background:rgba(200,168,75,.09);}
 .smith-item-check input{accent-color:var(--gold);width:15px;height:15px;}
@@ -205,9 +206,10 @@ body[data-suite-page="cooking"] .craft-toggle-panel{max-width:1120px;width:calc(
           <option value="0.02">+2% raw food</option>
           <option value="0.05">+5% raw food</option>
         </select>
+        <small class="control-help">Adds extra raw food to the shopping list in case you burn more than the statistical estimate. It only changes purchases and upfront cost.</small>
       </div>
       <div class="craft-toggle-group">
-        <span>Owned access</span>
+        <span>Owned items &amp; optional locations</span>
         <label class="smith-item-check"><input type="checkbox" id="gauntletsToggle" checked><img src="https://oldschool.runescape.wiki/images/Cooking_gauntlets.png" alt=""><span>Cooking gauntlets<small>Family Crest</small></span></label>
       </div>
       <div class="craft-toggle-group">
@@ -220,11 +222,11 @@ body[data-suite-page="cooking"] .craft-toggle-panel{max-width:1120px;width:calc(
       </div>
       <div class="craft-toggle-group">
         <span>&nbsp;</span>
-        <label class="smith-item-check"><input type="checkbox" id="mythsToggle"><img src="https://oldschool.runescape.wiki/images/Myths%27_Guild.png" alt=""><span>Myths' Guild access<small>Dragon Slayer II</small></span></label>
+        <label class="smith-item-check"><input type="checkbox" id="mythsToggle"><img src="https://oldschool.runescape.wiki/images/Myths%27_Guild.png" alt=""><span>Myths' Guild access<small>Shows its bank-side range · Dragon Slayer II</small></span></label>
       </div>
       <div class="craft-toggle-group">
         <span>&nbsp;</span>
-        <label class="smith-item-check"><input type="checkbox" id="firecapeToggle"><img src="https://oldschool.runescape.wiki/images/Fire_cape.png" alt=""><span>Fire cape<small>Mor Ul Rek access</small></span></label>
+        <label class="smith-item-check"><input type="checkbox" id="firecapeToggle"><img src="https://oldschool.runescape.wiki/images/Fire_cape.png" alt=""><span>Fire cape<small>Shows the Mor Ul Rek bank-side vent</small></span></label>
       </div>
       <div class="craft-toggle-group">
         <span>&nbsp;</span>
