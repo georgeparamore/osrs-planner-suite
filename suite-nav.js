@@ -6,7 +6,8 @@
     {name:'Farming',group:'Training planner',description:'Runs, patches, inventory',file:'osrs-farming-planner.html',icon:'https://oldschool.runescape.wiki/images/Farming_icon.png'},
     {name:'Herblore',group:'Training planner',description:'Routes and live costs',file:'osrs-herblore-planner.html',icon:'https://oldschool.runescape.wiki/images/Herblore_icon.png'},
     {name:'Prayer',group:'Training planner',description:'Methods and bone costs',file:'osrs-prayer-planner.html',icon:'https://oldschool.runescape.wiki/images/Prayer_icon.png'},
-    {name:'Crafting',group:'Training planner',description:'Gems, dragonhide, and more',file:'osrs-crafting-planner.html',icon:'https://oldschool.runescape.wiki/images/Crafting_icon.png'}
+    {name:'Crafting',group:'Training planner',description:'Gems, dragonhide, and more',file:'osrs-crafting-planner.html',icon:'https://oldschool.runescape.wiki/images/Crafting_icon.png'},
+    {name:'Smithing',group:'Training planner',description:'Anvils, Blast Furnace, Foundry',file:'osrs-smithing-planner.html',icon:'https://oldschool.runescape.wiki/images/Smithing_icon.png'}
   ];
   const currentFile=(location.pathname.split('/').pop()||'index.html').toLowerCase();
   const currentIndex=tools.findIndex(tool=>tool.file===currentFile);
@@ -16,7 +17,7 @@
   const header=document.querySelector('header');
   const logo=header?.querySelector('.logo');
   if(!header||!logo) return;
-  logo.textContent='OSRS Tools';
+  logo.textContent='OSRS Toolbox';
   const groups=['Market tool','Training planner'];
   const menuHtml=groups.map(group=>`<div class="suite-menu-group"><div class="suite-menu-title">${group==='Market tool'?'Market tools':'Training planners'}</div>${tools.filter(tool=>tool.group===group).map(tool=>`<a class="suite-menu-link${tool.file===currentFile?' current':''}" href="${tool.file}"><img src="${tool.icon}" alt=""><strong>${tool.name}</strong><small>${tool.description}</small></a>`).join('')}</div>`).join('');
   const host=document.createElement('div');
@@ -30,7 +31,7 @@
   document.addEventListener('click',event=>{if(!host.contains(event.target))close()});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'){close();button.focus()}});
 
-  if(current.name==='Herblore'||current.name==='Crafting'){
+  if(current.name==='Herblore'||current.name==='Crafting'||current.name==='Smithing'){
     const content=document.querySelector('.content');
     const oldPanel=document.querySelector('.input-panel');
     const speedPanel=document.querySelector('.speed-panel');
@@ -54,7 +55,7 @@
 
       const levelStrip=document.createElement('section');
       levelStrip.className='focused-level-strip';
-      levelStrip.innerHTML='<label class="focused-level-start"><span>From level</span></label><label class="focused-xp-start"><span>Current Herblore XP</span></label><i>&rarr;</i><label><span>To level</span></label>';
+      levelStrip.innerHTML=`<label class="focused-level-start"><span>From level</span></label><label class="focused-xp-start"><span>Current ${current.name} XP</span></label><i>&rarr;</i><label><span>To level</span></label>`;
       levelStrip.querySelector('.focused-level-start').append(fromInput);
       levelStrip.querySelector('label:last-of-type').append(toInput);
       updateButton.textContent='Update plan';

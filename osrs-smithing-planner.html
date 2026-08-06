@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smithing Training Planner – OSRS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap');
+:root{--bg:#0d0f14;--surface:#141720;--surface2:#1b1f2e;--border:#252a3a;--gold:#c8a84b;--gold-dim:#8a7030;--green:#2ecc71;--red:#e74c3c;--blue:#4a7eff;--purple:#9b6fd6;--text:#dde1ec;--text-dim:#6b7490;}
+[data-theme="light"]{--bg:#f0f2f5;--surface:#ffffff;--surface2:#e8eaf0;--border:#d0d4e0;--gold:#8a6a1a;--gold-dim:#b89030;--green:#1a8a45;--red:#c0392b;--blue:#2255cc;--purple:#7a4fc7;--text:#1a1e2e;--text-dim:#6b7490;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:16px;height:50px;flex-shrink:0;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--gold);letter-spacing:1px;text-decoration:none;}
+.logo span{color:var(--text-dim);font-weight:400;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.theme-btn{background:none;border:none;cursor:pointer;font-size:17px;color:var(--text-dim);transition:color .2s;}
+.theme-btn:hover{color:var(--gold);}
+.main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px);}
+.skill-nav{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;}
+.skill-nav-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);padding:0 14px;margin-bottom:6px;}
+.skill-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;cursor:pointer;background:none;border:none;color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;text-align:left;transition:all .15s;border-left:3px solid transparent;}
+.skill-btn:hover{background:var(--surface2);color:var(--text);}
+.skill-btn.active{background:var(--surface2);color:var(--gold);border-left-color:var(--gold);}
+.skill-btn .skill-icon-img{width:22px;height:22px;object-fit:contain;flex-shrink:0;}
+.skill-btn.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.skill-btn .soon-badge{margin-left:auto;font-size:8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.3px;}
+.content{flex:1;display:flex;flex-direction:column;overflow-y:auto;min-width:0;}
+.input-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 24px;flex-shrink:0;}
+.input-panel-top{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.skill-icon-large{width:32px;height:32px;object-fit:contain;}
+.skill-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;}
+.skill-desc{font-size:12px;color:var(--text-dim);margin-bottom:14px;}
+.input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.field-group{display:flex;flex-direction:column;gap:4px;}
+.field-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.field-group input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 11px;outline:none;transition:border-color .2s;width:120px;}
+.field-group input:focus{border-color:var(--gold-dim);}
+.apply-btn{padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.apply-btn:hover{opacity:.85;}
+.status-card{display:flex;align-items:center;gap:20px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:8px;padding:12px 18px;margin-top:14px;}
+.status-stat{display:flex;flex-direction:column;gap:1px;}
+.status-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.status-stat-value{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--gold);}
+.status-progress-wrap{flex:1;}
+.status-progress-bar{height:8px;background:var(--surface);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.status-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .4s ease;}
+.status-progress-text{font-size:10px;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;}
+.or-divider{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;align-self:center;padding:0 4px;}
+.manual-toggle{padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.manual-toggle:hover{border-color:var(--gold-dim);}
+.manual-toggle.active{border-color:var(--gold);color:var(--gold);}
+#womFields{display:none;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap;}
+#womFields.show{display:flex;}
+.fetch-status{font-size:11px;margin-top:8px;display:none;align-items:center;gap:6px;}
+.fetch-status.show{display:flex;}
+.fetch-status.error{color:var(--red);}
+.fetch-status.success{color:var(--green);}
+.fetch-status.loading{color:var(--text-dim);}
+.spinner-sm{display:inline-block;width:11px;height:11px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.speed-panel{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.speed-panel-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
+.speed-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+.speed-tab{flex:1;min-width:150px;display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .15s;}
+.speed-tab:hover{border-color:var(--gold-dim);}
+.speed-tab.active{border-color:var(--accent,var(--gold));background:rgba(200,168,75,.08);}
+.speed-tab-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.speed-tab-dot{width:9px;height:9px;border-radius:50%;}
+.speed-tab-sub{font-size:11px;color:var(--text-dim);}
+.plan-area{padding:20px 24px;flex:1;}
+.route-stop{position:relative;padding-left:34px;}
+.shopping-wrap{margin-top:20px;}
+.shopping-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:10px;padding:14px 20px;cursor:pointer;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;transition:background .15s;}
+.shopping-toggle:hover{background:var(--surface);}
+.shopping-toggle-arrow{font-size:14px;color:var(--text-dim);transition:transform .2s;}
+.shopping-toggle-arrow.open{transform:rotate(180deg);}
+.shopping-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:16px 20px;margin-top:-1px;}
+.shopping-body.show{display:block;}
+.shopping-section{margin-bottom:18px;}
+.shopping-section:last-child{margin-bottom:0;}
+.shopping-section-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--accent,var(--gold));margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.shopping-table{width:100%;border-collapse:collapse;font-size:13px;}
+.shopping-table th{text-align:left;padding:6px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);border-bottom:2px solid var(--border);}
+.shopping-table th.r{text-align:right;}
+.shopping-table td{padding:8px 10px;border-bottom:1px solid var(--border);}
+.shopping-table td.mono{font-family:'Share Tech Mono',monospace;text-align:right;}
+.shopping-table tr:last-child td{border-bottom:none;}
+.shopping-icon{width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:6px;}
+.shopping-grand-total{margin-top:14px;padding:12px 16px;background:linear-gradient(135deg,rgba(200,168,75,.12),rgba(200,168,75,.02));border:1px solid var(--gold-dim);border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;}
+.shopping-grand-total .gp{font-family:'Share Tech Mono',monospace;color:var(--gold);font-size:22px;}
+.shopping-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:10px;}
+.price-status{font-size:11px;color:var(--text-dim);margin-bottom:10px;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+/* SHARED TOGGLE-PANEL CONTROLS (same pattern as Crafting) */
+.craft-toggle-row{display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
+.craft-toggle-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;flex-shrink:0;}
+.craft-toggle-group{display:flex;flex-direction:column;gap:5px;}
+.craft-toggle-group>span{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.craft-seg{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.craft-seg button{background:var(--surface2);border:0;border-right:1px solid var(--border);color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 12px;cursor:pointer;}
+.craft-seg button:last-child{border-right:0;}
+.craft-seg button.active{background:var(--gold);color:#000;font-weight:700;}
+.craft-toggle-group select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 10px;}
+.smith-item-check{display:grid;grid-template-columns:auto 28px 1fr;align-items:center;gap:8px;min-width:170px;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--text);font-size:12px;}
+.smith-item-check:has(input:checked){border-color:var(--gold-dim);background:rgba(200,168,75,.09);}
+.smith-item-check input{accent-color:var(--gold);width:15px;height:15px;}
+.smith-item-check img{width:24px;height:24px;object-fit:contain;image-rendering:auto;}
+.smith-item-check span{display:flex;flex-direction:column;line-height:1.2;}
+.smith-item-check small{color:var(--text-dim);font-size:9px;margin-top:3px;}
+.craft-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(74,126,255,.13);color:var(--blue);white-space:nowrap;}
+.craft-badge.members{background:rgba(155,111,214,.15);color:var(--purple);}
+.craft-badge.req{background:rgba(231,76,60,.13);color:var(--red);}
+body[data-suite-page="smithing"] .craft-toggle-panel{max-width:1120px;width:calc(100% - 36px);margin:14px auto 0;border:1px solid var(--border);border-radius:8px;box-sizing:border-box;}
+/* FOUNDRY-SPECIFIC */
+.foundry-mode-bar{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+.foundry-mode-btn{border:0;border-right:1px solid var(--border);background:var(--surface2);color:var(--text);padding:12px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;}
+.foundry-mode-btn:last-child{border-right:0;}
+.foundry-mode-btn.active{background:rgba(200,168,75,.14);box-shadow:inset 0 -2px var(--gold);color:var(--gold);font-weight:700;}
+.foundry-controls{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;}
+.foundry-reward-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:16px;}
+.foundry-reward-option{display:grid;grid-template-columns:auto 34px 1fr;align-items:center;gap:9px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;}
+.foundry-reward-option.selected{border-color:var(--gold);background:rgba(200,168,75,.08);box-shadow:inset 3px 0 var(--gold);}
+.foundry-reward-icon{width:30px;height:30px;object-fit:contain;}
+.foundry-reward-option strong{font-size:12px;display:block;}
+.foundry-reward-option small{color:var(--text-dim);font-size:10px;}
+.foundry-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:16px;}
+.foundry-summary-stat{display:flex;flex-direction:column;gap:2px;}
+.foundry-summary-label{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.foundry-summary-value{font-family:'Share Tech Mono',monospace;font-size:17px;}
+.foundry-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:10px;}
+.upgrade-compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:8px;padding:12px 16px;margin-bottom:16px;}
+.upgrade-compare>div{display:flex;flex-direction:column;gap:2px;}
+.upgrade-compare span{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.upgrade-compare strong{font-family:'Share Tech Mono',monospace;font-size:15px;}
+</style>
+<link rel="stylesheet" href="suite-nav.css?v=19">
+</head>
+<body>
+<header>
+  <a class="logo" href="index.html" title="OSRS Tool Suite home">GE<span>Tracker</span></a>
+  <div class="header-right">
+    <button class="theme-btn" id="themeBtn">🌙</button>
+  </div>
+</header>
+<div class="main">
+  <nav class="skill-nav">
+    <div class="skill-nav-title">OSRS Tools</div>
+    <button class="skill-btn" onclick="location.href='osrs-ge-tracker.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Grand_Exchange_logo.png" alt="">GE Tracker</button>
+    <button class="skill-btn" onclick="location.href='osrs-skill-profit.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Coins_10000.png" alt="">Skill Profits</button>
+    <div class="skill-sep"></div>
+    <button class="skill-btn" onclick="location.href='osrs-training-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="">Construction</button>
+    <button class="skill-btn" onclick="location.href='osrs-farming-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="">Farming</button>
+    <button class="skill-btn" onclick="location.href='osrs-herblore-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">Herblore</button>
+    <button class="skill-btn" onclick="location.href='osrs-prayer-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">Prayer</button>
+    <button class="skill-btn" onclick="location.href='osrs-crafting-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">Crafting</button>
+    <button class="skill-btn active"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing</button>
+    <div class="skill-sep"></div>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">Fletching<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking<span class="soon-badge">Soon</span></button>
+  </nav>
+  <div class="content">
+    <div class="input-panel">
+      <div class="input-panel-top">
+        <img class="skill-icon-large" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">
+        <div class="skill-title">Smithing Training Planner</div>
+      </div>
+      <div class="skill-desc">Set your current level and target, pick a route, and get a verified step-by-step plan with live cost estimates from the Grand Exchange.</div>
+      <div id="priceStatus" class="price-status">⏳ Loading live Grand Exchange prices…</div>
+      <div class="input-row">
+        <div class="field-group">
+          <span class="field-label">OSRS Username</span>
+          <input type="text" id="womUsername" placeholder="e.g. Zezima" autocomplete="off">
+        </div>
+        <button class="apply-btn" id="womFetchBtn">Fetch Stats</button>
+        <div class="field-group">
+          <span class="field-label">Target Level</span>
+          <input type="number" id="targetLevel" min="2" max="99" value="99">
+        </div>
+        <div class="or-divider">or</div>
+        <button class="manual-toggle" id="womToggle">Enter Manually</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">Pulls your live Smithing level/XP from Wise Old Man.</div>
+      <div id="womFields">
+        <div class="field-group">
+          <span class="field-label">Current Level</span>
+          <input type="number" id="manualLevel" min="1" max="99" value="1">
+        </div>
+        <div class="field-group">
+          <span class="field-label">Current XP (optional)</span>
+          <input type="number" id="manualXp" min="0" placeholder="auto from level">
+        </div>
+        <button class="apply-btn" id="applyBtn">Update Plan</button>
+      </div>
+      <div class="fetch-status" id="womStatus"></div>
+      <div class="status-card" id="statusCard" style="margin-top:14px;">
+        <div class="status-stat"><div class="status-stat-label">Current</div><div class="status-stat-value" id="statusLevel">1</div></div>
+        <div class="status-progress-wrap">
+          <div class="status-progress-bar"><div class="status-progress-fill" id="statusProgressFill" style="width:0%"></div></div>
+          <div class="status-progress-text"><span id="statusXpText">0 XP</span><span id="statusTargetText">Target: Level 99</span></div>
+        </div>
+        <div class="status-stat"><div class="status-stat-label">XP Remaining</div><div class="status-stat-value" id="statusXpRemaining">—</div></div>
+      </div>
+    </div>
+    <div class="craft-toggle-row craft-toggle-panel">
+      <div class="craft-toggle-group">
+        <span>Account type</span>
+        <div class="craft-seg" id="membersToggle">
+          <button type="button" data-members="true" class="active">Members</button>
+          <button type="button" data-members="false">F2P</button>
+        </div>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Owned items</span>
+        <label class="smith-item-check"><input type="checkbox" id="gauntletsToggle" checked><img src="https://oldschool.runescape.wiki/images/Goldsmith_gauntlets.png" alt=""><span>Goldsmith gauntlets<small>Family Crest</small></span></label>
+      </div>
+      <div class="craft-toggle-group">
+        <span>&nbsp;</span>
+        <label class="smith-item-check"><input type="checkbox" id="coalBagToggle" checked><img src="https://oldschool.runescape.wiki/images/Coal_bag.png" alt=""><span>Coal bag<small>Improves Blast Furnace rates</small></span></label>
+      </div>
+      <div class="craft-toggle-group">
+        <span>&nbsp;</span>
+        <label class="smith-item-check"><input type="checkbox" id="uniformToggle" checked><img src="https://oldschool.runescape.wiki/images/Smiths_tunic.png" alt=""><span>Smiths' Uniform<small>Full outfit</small></span></label>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Optimal anvil (Prifddinas)</span>
+        <div class="craft-seg" id="optimalAnvilToggle">
+          <button type="button" data-optimal="false" class="active">Off</button>
+          <button type="button" data-optimal="true">On</button>
+        </div>
+      </div>
+      <div class="craft-toggle-group">
+        <span>&nbsp;</span>
+        <label class="smith-item-check"><input type="checkbox" id="doubleMouldToggle"><img src="https://oldschool.runescape.wiki/images/Double_ammo_mould.png" alt=""><span>Double ammo mould<small>2,000 Foundry reputation</small></span></label>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Output handling</span>
+        <select id="outputHandling">
+          <option value="ge">Sell on Grand Exchange</option>
+          <option value="alch">High Alchemy (anvil weapons/armour only)</option>
+        </select>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Low Attention prefers</span>
+        <div class="craft-seg" id="lowAttentionPref">
+          <button type="button" data-pref="darttips" class="active">Dart tips</button>
+          <button type="button" data-pref="cannonballs">Cannonballs</button>
+        </div>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Blast Furnace stamina</span>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" id="staminaToggle" checked style="accent-color:var(--gold);">
+          Include ~40 doses/hr
+        </label>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Cheapest route</span>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" id="cheapestFloorToggle" checked style="accent-color:var(--gold);">
+          Skip methods slower than 40k xp/hr
+        </label>
+      </div>
+    </div>
+    <div class="speed-panel">
+      <div class="speed-panel-label">Route</div>
+      <div class="speed-tabs">
+        <div class="speed-tab" data-speed="fastest" style="--accent:#e74c3c;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#e74c3c;"></span>Fastest</div>
+          <div class="speed-tab-sub">Max XP/hr — early anvil, then Blast Furnace gold or platebodies, whichever wins live</div>
+        </div>
+        <div class="speed-tab active" data-speed="simple" style="--accent:#c8a84b;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#c8a84b;"></span>Simple</div>
+          <div class="speed-tab-sub">Stable anvil progression — Iron, Steel, Mithril, Adamant platebodies</div>
+        </div>
+        <div class="speed-tab" data-speed="cheapest" style="--accent:#2ecc71;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#2ecc71;"></span>Cheapest</div>
+          <div class="speed-tab-sub">Lowest live net GP/XP — profitable Blast Furnace bars may win, but require active play</div>
+        </div>
+        <div class="speed-tab" data-speed="lowattention" style="--accent:#4a9eff;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#4a9eff;"></span>Low Attention</div>
+          <div class="speed-tab-sub">Dart tips (or cannonballs) — long Make-X inventories, fewer clicks</div>
+        </div>
+        <div class="speed-tab" data-speed="foundry" style="--accent:#9b6fd6;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#9b6fd6;"></span>Giants' Foundry</div>
+          <div class="speed-tab-sub">Minigame — train to level or grind toward selected rewards</div>
+        </div>
+      </div>
+    </div>
+    <div class="plan-area" id="planArea">
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:60px 20px;color:var(--text-dim);text-align:center;flex-direction:column;">
+        <div style="font-size:15px;font-weight:600;color:var(--text);">Set your starting level to generate a route</div>
+        <div style="font-size:12px;max-width:320px;line-height:1.6;">Enter your current Smithing level and target above, then pick a route.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// ── EXACT OSRS XP TABLE (verified against Wiki, identical across all skills) ──────
+const XP_TABLE = [0,83,174,276,388,512,650,801,969,1154,1358,1584,1833,2107,2411,2746,3115,3523,3973,4470,5018,5624,6291,7028,7842,8740,9730,10824,12031,13363,14833,16456,18247,20224,22406,24815,27473,30408,33648,37224,41171,45529,50339,55649,61512,67983,75127,83014,91721,101333,111945,123660,136594,150872,166636,184040,203254,224466,247886,273742,302288,333804,368599,407015,449428,496254,547953,605032,668051,737627,814445,899257,992895,1096278,1210421,1336443,1475581,1629200,1798808,1986068,2192818,2421087,2673114,2951373,3258594,3597792,3972294,4385776,4842295,5346332,5902831,6517253,7195629,7944614,8771558,9684577,10692629,11805606,13034431];
+function xpForLevel(l){l=Math.max(1,Math.min(99,l));return XP_TABLE[l-1];}
+function levelForXp(xp){for(let l=99;l>=1;l--){if(xp>=XP_TABLE[l-1])return l;}return 1;}
+
+// ── VERIFIED SMITHING METHODS DATABASE ────────────────────────────────────────────
+// XP values, level requirements, exact quantities, and rates cross-checked against the
+// OSRS Wiki (Smithing, Pay-to-play/Free-to-play Smithing training, Blast Furnace and its
+// Strategies page, Goldsmith gauntlets, Giants' Foundry and its Strategies page) on
+// 2026-08-05. Baseline xp/hr figures below are the handoff's Wiki-sourced numbers;
+// actionsPerHr is derived by dividing that xp/hr by xpPerAction, so both stay consistent.
+//
+// All ordinary anvil weapons/armour (dagger through Rune platebody) are F2P-trainable —
+// Smithing itself has no members gate at the anvil. Only Blast Furnace, dart tips
+// (The Tourist Trap), cannonballs (Dwarf Cannon), and Giants' Foundry (Sleeping Giants)
+// are members-only, matching the F2P behavior section of the handoff.
+const EARLY_SEQUENCE = [
+  {family:'anvil', name:'Bronze dagger',    minLevel:1,  maxLevel:5,  xpPerAction:12.5,  actionsPerHr:1112, inputNames:[{name:'Bronze bar',qty:1}], outputName:'Bronze dagger',    highAlch:6},
+  {family:'anvil', name:'Bronze scimitar',  minLevel:5,  maxLevel:9,  xpPerAction:25,    actionsPerHr:1028, inputNames:[{name:'Bronze bar',qty:2}], outputName:'Bronze scimitar',  highAlch:19},
+  {family:'anvil', name:'Bronze warhammer', minLevel:9,  maxLevel:18, xpPerAction:37.5,  actionsPerHr:965,  inputNames:[{name:'Bronze bar',qty:3}], outputName:'Bronze warhammer', highAlch:28},
+  {family:'anvil', name:'Bronze platebody', minLevel:18, maxLevel:24, xpPerAction:62.5,  actionsPerHr:834,  inputNames:[{name:'Bronze bar',qty:5}], outputName:'Bronze platebody', highAlch:96},
+  {family:'anvil', name:'Iron warhammer',   minLevel:24, maxLevel:33, xpPerAction:75,    actionsPerHr:964,  inputNames:[{name:'Iron bar',qty:3}],   outputName:'Iron warhammer',   highAlch:103},
+  {family:'anvil', name:'Iron platebody',   minLevel:33, maxLevel:39, xpPerAction:125,   actionsPerHr:834,  inputNames:[{name:'Iron bar',qty:5}],   outputName:'Iron platebody',   highAlch:336},
+  {family:'anvil', name:'Steel warhammer',  minLevel:39, maxLevel:40, xpPerAction:112.5, actionsPerHr:964,  inputNames:[{name:'Steel bar',qty:3}],  outputName:'Steel warhammer',  highAlch:384},
+];
+// Platebody tiers 48+. actionsPerHrOptimal uses the Prifddinas anvil rate; actionsPerHrNormal
+// is the conservative ordinary-location rate used unless the Optimal anvil toggle is on.
+const PLATEBODY_TIERS = [
+  {family:'platebody', name:'Steel platebody',   minLevel:48, maxLevel:68, xpPerAction:187.5, actionsPerHrNormal:768, actionsPerHrOptimal:833, inputNames:[{name:'Steel bar',qty:5}],      outputName:'Steel platebody',   highAlch:1200},
+  {family:'platebody', name:'Mithril platebody', minLevel:68, maxLevel:88, xpPerAction:250,   actionsPerHrNormal:800, actionsPerHrOptimal:833, inputNames:[{name:'Mithril bar',qty:5}],    outputName:'Mithril platebody', highAlch:3120},
+  {family:'platebody', name:'Adamant platebody', minLevel:88, maxLevel:99, xpPerAction:312.5, actionsPerHrNormal:768, actionsPerHrOptimal:833, inputNames:[{name:'Adamantite bar',qty:5}], outputName:'Adamant platebody', highAlch:9984, note:'Reliable through level 99. Rune platebody (98) relies on a boost and is intentionally excluded from automatic routes.'},
+];
+// Blast Furnace gold: 6,400 bars/hr is a transparent baseline, not the wiki's cited maximum.
+// XP/action switches with the Goldsmith gauntlets toggle (56.2 with, 22.5 without).
+const BLAST_FURNACE_GOLD = {family:'bfgold', name:'Blast Furnace gold bars', minLevel:40, maxLevel:99, actionsPerHr:6400, inputNames:[{name:'Gold ore',qty:1}], outputName:'Gold bar', membersOnly:true, requirements:['Family Crest (for gauntlets)','Ice gloves or Smiths gloves (i)'], note:'6,400 bars/hr is a documented baseline, not the wiki\'s cited maximum solo rate (up to ~6,600). Includes the 72,000 gp/hr official-world fee and, if enabled, a ~40 stamina-dose/hr assumption.'};
+// Blast Furnace coal-saving bars (Cheapest's members pool). No-coal-bag rates are a labeled
+// -30% estimate — the wiki does not publish a specific no-coal-bag figure.
+const BLAST_FURNACE_BARS = [
+  {family:'bfbar', name:'Blast Furnace iron bars',       minLevel:15, maxLevel:99, xpPerAction:12.5, actionsPerHrCoalBag:5800, actionsPerHrNoCoalBag:5800, inputNames:[{name:'Iron ore',qty:1}],                              outputName:'Iron bar',       membersOnly:true, note:'Iron needs no coal, so the Coal bag toggle does not change its rate.'},
+  {family:'bfbar', name:'Blast Furnace steel bars',      minLevel:30, maxLevel:99, xpPerAction:17.5, actionsPerHrCoalBag:5400, actionsPerHrNoCoalBag:3780, inputNames:[{name:'Iron ore',qty:1},{name:'Coal',qty:1}],         outputName:'Steel bar',      membersOnly:true},
+  {family:'bfbar', name:'Blast Furnace mithril bars',    minLevel:50, maxLevel:99, xpPerAction:30,   actionsPerHrCoalBag:3600, actionsPerHrNoCoalBag:2520, inputNames:[{name:'Mithril ore',qty:1},{name:'Coal',qty:2}],      outputName:'Mithril bar',    membersOnly:true},
+  {family:'bfbar', name:'Blast Furnace adamantite bars', minLevel:70, maxLevel:99, xpPerAction:37.5, actionsPerHrCoalBag:2700, actionsPerHrNoCoalBag:1890, inputNames:[{name:'Adamantite ore',qty:1},{name:'Coal',qty:3}],   outputName:'Adamantite bar', membersOnly:true},
+  {family:'bfbar', name:'Blast Furnace runite bars',     minLevel:85, maxLevel:99, xpPerAction:50,   actionsPerHrCoalBag:2160, actionsPerHrNoCoalBag:1512, inputNames:[{name:'Runite ore',qty:1},{name:'Coal',qty:4}],       outputName:'Runite bar',     membersOnly:true},
+];
+BLAST_FURNACE_BARS.forEach(method=>method.requirements=['Ice gloves or Smiths gloves (i)']);
+// Dart tips: 1,060 actions/hr without Smiths' Uniform, 1,300 with (10,600 / 13,000 tips per
+// hour ÷ 10 tips per bar). Requires The Tourist Trap.
+const DART_TIPS = [
+  {family:'darttip', name:'Bronze dart tips',  minLevel:4,  maxLevel:19, xpPerAction:12.5, outputQty:10, inputNames:[{name:'Bronze bar',qty:1}],  outputName:'Bronze dart tip',  membersOnly:true, requirements:['The Tourist Trap']},
+  {family:'darttip', name:'Iron dart tips',    minLevel:19, maxLevel:34, xpPerAction:25,   outputQty:10, inputNames:[{name:'Iron bar',qty:1}],    outputName:'Iron dart tip',    membersOnly:true, requirements:['The Tourist Trap']},
+  {family:'darttip', name:'Steel dart tips',   minLevel:34, maxLevel:54, xpPerAction:37.5, outputQty:10, inputNames:[{name:'Steel bar',qty:1}],   outputName:'Steel dart tip',   membersOnly:true, requirements:['The Tourist Trap']},
+  {family:'darttip', name:'Mithril dart tips', minLevel:54, maxLevel:74, xpPerAction:50,   outputQty:10, inputNames:[{name:'Mithril bar',qty:1}], outputName:'Mithril dart tip', membersOnly:true, requirements:['The Tourist Trap']},
+  {family:'darttip', name:'Adamant dart tips', minLevel:74, maxLevel:89, xpPerAction:62.5, outputQty:10, inputNames:[{name:'Adamantite bar',qty:1}], outputName:'Adamant dart tip', membersOnly:true, requirements:['The Tourist Trap']},
+  {family:'darttip', name:'Rune dart tips',    minLevel:89, maxLevel:99, xpPerAction:75,   outputQty:10, inputNames:[{name:'Runite bar',qty:1}],  outputName:'Rune dart tip',    membersOnly:true, requirements:['The Tourist Trap']},
+];
+// Cannonballs: normal mould is 1 steel bar → 4 balls (25.6 xp, 13,824 xp/hr); double mould is
+// 2 bars → 8 balls (51.2 xp, 27,648 xp/hr). Both divide out to exactly 540 actions/hr, so
+// actionsPerHr is constant regardless of mould — only bars/output/xp per action double.
+const CANNONBALL_METHOD = {family:'cannonball', name:'Steel cannonballs', minLevel:35, maxLevel:99, actionsPerHr:540, outputName:'Cannonball', membersOnly:true, requirements:['Dwarf Cannon'], note:'Baseline solo rate — not the newer maximum-effort teleport method (~6,000 balls/hr).'};
+
+function earlyPrefixUntil(level){
+  return EARLY_SEQUENCE.filter(m=>m.minLevel<level).map(m=>({...m, maxLevel:Math.min(m.maxLevel,level)}));
+}
+
+// Fastest: mathematical greedy pick of highest live xp/hr among early anvil, platebodies,
+// and Blast Furnace gold. No runners/boosts. Recomputing per-toggle means gauntlets-off
+// correctly re-compares against platebodies (acceptance test 7).
+const FASTEST_POOL = [...EARLY_SEQUENCE, ...PLATEBODY_TIERS, BLAST_FURNACE_GOLD].map(m=>({...m, maxLevel:99}));
+// Cheapest: full candidate pool across Blast Furnace bars, dart tips, platebodies, and
+// cannonballs, sorted by live net GP/XP with a default 40,000 xp/hr floor.
+const CHEAPEST_POOL = [...EARLY_SEQUENCE, ...PLATEBODY_TIERS, ...BLAST_FURNACE_BARS, ...DART_TIPS, CANNONBALL_METHOD].map(m=>({...m, maxLevel:99}));
+// Simple: curated stable identity — early sequence, then Iron platebodies extended to 48
+// (skipping Steel warhammer) so the route never leaves platebodies once they're reachable.
+const SMITHING_SIMPLE = [
+  EARLY_SEQUENCE[0], EARLY_SEQUENCE[1], EARLY_SEQUENCE[2], EARLY_SEQUENCE[3], EARLY_SEQUENCE[4],
+  {...EARLY_SEQUENCE[5], maxLevel:48, note:'Kept on Iron platebodies nine levels past its natural window to stay on a single stable method instead of switching to Steel warhammer.'},
+  PLATEBODY_TIERS[0], PLATEBODY_TIERS[1], PLATEBODY_TIERS[2],
+];
+const SMITHING_ROUTES = { fastest: FASTEST_POOL, cheapest: CHEAPEST_POOL, simple: SMITHING_SIMPLE };
+const CHEAPEST_XPHR_FLOOR = 40000;
+
+// ── GIANTS' FOUNDRY DATA ──────────────────────────────────────────────────────────
+// Baseline no-uniform, optimal-mould estimates from the Wiki's Strategies page. Kovac's
+// coin reward = 2 × sword XP reward (verified: rewardGpPerHr / swordsPerHr = 2 × xpPerHr/swordsPerHr
+// for every row below, e.g. Bronze/Iron: 195,840/16 = 12,240 = 2 × (97,920/16)).
+const FOUNDRY_ALLOYS = [
+  {name:'Bronze / Iron',        level:15, swordsPerHr:16, barsPerHr:448, xpPerHr:97920,  repPerHr:1264, rewardGpPerHr:195840, bar1:'Bronze bar',     bar2:'Iron bar',       ratio:[9,19],  ratioVerified:true},
+  {name:'Iron / Steel',         level:30, swordsPerHr:16, barsPerHr:448, xpPerHr:133920, repPerHr:1568, rewardGpPerHr:267840, bar1:'Iron bar',       bar2:'Steel bar',      ratio:[14,14], ratioVerified:false},
+  {name:'Steel / Mithril',      level:50, swordsPerHr:14, barsPerHr:392, xpPerHr:164640, repPerHr:1722, rewardGpPerHr:329280, bar1:'Steel bar',      bar2:'Mithril bar',    ratio:[14,14], ratioVerified:false},
+  {name:'Mithril / Adamantite', level:70, swordsPerHr:12, barsPerHr:336, xpPerHr:198000, repPerHr:1836, rewardGpPerHr:396000, bar1:'Mithril bar',    bar2:'Adamantite bar', ratio:[18,10], ratioVerified:true},
+  {name:'Adamantite / Runite',  level:85, swordsPerHr:11, barsPerHr:308, xpPerHr:253110, repPerHr:2068, rewardGpPerHr:506220, bar1:'Adamantite bar', bar2:'Runite bar',     ratio:[19,9],  ratioVerified:true},
+];
+const FOUNDRY_UNIFORM_BONUS = 1.175; // Wiki describes "roughly 15-20%"; 17.5% used as a single labeled midpoint assumption.
+const FOUNDRY_NO_OPTIMAL_MOULD_PENALTY = 0.80; // Labeled -20% estimate; wiki does not give an exact non-optimal-mould rate.
+const FOUNDRY_MIN_LEVEL = 15;
+const FOUNDRY_PIECE_IDS = ['gloves','boots','tunic','trousers'];
+const FOUNDRY_REWARDS = [
+  {id:'doublemould', name:'Double ammo mould', rep:2000, desc:'Craft ammunition at twice the normal rate. Requires Dwarf Cannon.'},
+  {id:'gloves',       name:'Smiths gloves',    rep:3500, desc:"Can be combined with Ice gloves to make Smiths gloves (i)."},
+  {id:'boots',        name:'Smiths boots',     rep:3500, desc:"One piece of the Smiths' Uniform."},
+  {id:'tunic',        name:'Smiths tunic',     rep:4000, desc:"One piece of the Smiths' Uniform."},
+  {id:'trousers',     name:'Smiths trousers',  rep:4000, desc:"One piece of the Smiths' Uniform."},
+  {id:'blade',        name:'Colossal blade',   rep:5000, desc:'A large two-handed reward weapon.'},
+];
+let foundryMode='level';
+let foundryOptimalMoulds=true, foundryCurrentRep=0;
+let selectedFoundryRewards=new Set();
+
+// ── LIVE GE PRICING ─────────────────────────────────────────────────────────────
+const WIKI_MAPPING='https://prices.runescape.wiki/api/v1/osrs/mapping';
+const WIKI_LATEST='https://prices.runescape.wiki/api/v1/osrs/latest';
+let nameToId={}, prices={}, nameToIcon={}, pricesLoaded=false;
+
+function priceOf(name){
+  if(!name) return 0;
+  const id=nameToId[name.toLowerCase()];
+  if(!id||!prices[id]) return 0;
+  return prices[id].high || prices[id].low || 0;
+}
+function sellPriceOf(name){
+  if(!name) return 0;
+  const id=nameToId[name.toLowerCase()];
+  if(!id||!prices[id]) return 0;
+  const raw = prices[id].low || prices[id].high || 0;
+  const tax = Math.min(5000000, Math.max(1, Math.floor(raw * 0.01)));
+  return Math.max(0, raw - tax);
+}
+function wikiItemIcon(name,className='shopping-icon'){
+  const mapped=nameToIcon[name.toLowerCase()];
+  const filename=mapped||`${name.replace(/ /g,'_')}.png`;
+  const src=mapped
+    ? `https://oldschool.runescape.wiki/images/${encodeURIComponent(filename.replace(/ /g,'_'))}`
+    : `https://oldschool.runescape.wiki/w/Special:Redirect/file/${encodeURIComponent(filename)}`;
+  return `<img class="${className}" src="${src}" alt="${name}" onerror="this.style.display='none'">`;
+}
+
+async function loadPrices(){
+  try{
+    const [mapRes,priceRes]=await Promise.all([fetch(WIKI_MAPPING),fetch(WIKI_LATEST)]);
+    const mapData=await mapRes.json(), priceData=await priceRes.json();
+    mapData.forEach(i=>{ nameToId[i.name.toLowerCase()]=String(i.id); if(i.icon) nameToIcon[i.name.toLowerCase()]=i.icon; });
+    Object.entries(priceData.data).forEach(([id,p])=>{ prices[id]=p; });
+    pricesLoaded=true;
+    const el=document.getElementById('priceStatus');
+    el.textContent='✓ Live Grand Exchange prices loaded';
+    el.style.color='var(--green)';
+    generatePlan();
+  }catch(e){
+    const el=document.getElementById('priceStatus');
+    el.textContent='⚠ Could not load live prices — cost estimates unavailable';
+    el.style.color='var(--red)';
+  }
+}
+
+// ── STATE ───────────────────────────────────────────────────────────────────────
+const SUITE_THEME_KEY='osrs-suite-theme';
+let playerLevel=1, playerXp=0, targetLevelVal=99, currentSpeed='simple', isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
+let membersEnabled=true, gauntletsEnabled=true, coalBagEnabled=true, uniformEnabled=true, optimalAnvilEnabled=false, doubleMouldEnabled=false;
+let outputHandling='ge', lowAttentionPref='darttips', staminaEnabled=true, cheapestFloorEnabled=true;
+document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  localStorage.setItem(SUITE_THEME_KEY,isDark?'dark':'light');
+});
+
+function wireSeg(hostId, dataAttr, setter){
+  document.getElementById(hostId).addEventListener('click',e=>{
+    const btn=e.target.closest(`button[data-${dataAttr}]`);
+    if(!btn) return;
+    document.querySelectorAll(`#${hostId} button`).forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    setter(btn.dataset[dataAttr]);
+    generatePlan();
+  });
+}
+wireSeg('membersToggle','members', v=>membersEnabled = v==='true');
+wireSeg('optimalAnvilToggle','optimal', v=>optimalAnvilEnabled = v==='true');
+wireSeg('lowAttentionPref','pref', v=>lowAttentionPref = v);
+document.getElementById('gauntletsToggle').addEventListener('change',e=>{ gauntletsEnabled=e.target.checked; generatePlan(); });
+document.getElementById('coalBagToggle').addEventListener('change',e=>{ coalBagEnabled=e.target.checked; generatePlan(); });
+document.getElementById('uniformToggle').addEventListener('change',e=>{ uniformEnabled=e.target.checked; generatePlan(); });
+document.getElementById('doubleMouldToggle').addEventListener('change',e=>{ doubleMouldEnabled=e.target.checked; generatePlan(); });
+document.getElementById('outputHandling').addEventListener('change',e=>{ outputHandling = e.target.value; generatePlan(); });
+document.getElementById('staminaToggle').addEventListener('change',e=>{ staminaEnabled = e.target.checked; generatePlan(); });
+document.getElementById('cheapestFloorToggle').addEventListener('change',e=>{ cheapestFloorEnabled = e.target.checked; generatePlan(); });
+
+// ── WISE OLD MAN LOOKUP ───────────────────────────────────────────────────────
+const WOM_API='https://api.wiseoldman.net/v2';
+const WOM_USERNAME_KEY='osrs_wom_username';
+
+async function fetchWomPlayer(username){
+  const url=`${WOM_API}/players/${encodeURIComponent(username)}`;
+  const res=await fetch(url);
+  if(res.status===404){
+    const trackRes=await fetch(url,{method:'POST'});
+    if(!trackRes.ok) throw new Error(`Player "${username}" not found`);
+    return trackRes.json();
+  }
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+
+function womSkill(data,skillKey){
+  const skill=data?.latestSnapshot?.data?.skills?.[skillKey];
+  if(!skill||skill.experience==null||skill.experience<0) return null;
+  return {level:skill.level,xp:skill.experience};
+}
+
+const womToggle=document.getElementById('womToggle');
+const womFields=document.getElementById('womFields');
+womToggle.addEventListener('click',()=>{
+  womFields.classList.toggle('show');
+  womToggle.classList.toggle('active');
+});
+
+const womUsernameInput=document.getElementById('womUsername');
+const womFetchBtn=document.getElementById('womFetchBtn');
+const womStatus=document.getElementById('womStatus');
+
+const savedWomUsername=localStorage.getItem(WOM_USERNAME_KEY);
+if(savedWomUsername) womUsernameInput.value=savedWomUsername;
+
+function setWomStatus(msg,type){
+  womStatus.textContent=msg;
+  womStatus.className='fetch-status show '+type;
+}
+
+async function doWomLookup(){
+  const username=womUsernameInput.value.trim();
+  if(!username){setWomStatus('Enter a username first','error');return;}
+  womFetchBtn.disabled=true;
+  womStatus.innerHTML='<span class="spinner-sm"></span> Looking up stats on Wise Old Man…';
+  womStatus.className='fetch-status show loading';
+  try{
+    const data=await fetchWomPlayer(username);
+    const skillData=womSkill(data,'smithing');
+    if(!skillData){
+      throw new Error('No Smithing data for this player (may be unranked)');
+    }
+    document.getElementById('manualLevel').value=skillData.level;
+    document.getElementById('manualXp').value=skillData.xp;
+    document.dispatchEvent(new CustomEvent('herblore:exact-xp'));
+    localStorage.setItem(WOM_USERNAME_KEY,username);
+    setWomStatus(`✓ Loaded ${data.displayName}'s stats — Level ${skillData.level} Smithing (${skillData.xp.toLocaleString()} XP)`,'success');
+    document.getElementById('applyBtn').click();
+  }catch(e){
+    console.error(e);
+    setWomStatus(`⚠ ${e.message||'Lookup failed'}`,'error');
+  }finally{
+    womFetchBtn.disabled=false;
+  }
+}
+womFetchBtn.addEventListener('click',doWomLookup);
+womUsernameInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); doWomLookup(); } });
+if(savedWomUsername) doWomLookup();
+
+const manualLevelInput=document.getElementById('manualLevel');
+const manualXpInput=document.getElementById('manualXp');
+manualLevelInput.addEventListener('input',()=>{
+  manualXpInput.value='';
+});
+
+document.getElementById('applyBtn').addEventListener('click',()=>{
+  const lvl=parseInt(manualLevelInput.value)||1;
+  const xpInput=manualXpInput.value.trim();
+  const tgt=parseInt(document.getElementById('targetLevel').value)||99;
+  const parsedXp=xpInput===''?NaN:parseInt(xpInput);
+  const exactMode=!manualXpInput.disabled;
+  if(exactMode&&Number.isFinite(parsedXp)){
+    playerXp=Math.max(0,Math.min(200000000,parsedXp));
+    playerLevel=levelForXp(playerXp);
+    manualLevelInput.value=playerLevel;
+    manualXpInput.value=playerXp;
+  }else{
+    playerLevel=Math.max(1,Math.min(99,lvl));
+    playerXp=xpForLevel(playerLevel);
+    if(exactMode) manualXpInput.value=playerXp;
+  }
+  targetLevelVal=playerLevel>=99?99:Math.max(playerLevel+1,Math.min(99,tgt));
+  updateStatusCard(); generatePlan();
+});
+
+document.querySelectorAll('.speed-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.speed-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentSpeed=tab.dataset.speed;
+    generatePlan();
+  });
+});
+
+function updateStatusCard(){
+  const cur=levelForXp(playerXp);
+  document.getElementById('statusLevel').textContent=cur;
+  const targetXp=xpForLevel(targetLevelVal);
+  const startXp=xpForLevel(cur);
+  const pct=targetLevelVal<=cur?100:Math.max(0,Math.min(100,(playerXp-startXp)/((targetXp-startXp)||1)*100));
+  document.getElementById('statusProgressFill').style.width=pct+'%';
+  document.getElementById('statusXpText').textContent=playerXp.toLocaleString()+' XP';
+  document.getElementById('statusTargetText').textContent='Target: Level '+targetLevelVal;
+  document.getElementById('statusXpRemaining').textContent=Math.max(0,targetXp-playerXp).toLocaleString();
+}
+
+// ── DYNAMIC METHOD RESOLUTION (toggles affect these fields) ───────────────────────
+function isBlastFurnace(method){ return method.family==='bfgold'||method.family==='bfbar'; }
+function xpPerActionFor(method){
+  if(method.family==='bfgold') return gauntletsEnabled?56.2:22.5;
+  if(method.family==='cannonball') return doubleMouldEnabled?51.2:25.6;
+  return method.xpPerAction;
+}
+function actionsPerHrFor(method){
+  if(method.family==='platebody') return optimalAnvilEnabled?method.actionsPerHrOptimal:method.actionsPerHrNormal;
+  if(method.family==='darttip') return uniformEnabled?1300:1060;
+  if(method.family==='bfbar') return coalBagEnabled?method.actionsPerHrCoalBag:method.actionsPerHrNoCoalBag;
+  return method.actionsPerHr;
+}
+function outputQtyFor(method){
+  if(method.family==='cannonball') return doubleMouldEnabled?8:4;
+  return method.outputQty||1;
+}
+function baseInputsFor(method){
+  if(method.family==='cannonball') return [{name:'Steel bar',qty:doubleMouldEnabled?2:1}];
+  return method.inputNames||[];
+}
+function furnaceFeePerAction(method){ return isBlastFurnace(method) ? 72000/actionsPerHrFor(method) : 0; }
+function staminaPotionsPerAction(method){ return (staminaEnabled && isBlastFurnace(method)) ? 10/actionsPerHrFor(method) : 0; } // 40 doses/hr ÷ 4 doses/potion = 10 potions/hr
+function effectiveInputs(method){
+  const inputs = baseInputsFor(method).slice();
+  if(outputHandling==='alch' && method.highAlch) inputs.push({name:'Nature rune', qty:1});
+  const staminaQty = staminaPotionsPerAction(method);
+  if(staminaQty>0) inputs.push({name:'Stamina potion(4)', qty:staminaQty});
+  return inputs;
+}
+function xpPerHrFor(method){ return xpPerActionFor(method) * actionsPerHrFor(method); }
+function creditFor(method){
+  if(outputHandling==='alch' && method.highAlch) return method.highAlch;
+  return sellPriceOf(method.outputName) * outputQtyFor(method);
+}
+function netCostPerAction(method){
+  const inputCost = effectiveInputs(method).reduce((sum,n)=>sum+priceOf(n.name)*n.qty,0);
+  return inputCost + furnaceFeePerAction(method) - creditFor(method);
+}
+function netGpPerXp(method){
+  const hasOutput = creditFor(method) > 0;
+  const hasAllInputs = effectiveInputs(method).every(n=>priceOf(n.name)>0);
+  return hasOutput && hasAllInputs ? netCostPerAction(method)/xpPerActionFor(method) : Infinity;
+}
+
+// ── ROUTE GENERATION ────────────────────────────────────────────────────────────
+function lowAttentionRoute(){
+  if(!membersEnabled) return [];
+  return lowAttentionPref==='cannonballs'
+    ? [...earlyPrefixUntil(35), {...CANNONBALL_METHOD, maxLevel:99}]
+    : [...earlyPrefixUntil(4), ...DART_TIPS];
+}
+
+function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel)){
+  let methods = speed==='lowattention' ? lowAttentionRoute() : (SMITHING_ROUTES[speed] || []);
+  if(!membersEnabled) methods = methods.filter(m=>!m.membersOnly);
+  const isPool = speed==='fastest' || speed==='cheapest';
+  const stops=[];
+  let lvl=startLevel;
+  while(lvl<endLevel){
+    let candidates=methods.filter(m=>m.minLevel<=lvl&&m.maxLevel>lvl);
+    if(!candidates.length){
+      const next=methods.filter(m=>m.minLevel>lvl).sort((a,b)=>a.minLevel-b.minLevel)[0];
+      if(!next) break;
+      lvl=next.minLevel; continue;
+    }
+    let method;
+    if(speed==='fastest'){
+      method=candidates.slice().sort((a,b)=>xpPerHrFor(b)-xpPerHrFor(a))[0];
+    }else if(speed==='cheapest'){
+      const withFloor = cheapestFloorEnabled ? candidates.filter(m=>xpPerHrFor(m)>=CHEAPEST_XPHR_FLOOR) : candidates;
+      const pool = (withFloor.length ? withFloor : candidates).filter(m=>Number.isFinite(netGpPerXp(m)));
+      if(!pool.length) break;
+      method=pool.slice().sort((a,b)=>netGpPerXp(a)-netGpPerXp(b))[0];
+    }else{
+      method=candidates.slice().sort((a,b)=>b.maxLevel-a.maxLevel)[0];
+    }
+    const nextUnlock=isPool
+      ? methods.filter(m=>m.minLevel>lvl).reduce((next,m)=>Math.min(next,m.minLevel),Infinity)
+      : Infinity;
+    const stopEnd=isPool
+      ? Math.min(nextUnlock,endLevel)
+      : Math.min(method.maxLevel,endLevel);
+    const xpStart=lvl===startLevel?Math.max(xpForLevel(lvl),startXp):xpForLevel(lvl), xpEnd=xpForLevel(stopEnd);
+    const xpNeeded=xpEnd-xpStart;
+    const actionsNeeded=Math.ceil(xpNeeded/xpPerActionFor(method));
+    const hoursNeeded=actionsNeeded/actionsPerHrFor(method);
+    const totalCost=pricesLoaded?netCostPerAction(method)*actionsNeeded:0;
+    const previous=stops[stops.length-1];
+    if(isPool&&previous&&previous.name===method.name){
+      previous.levelEnd=stopEnd;
+      previous.xpNeeded+=xpNeeded;
+      previous.actionsNeeded=Math.ceil(previous.xpNeeded/xpPerActionFor(method));
+      previous.hoursNeeded=previous.actionsNeeded/actionsPerHrFor(method);
+      previous.totalCost=netCostPerAction(method)*previous.actionsNeeded;
+    }else{
+      const liveNote=speed==='cheapest'
+        ? `Cheapest eligible method at ${netGpPerXp(method).toFixed(2)} net GP/XP using the latest loaded GE prices. This choice can change as prices move.`
+        : (speed==='fastest' ? `Highest XP/hr eligible method (${Math.round(xpPerHrFor(method)).toLocaleString()} xp/hr) at this level.` : method.note);
+      stops.push({...method,note:liveNote,levelStart:lvl,levelEnd:stopEnd,xpNeeded,actionsNeeded,hoursNeeded,totalCost});
+    }
+    lvl=stopEnd;
+  }
+  return stops;
+}
+
+function fmt(n){if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
+function fmtExact(n){return Math.ceil(n).toLocaleString();}
+function fmtGp(n){const abs=Math.abs(n);let s;if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';else s=Math.round(abs).toLocaleString();return(n<0?'-':'')+s+' gp';}
+function fmtHrs(h){if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixed(1)+' hrs';return(h/24).toFixed(1)+' days';}
+
+function requirementBadges(stop){
+  const badges=[stop.membersOnly?`<span class="craft-badge members">Members</span>`:`<span class="craft-badge">F2P</span>`];
+  (stop.requirements||[]).forEach(r=>badges.push(`<span class="craft-badge req">${r}</span>`));
+  return badges.join('');
+}
+
+function updateRouteTabMetrics(startLevel,endLevel){
+  if(!pricesLoaded||startLevel>=endLevel)return;
+  ['fastest','simple','cheapest','lowattention'].forEach(speed=>{
+    const route=buildRoute(startLevel,endLevel,speed,playerXp);
+    const cost=route.reduce((sum,stop)=>sum+stop.totalCost,0);
+    const hours=route.reduce((sum,stop)=>sum+stop.hoursNeeded,0);
+    const subtitle=document.querySelector(`.speed-tab[data-speed="${speed}"] .speed-tab-sub`);
+    if(subtitle&&route.length)subtitle.dataset.liveSummary=`${fmtGp(Math.abs(cost)).replace(' gp','')} · ${fmtHrs(hours)}`;
+  });
+}
+
+function renderRouteStops(stops, accent, curLevel){
+  const lastStop=stops[stops.length-1];
+  const reachedTarget = lastStop.levelEnd >= targetLevelVal;
+  const totalHrs=stops.reduce((s,x)=>s+x.hoursNeeded,0);
+  const totalCost=stops.reduce((s,x)=>s+x.totalCost,0);
+  const totalActions=stops.reduce((s,x)=>s+x.actionsNeeded,0);
+  let grossIngredientCost = 0;
+  if(pricesLoaded){
+    stops.forEach(stop=>{
+      const inCostPerAction=effectiveInputs(stop).reduce((s,n)=>s+(priceOf(n.name)||0)*n.qty,0) + furnaceFeePerAction(stop);
+      grossIngredientCost += inCostPerAction * stop.actionsNeeded;
+    });
+  }
+
+  let html='';
+  if(!reachedTarget){
+    html+=`<div style="background:rgba(231,76,60,.1);border:1px solid var(--red);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--red);">⚠ This route only reaches level ${lastStop.levelEnd} with the current settings. ${!membersEnabled?'Switch to Members to continue past this point.':'No further eligible methods were found.'}</div>`;
+  }
+
+  html+=`<div class="focus-summary">
+    <div><span>${totalCost>=0?'Net cost':'Net profit'}</span><strong style="color:${totalCost>=0?'#e74c3c':'#2ecc71'};">${pricesLoaded?fmtGp(Math.abs(totalCost)):'Loading…'}</strong></div>
+    <div><span>Time</span><strong>${fmtHrs(totalHrs)}</strong></div>
+    <div><span>Actions</span><strong>${fmtExact(totalActions)}</strong></div>
+    <div><span>Upfront</span><strong>${pricesLoaded?fmtGp(grossIngredientCost):'Loading…'}</strong></div>
+  </div>`;
+
+  html+=`<div class="focus-route-list" style="--accent:${accent};">`;
+  stops.forEach(stop=>{
+    const ingList=effectiveInputs(stop).map(n=>`${n.name}${n.qty!==1?` ×${n.qty%1===0?n.qty:n.qty.toFixed(2)}`:''}`).join(' + ');
+    const outQty=outputQtyFor(stop);
+    html+=`<article class="focus-route-row">
+      <div class="focus-levels"><span>${stop.levelStart}</span><span>→</span><span>${stop.levelEnd}</span></div>
+      <div class="focus-method">
+        <h3>${stop.name} ${requirementBadges(stop)}</h3>
+        <p>${ingList || '—'}${outQty>1?` → ${outQty}× ${stop.outputName}`:''}</p>
+        <small>${fmt(xpPerHrFor(stop))} xp/hr · ${fmtHrs(stop.hoursNeeded)}${stop.note?' · '+stop.note:''}</small>
+      </div>
+      <div class="focus-route-stat"><strong>${stop.actionsNeeded.toLocaleString()}</strong><span>actions</span></div>
+      <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded?fmtGp(Math.abs(stop.totalCost)).replace(' gp',''):'—'}</strong><span>${stop.totalCost<0?'net profit':'net cost'}</span></div>
+      <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded&&stop.xpNeeded>0?(stop.totalCost/stop.xpNeeded).toFixed(2):'—'}</strong><span>gp/xp</span></div>
+    </article>`;
+  });
+  html+=`</div>`;
+
+  if(pricesLoaded){
+    html+=`<div class="focus-market-note">Prices use current Grand Exchange buy costs, estimated sell revenue (or High Alchemy value where selected), GE tax, and Blast Furnace fees/stamina where applicable.</div>`;
+
+    const grandTotals = new Map();
+    let shoppingBody = '';
+    stops.forEach(stop=>{
+      const stopInputs=effectiveInputs(stop);
+      let stopRows = '';
+      stopInputs.forEach(input=>{
+        const qty = Math.ceil(stop.actionsNeeded * input.qty);
+        const unitCost = priceOf(input.name);
+        const lineCost = unitCost * qty;
+        if(!grandTotals.has(input.name)) grandTotals.set(input.name,{qty:0,unitCost});
+        grandTotals.get(input.name).qty += qty;
+        const icon = nameToIcon[input.name.toLowerCase()]
+          ? `<img class="shopping-icon" src="https://oldschool.runescape.wiki/images/${encodeURIComponent(nameToIcon[input.name.toLowerCase()].replace(/ /g,'_'))}" alt="">`
+          : '';
+        stopRows += `<tr>
+          <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(input.name.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${input.name}</a></td>
+          <td class="mono">${fmtExact(qty)}</td>
+          <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
+          <td class="mono">${unitCost>0?fmtGp(lineCost):'—'}</td>
+        </tr>`;
+      });
+      const feeTotal = furnaceFeePerAction(stop) * stop.actionsNeeded;
+      if(feeTotal>0){
+        stopRows += `<tr><td colspan="2" style="color:var(--text-dim);">Blast Furnace world fee (72,000 gp/hr)</td><td class="mono">—</td><td class="mono">${fmtGp(feeTotal)}</td></tr>`;
+      }
+      shoppingBody += `<div class="shopping-section" style="--accent:${accent};">
+        <div class="shopping-section-title">Lvl ${stop.levelStart} → ${stop.levelEnd}: ${stop.name}</div>
+        <table class="shopping-table">
+          <thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Each</th><th class="r">Total</th></tr></thead>
+          <tbody>${stopRows}</tbody>
+        </table>
+      </div>`;
+    });
+
+    let grandRows = '';
+    let grandTotal = 0;
+    grandTotals.forEach(({qty,unitCost},name)=>{
+      const lineCost = unitCost * qty;
+      grandTotal += lineCost;
+      const icon = nameToIcon[name.toLowerCase()]
+        ? `<img class="shopping-icon" src="https://oldschool.runescape.wiki/images/${encodeURIComponent(nameToIcon[name.toLowerCase()].replace(/ /g,'_'))}" alt="">`
+        : '';
+      grandRows += `<tr>
+        <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(name.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${name}</a></td>
+        <td class="mono">${fmtExact(qty)}</td>
+        <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
+        <td class="mono">${unitCost>0?fmtGp(unitCost*qty):'—'}</td>
+      </tr>`;
+    });
+    const totalFees = stops.reduce((s,stop)=>s+furnaceFeePerAction(stop)*stop.actionsNeeded,0);
+    if(totalFees>0) grandTotal += totalFees;
+
+    const outTotals = new Map();
+    stops.forEach(stop=>{
+      if(!stop.outputName) return;
+      const sp = creditFor(stop) / outputQtyFor(stop);
+      if(!outTotals.has(stop.outputName)) outTotals.set(stop.outputName,{qty:0,sp});
+      outTotals.get(stop.outputName).qty += stop.actionsNeeded * outputQtyFor(stop);
+    });
+    let sellCredit = 0;
+    let sellRows = '';
+    outTotals.forEach(({qty,sp},name)=>{
+      const total = sp*qty;
+      sellCredit += total;
+      sellRows += `<tr style="color:var(--green);">
+        <td colspan="2" style="color:var(--green);">${name} ×${fmtExact(qty)}</td>
+        <td class="mono" style="color:var(--green);">${fmtGp(sp)}</td>
+        <td class="mono" style="color:var(--green);">−${fmtGp(total)}</td>
+      </tr>`;
+    });
+
+    const netCost = grandTotal - sellCredit;
+
+    html += `<div class="shopping-wrap">
+      <button class="shopping-toggle" id="shoppingToggle">
+        <span>🛒 Full Shopping List (Lvl ${curLevel} → ${lastStop.levelEnd})</span>
+        <span class="shopping-toggle-arrow" id="shoppingArrow">▾</span>
+      </button>
+      <div class="shopping-body" id="shoppingBody">
+        ${shoppingBody}
+        <div class="shopping-section">
+          <div class="shopping-section-title" style="color:var(--text);">📦 Grand Total — Everything You Need</div>
+          <table class="shopping-table">
+            <thead><tr><th>Item</th><th class="r">Total Qty</th><th class="r">Each</th><th class="r">Total Cost</th></tr></thead>
+            <tbody>${grandRows}${totalFees>0?`<tr><td colspan="2" style="color:var(--text-dim);">Blast Furnace world fees</td><td class="mono">—</td><td class="mono">${fmtGp(totalFees)}</td></tr>`:''}${sellRows}</tbody>
+          </table>
+          <div class="shopping-grand-total" style="flex-direction:column;align-items:stretch;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="color:var(--text-dim);font-size:14px;">💰 Upfront Capital Needed</span>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#e74c3c;">${fmtGp(grandTotal)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="color:var(--green);font-size:14px;">📈 ${outputHandling==='alch'?'Alch/Sell All Finished Items':'Sell All Finished Items'}</span>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--green);">−${fmtGp(sellCredit)}</span>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:16px;font-weight:700;">${netCost>=0?'Net Cost':'Net Profit'}</span>
+              <span class="gp" style="color:${netCost>=0?'#e74c3c':'#2ecc71'};">${fmtGp(Math.abs(netCost))}</span>
+            </div>
+          </div>
+          <div class="shopping-note">Quantities are exact (rounded up to whole items). Prices update live from the Grand Exchange. Check prices again before bulk buying as margins shift daily.</div>
+        </div>
+      </div>
+    </div>`;
+  }
+  return html;
+}
+
+// ── GIANTS' FOUNDRY RENDERING ──────────────────────────────────────────────────
+function foundryAlloyRates(alloy){
+  let mult=1;
+  if(uniformEnabled) mult*=FOUNDRY_UNIFORM_BONUS;
+  if(!foundryOptimalMoulds) mult*=FOUNDRY_NO_OPTIMAL_MOULD_PENALTY;
+  return {
+    swordsPerHr: alloy.swordsPerHr*mult, barsPerHr: alloy.barsPerHr*mult, xpPerHr: alloy.xpPerHr*mult,
+    repPerHr: alloy.repPerHr*mult, rewardGpPerHr: alloy.rewardGpPerHr*mult,
+  };
+}
+function bestAlloyForLevel(level){
+  const eligible=FOUNDRY_ALLOYS.filter(a=>a.level<=level);
+  return (eligible.length?eligible[eligible.length-1]:FOUNDRY_ALLOYS[0]);
+}
+function renderFoundryModeToggle(){
+  return `<div class="foundry-mode-bar"><button class="foundry-mode-btn${foundryMode==='level'?' active':''}" data-foundry-mode="level">Train to level</button><button class="foundry-mode-btn${foundryMode==='reward'?' active':''}" data-foundry-mode="reward">Earn rewards</button></div>`;
+}
+function renderFoundryControls(){
+  return `<div class="foundry-controls">
+    <div class="craft-toggle-group"><span>Optimal moulds unlocked</span><div class="craft-seg" id="foundryMouldsToggle"><button type="button" data-fmould="true" class="${foundryOptimalMoulds?'active':''}">Yes</button><button type="button" data-fmould="false" class="${!foundryOptimalMoulds?'active':''}">No</button></div></div>
+    <div class="field-group"><span class="field-label">Current reputation</span><input type="number" id="foundryRepInput" min="0" value="${foundryCurrentRep}" style="width:130px;"></div>
+  </div>`;
+}
+function wireFoundryControls(){
+  document.getElementById('foundryMouldsToggle').addEventListener('click',e=>{
+    const btn=e.target.closest('button[data-fmould]'); if(!btn) return;
+    foundryOptimalMoulds = btn.dataset.fmould==='true';
+    generatePlan();
+  });
+  document.getElementById('foundryRepInput').addEventListener('change',e=>{
+    foundryCurrentRep = Math.max(0, parseInt(e.target.value)||0);
+    generatePlan();
+  });
+  document.querySelectorAll('.foundry-mode-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    foundryMode = btn.dataset.foundryMode;
+    generatePlan();
+  }));
+}
+
+function renderFoundryLevelPlan(curLevel, targetLevel){
+  if(curLevel < FOUNDRY_MIN_LEVEL){
+    return `<div class="route-stop" style="text-align:center;padding:30px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:#9b6fd6;margin-bottom:8px;">Level 15 required</div><div style="color:var(--text-dim);font-size:13px;max-width:400px;margin:0 auto;">Giants' Foundry requires level 15 Smithing and completion of Sleeping Giants. Your current level is ${curLevel}.</div></div>`;
+  }
+  const xpRemaining = Math.max(0, xpForLevel(targetLevel) - playerXp);
+  // Walk through the alloy tiers the player will pass through on the way to target, summing each segment.
+  let xp=Math.max(xpForLevel(curLevel), playerXp), lvl=curLevel;
+  const segments=[];
+  while(lvl<targetLevel){
+    const alloy=bestAlloyForLevel(lvl);
+    const nextTierLevel=FOUNDRY_ALLOYS.filter(a=>a.level>lvl).reduce((m,a)=>Math.min(m,a.level),Infinity);
+    const segEnd=Math.min(nextTierLevel,targetLevel);
+    const xpStart=Math.max(xpForLevel(lvl),xp), xpEnd=xpForLevel(segEnd);
+    const rates=foundryAlloyRates(alloy);
+    const hoursNeeded=(xpEnd-xpStart)/rates.xpPerHr;
+    const swords=hoursNeeded*rates.swordsPerHr;
+    const bar1Qty=swords*alloy.ratio[0], bar2Qty=swords*alloy.ratio[1];
+    const rep=hoursNeeded*rates.repPerHr;
+    const rewardGp=hoursNeeded*rates.rewardGpPerHr;
+    const bar1Cost=priceOf(alloy.bar1)*bar1Qty, bar2Cost=priceOf(alloy.bar2)*bar2Qty;
+    const netCost=bar1Cost+bar2Cost-rewardGp;
+    segments.push({alloy,levelStart:lvl,levelEnd:segEnd,hoursNeeded,swords,bar1Qty,bar2Qty,rep,rewardGp,bar1Cost,bar2Cost,netCost});
+    lvl=segEnd;
+  }
+  const totalHours=segments.reduce((s,x)=>s+x.hoursNeeded,0);
+  const totalSwords=segments.reduce((s,x)=>s+x.swords,0);
+  const totalRep=segments.reduce((s,x)=>s+x.rep,0);
+  const totalNetCost=segments.reduce((s,x)=>s+x.netCost,0);
+
+  let html=`<div class="foundry-summary">
+    <div class="foundry-summary-stat"><div class="foundry-summary-label">XP Remaining</div><div class="foundry-summary-value">${fmt(xpRemaining)}</div></div>
+    <div class="foundry-summary-stat"><div class="foundry-summary-label">Est. Time</div><div class="foundry-summary-value">${fmtHrs(totalHours)}</div></div>
+    <div class="foundry-summary-stat"><div class="foundry-summary-label">Swords</div><div class="foundry-summary-value">${fmtExact(totalSwords)}</div></div>
+    <div class="foundry-summary-stat"><div class="foundry-summary-label">Reputation</div><div class="foundry-summary-value">${fmtExact(totalRep)}</div></div>
+    <div class="foundry-summary-stat"><div class="foundry-summary-label">${totalNetCost>=0?'Net Cost':'Net Profit'} (materials vs. Kovac's reward)</div><div class="foundry-summary-value" style="color:${totalNetCost>=0?'#e74c3c':'#2ecc71'};">${pricesLoaded?fmtGp(Math.abs(totalNetCost)):'Loading…'}</div></div>
+  </div>`;
+  html+=`<div class="focus-route-list">`;
+  segments.forEach(seg=>{
+    const ratioNote=seg.alloy.ratioVerified?'':' — ratio not independently verified this session, using an even split as a labeled placeholder';
+    html+=`<article class="focus-route-row">
+      <div class="focus-levels"><span>${seg.levelStart}</span><span>→</span><span>${seg.levelEnd}</span></div>
+      <div class="focus-method">
+        <h3>${seg.alloy.name} alloy swords</h3>
+        <p>${fmtExact(seg.bar1Qty)} ${seg.alloy.bar1} + ${fmtExact(seg.bar2Qty)} ${seg.alloy.bar2} (${seg.alloy.ratio[0]}:${seg.alloy.ratio[1]} ratio${ratioNote})</p>
+        <small>${fmtExact(seg.swords)} swords · ${fmtHrs(seg.hoursNeeded)} · ${fmtExact(seg.rep)} reputation</small>
+      </div>
+      <div class="focus-route-stat"><strong>${pricesLoaded?fmtGp(seg.bar1Cost+seg.bar2Cost):'—'}</strong><span>materials</span></div>
+      <div class="focus-route-stat"><strong style="color:var(--green);">${pricesLoaded?fmtGp(seg.rewardGp):'—'}</strong><span>Kovac's reward</span></div>
+      <div class="focus-route-stat"><strong style="color:${seg.netCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded?fmtGp(Math.abs(seg.netCost)):'—'}</strong><span>${seg.netCost<0?'net profit':'net cost'}</span></div>
+    </article>`;
+  });
+  html+=`</div>`;
+  html+=`<div class="foundry-note">Baseline no-uniform, optimal-mould estimates from the Wiki's Strategies page. Smiths' Uniform assumes a single labeled +17.5% (Wiki states "roughly 15-20%"). Without optimal moulds, a labeled -20% estimate is applied since the Wiki does not give an exact non-optimal-mould rate. Kovac's coin reward = 2 × the sword's XP reward. Default alloys use bars, not recycled equipment (a future enhancement).</div>`;
+  return html;
+}
+
+function renderFoundryRewardPlan(curLevel){
+  if(curLevel < FOUNDRY_MIN_LEVEL){
+    return `<div class="route-stop" style="text-align:center;padding:30px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:#9b6fd6;margin-bottom:8px;">Level 15 required</div><div style="color:var(--text-dim);font-size:13px;">Giants' Foundry requires level 15 Smithing and completion of Sleeping Giants.</div></div>`;
+  }
+  // Resolve the reward set: any individually-selected uniform piece plus a convenience
+  // "select all four" action never double counts — reputation is always summed from the
+  // four piece IDs directly, so there is no separate 15,000-rep "full uniform" line.
+  const rewards=FOUNDRY_REWARDS.filter(r=>selectedFoundryRewards.has(r.id));
+  const repNeeded=Math.max(0, rewards.reduce((s,r)=>s+r.rep,0) - foundryCurrentRep);
+  const alloy=bestAlloyForLevel(curLevel);
+  const rates=foundryAlloyRates(alloy);
+  const hoursNeeded=repNeeded/rates.repPerHr;
+  const swordsNeeded=hoursNeeded*rates.swordsPerHr;
+  const bar1Qty=swordsNeeded*alloy.ratio[0], bar2Qty=swordsNeeded*alloy.ratio[1];
+  const bar1Cost=priceOf(alloy.bar1)*bar1Qty, bar2Cost=priceOf(alloy.bar2)*bar2Qty;
+  const rewardGp=hoursNeeded*rates.rewardGpPerHr;
+  const netCost=bar1Cost+bar2Cost-rewardGp;
+  const xpGained=hoursNeeded*rates.xpPerHr;
+  const projectedLevel=levelForXp(Math.min(200000000, playerXp+xpGained));
+  const allFourSelected=FOUNDRY_PIECE_IDS.every(id=>selectedFoundryRewards.has(id));
+
+  const grid=FOUNDRY_REWARDS.map(r=>`<label class="foundry-reward-option${selectedFoundryRewards.has(r.id)?' selected':''}"><input type="checkbox" value="${r.id}" data-foundry-reward="1"${selectedFoundryRewards.has(r.id)?' checked':''}>${wikiItemIcon(r.name,'foundry-reward-icon')}<span><strong>${r.name}</strong><small>${fmtExact(r.rep)} reputation</small></span></label>`).join('')
+    + `<label class="foundry-reward-option${allFourSelected?' selected':''}"><input type="checkbox" id="foundryFullUniform"${allFourSelected?' checked':''}>${wikiItemIcon('Smiths tunic','foundry-reward-icon')}<span><strong>Full Smiths' Uniform</strong><small>Selects all four pieces — never double-counted</small></span></label>`;
+
+  return `<div class="foundry-reward-grid">${grid}</div>
+  ${rewards.length?`<div class="foundry-summary">
+    <div class="foundry-summary-stat"><div class="foundry-summary-label">Reputation needed</div><div class="foundry-summary-value">${fmtExact(repNeeded)}</div></div>
+    <div class="foundry-summary-stat"><div class="foundry-summary-label">Est. time</div><div class="foundry-summary-value">${fmtHrs(hoursNeeded)}</div></div>
+    <div class="foundry-summary-stat"><div class="foundry-summary-label">Swords</div><div class="foundry-summary-value">${fmtExact(swordsNeeded)}</div></div>
+    <div class="foundry-summary-stat"><div class="foundry-summary-label">XP gained</div><div class="foundry-summary-value">${fmt(xpGained)}</div></div>
+    <div class="foundry-summary-stat"><div class="foundry-summary-label">Projected ending level</div><div class="foundry-summary-value">${projectedLevel}</div></div>
+    <div class="foundry-summary-stat"><div class="foundry-summary-label">${netCost>=0?'Net Cost':'Net Profit'}</div><div class="foundry-summary-value" style="color:${netCost>=0?'#e74c3c':'#2ecc71'};">${pricesLoaded?fmtGp(Math.abs(netCost)):'Loading…'}</div></div>
+  </div>
+  <div class="focus-route-list"><article class="focus-route-row">
+    <div class="focus-method"><h3>${alloy.name} alloy swords (current level ${curLevel})</h3><p>${fmtExact(bar1Qty)} ${alloy.bar1} + ${fmtExact(bar2Qty)} ${alloy.bar2}</p><small>${alloy.ratio[0]}:${alloy.ratio[1]} ratio${alloy.ratioVerified?'':' — not independently verified, using an even split as a labeled placeholder'}</small></div>
+    <div class="focus-route-stat"><strong>${pricesLoaded?fmtGp(bar1Cost+bar2Cost):'—'}</strong><span>materials</span></div>
+    <div class="focus-route-stat"><strong style="color:var(--green);">${pricesLoaded?fmtGp(rewardGp):'—'}</strong><span>Kovac's reward</span></div>
+  </article></div>`
+  :`<div class="route-stop" style="text-align:center;padding:24px;color:var(--text-dim);">Select at least one reward to calculate the reputation grind.</div>`}
+  <div class="foundry-note">Uses your current Smithing level's best-unlocked alloy for the whole grind. Enter Current reputation above to reduce the grind by what you've already earned. Repeatable Kovac's grog, smithing catalysts, and ore packs are excluded from v1 reward goals.</div>`;
+}
+
+function wireFoundryRewardInputs(){
+  document.querySelectorAll('[data-foundry-reward]').forEach(input=>input.addEventListener('change',()=>{
+    if(input.checked) selectedFoundryRewards.add(input.value); else selectedFoundryRewards.delete(input.value);
+    generatePlan();
+  }));
+  const fullUniform=document.getElementById('foundryFullUniform');
+  if(fullUniform) fullUniform.addEventListener('change',()=>{
+    FOUNDRY_PIECE_IDS.forEach(id=>{ if(fullUniform.checked) selectedFoundryRewards.add(id); else selectedFoundryRewards.delete(id); });
+    generatePlan();
+  });
+}
+
+// ── MAIN RENDER ─────────────────────────────────────────────────────────────────
+function generatePlan(){
+  const planArea=document.getElementById('planArea');
+  const curLevel=levelForXp(playerXp);
+  updateRouteTabMetrics(curLevel,targetLevelVal);
+  const accentMap={fastest:'#e74c3c', simple:'#c8a84b', cheapest:'#2ecc71', lowattention:'#4a9eff', foundry:'#9b6fd6'};
+  const accent=accentMap[currentSpeed]||'#c8a84b';
+
+  if(currentSpeed==='foundry'){
+    if(!membersEnabled){
+      planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);">Giants' Foundry is members-only. Switch to Members to plan this route.</div>`;
+      return;
+    }
+    planArea.innerHTML = renderFoundryModeToggle() + renderFoundryControls() + (foundryMode==='reward'?renderFoundryRewardPlan(curLevel):renderFoundryLevelPlan(curLevel,targetLevelVal));
+    wireFoundryControls();
+    if(foundryMode==='reward') wireFoundryRewardInputs();
+    return;
+  }
+
+  if(curLevel>=targetLevelVal){
+    planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);"><div style="font-size:18px;color:var(--gold);margin-bottom:8px;">🎉 Already reached Level ${targetLevelVal}!</div><div style="font-size:12px;">Set a higher target level to continue planning.</div></div>`;
+    return;
+  }
+  if(currentSpeed==='cheapest'&&!pricesLoaded){
+    planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);"><div class="spinner" style="margin:0 auto 14px;"></div><div>Waiting for live Grand Exchange prices to choose the best-value methods…</div></div>`;
+    return;
+  }
+  if(currentSpeed==='lowattention'&&!membersEnabled){
+    planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);">Dart tips and cannonballs are both members-only (The Tourist Trap / Dwarf Cannon). Switch to Members to see a Low Attention plan.</div>`;
+    return;
+  }
+
+  const stops=buildRoute(curLevel,targetLevelVal,currentSpeed,playerXp);
+  if(!stops.length){
+    planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);">No route available for this level range and setting.</div>`;
+    return;
+  }
+  planArea.innerHTML = renderRouteStops(stops, accent, curLevel);
+  const shoppingBtn=document.getElementById('shoppingToggle');
+  if(shoppingBtn){
+    shoppingBtn.addEventListener('click',()=>{
+      document.getElementById('shoppingBody').classList.toggle('show');
+      document.getElementById('shoppingArrow').classList.toggle('open');
+    });
+  }
+}
+
+// Boot
+updateStatusCard();
+generatePlan();
+loadPrices();
+</script>
+<script src="suite-nav.js?v=20"></script>
+</body>
+</html>
