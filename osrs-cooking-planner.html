@@ -227,6 +227,10 @@ body[data-suite-page="cooking"] .craft-toggle-panel{max-width:1120px;width:calc(
         <label class="smith-item-check"><input type="checkbox" id="firecapeToggle"><img src="https://oldschool.runescape.wiki/images/Fire_cape.png" alt=""><span>Fire cape<small>Mor Ul Rek access</small></span></label>
       </div>
       <div class="craft-toggle-group">
+        <span>&nbsp;</span>
+        <label class="smith-item-check"><input type="checkbox" id="karambwanQuestToggle" checked><img src="https://oldschool.runescape.wiki/images/Cooked_karambwan.png" alt=""><span>Cooked karambwan unlocked<small>Tai Bwo Wannai Trio</small></span></label>
+      </div>
+      <div class="craft-toggle-group">
         <span>Cheapest route</span>
         <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer;">
           <input type="checkbox" id="cheapestFloorToggle" checked style="accent-color:var(--gold);">
@@ -278,21 +282,8 @@ function levelForXp(xp){for(let l=99;l>=1;l--){if(xp>=XP_TABLE[l-1])return l;}re
 // internally-inconsistent shark value contradicted by the handoff's own required
 // acceptance test (shark = level 94 with gauntlets) and by the Shark page directly.
 //
-// IMPORTANT MODELING LIMITATION: the game's real success-chance formula is a verified
-// piecewise low/high linear interpolation (confirmed by the Hosidius Kitchen page,
-// which describes its diary bonus as "a flat increase to the low and high values ...
-// used in the game's skilling success function"), but this session could not extract
-// the exact per-food low/high breakpoints and starting percentages from the available
-// Wiki pages. Per the handoff's explicit fallback ("label it as a guide-table estimate"
-// when an exact formula/data row can't be verified), successChance() below uses the
-// VERIFIED burn-stop level as an exact anchor (success is exactly 100% at and above
-// that level — this is what every acceptance test checks) and a LABELED linear
-// interpolation from an assumed 50% chance at the food's unlock level up to that
-// anchor for intermediate levels. Foods that can never reach 100% without a Cooking
-// cape (shark/anglerfish without gauntlets, manta ray) use a labeled asymptotic
-// approximation capped at 90% instead of a hard stop.
-const COOKING_ESTIMATE_START_CHANCE = 0.50;
-const COOKING_NEVER_STOPS_CAP = 0.90;
+// Exact low/high success parameters are taken from each item's current OSRS Wiki
+// Skilling success chart. The documented engine formula returns a chance out of 256.
 
 const FOODS = [
   {family:'fish', name:'Sardine',   minLevel:1,  xpPerSuccess:40, rawName:'Raw sardine',   cookedName:'Sardine',   membersOnly:false, gauntletsEligible:false, stops:{range:38, fire:38, lumbridge:34}},
@@ -307,7 +298,7 @@ const FOODS = [
   {family:'fish', name:'Monkfish',  minLevel:62, xpPerSuccess:150,rawName:'Raw monkfish',  cookedName:'Monkfish',  membersOnly:true,  gauntletsEligible:true,  stops:{range:90, fire:92, gauntlets:86}, requirements:['Swan Song']},
   {family:'fish', name:'Shark',     minLevel:80, xpPerSuccess:210,rawName:'Raw shark',     cookedName:'Shark',     membersOnly:true,  gauntletsEligible:true,  stops:{range:null, fire:null, gauntlets:94}},
   {family:'fish', name:'Anglerfish',minLevel:84, xpPerSuccess:230,rawName:'Raw anglerfish',cookedName:'Anglerfish',membersOnly:true,  gauntletsEligible:true,  stops:{range:null, fire:null, gauntlets:97, gauntletsEliteHosidius:87}},
-  {family:'fish', name:'Manta ray', minLevel:91, xpPerSuccess:216.3,rawName:'Raw manta ray',cookedName:'Manta ray',membersOnly:true,  gauntletsEligible:false, stops:{range:null, fire:null}, note:'No verified sub-99 burn-stop level found this session (manta ray is not on the Wiki\'s cooking-gauntlets list) — modeled as never fully stopping without a Cooking cape, per the guide-table fallback.'},
+  {family:'fish', name:'Manta ray', minLevel:91, xpPerSuccess:216.3,rawName:'Raw manta ray',cookedName:'Manta ray',membersOnly:true,  gauntletsEligible:false, stops:{range:null, fire:null}, note:'Manta ray is not affected by cooking gauntlets and can still burn before the Cooking cape; exact Wiki success parameters are used.'},
 ];
 
 // Karambwan: poison (1-tick leveling filler, F2P-unavailable — Karamja/TBW content is
@@ -325,9 +316,27 @@ const KARAMBWAN_BANK_RATE = 1435;     // cook-all beside a bank, level 95+
 const WINE = {family:'wine', name:'Jug of wine', minLevel:35, maxLevel:99, xpPerSuccess:200, rawName:'Grapes', secondaryName:'Jug of water', cookedName:'Jug of wine', membersOnly:false, gauntletsEligible:false, stops:{range:68, fire:68}, rawAttemptsPerHr:2400, note:'480,000 xp/hr from level 68+ is a labeled baseline within the Wiki\'s cited 470,000-490,000 range. Wine is usually not meaningfully resold; only credited if the price API actually returns a valid Jug of wine sell price.'};
 
 // ── LOCATIONS ───────────────────────────────────────────────────────────────────
+const COOKING_CHANCES={
+  Sardine:{base:[118,492],lumbridge:[128,512],hos5:[130,504],hos10:[143,517]},
+  Herring:{base:[108,472],lumbridge:[118,492],hos5:[120,484],hos10:[133,497]},
+  Mackerel:{base:[98,452],lumbridge:[108,472],hos5:[110,464],hos10:[123,477]},
+  Trout:{base:[88,432],lumbridge:[98,452],hos5:[100,444],hos10:[113,457]},
+  Pike:{base:[78,412],lumbridge:[88,432],hos5:[90,424],hos10:[103,437]},
+  Salmon:{base:[68,392],lumbridge:[78,402],hos5:[80,404],hos10:[93,417]},
+  Tuna:{base:[58,372],hos5:[70,384],hos10:[83,397]},
+  Lobster:{base:[38,332],gauntlets:[55,368],hos5:[50,344],hos10:[63,357],hos5Gauntlets:[67,380],hos10Gauntlets:[80,393]},
+  Swordfish:{fire:[18,292],range:[30,310],gauntlets:[30,310],hos5:[42,322],hos10:[55,335]},
+  Monkfish:{fire:[11,275],range:[13,280],gauntlets:[24,290],hos5:[25,292],hos10:[38,305],hos5Gauntlets:[36,302],hos10Gauntlets:[49,315]},
+  Shark:{fire:[1,202],range:[1,232],gauntlets:[15,270],hos5:[13,244],hos10:[26,257],hos5Gauntlets:[27,282],hos10Gauntlets:[40,295]},
+  Anglerfish:{fire:[1,200],range:[1,220],gauntlets:[12,260],hos5:[13,232],hos10:[26,245],hos5Gauntlets:[24,272],hos10Gauntlets:[37,285]},
+  'Manta ray':{fire:[1,202],range:[1,222],hos5:[13,234],hos10:[26,247]},
+  'Cooked karambwan':{base:[70,255],hos5:[82,267],hos10:[95,280]},
+  'Jug of wine':{base:[48,352]}
+};
+
 const LOCATIONS = {
   myths:      {name:"Myths' Guild",     attemptsPerHr:1435, profile:'range',     membersOnly:true,  requirement:'mythsToggle',     requirementLabel:'Dragon Slayer II'},
-  rogues:     {name:"Rogues' Den",      attemptsPerHr:1435, profile:'fire',      membersOnly:false, requirement:null},
+  rogues:     {name:"Rogues' Den",      attemptsPerHr:1435, profile:'fire',      membersOnly:true,  requirement:null},
   morulrek:   {name:'Mor Ul Rek',       attemptsPerHr:1435, profile:'range',     membersOnly:true,  requirement:'firecapeToggle',  requirementLabel:'Fire cape'},
   hosidius:   {name:'Hosidius Kitchen', attemptsPerHr:1365, profile:'hosidius',  membersOnly:true,  requirement:'hosidiusToggle',  requirementLabel:'Easy Kourend & Kebos diary'},
   cooksguild: {name:"Cooks' Guild",     attemptsPerHr:1411, profile:'range',     membersOnly:true,  requirement:null, requirementLabel:'Hard Varrock diary or 99 Cooking'},
@@ -417,7 +426,7 @@ async function loadPrices(){
 // ── STATE ───────────────────────────────────────────────────────────────────────
 const SUITE_THEME_KEY='osrs-suite-theme';
 let playerLevel=1, playerXp=0, targetLevelVal=99, currentSpeed='simple', isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
-let membersEnabled=true, gauntletsOwned=true, hosidiusAccess=true, eliteDiaryOwned=false, mythsAccess=false, firecapeOwned=false;
+let membersEnabled=true, gauntletsOwned=true, hosidiusAccess=true, eliteDiaryOwned=false, mythsAccess=false, firecapeOwned=false, karambwanQuest=true;
 let currentLocation='rogues', bufferPct=0, cheapestFloorEnabled=true;
 document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
 document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
@@ -467,6 +476,7 @@ wireAccessCheckbox('hosidiusToggle', v=>hosidiusAccess=v);
 wireAccessCheckbox('eliteDiaryToggle', v=>eliteDiaryOwned=v);
 wireAccessCheckbox('mythsToggle', v=>mythsAccess=v);
 wireAccessCheckbox('firecapeToggle', v=>firecapeOwned=v);
+wireAccessCheckbox('karambwanQuestToggle', v=>karambwanQuest=v);
 
 document.getElementById('membersToggle').addEventListener('click',e=>{
   const btn=e.target.closest('button[data-members]');
@@ -596,42 +606,32 @@ function updateStatusCard(){
 }
 
 // ── BURN / SUCCESS-CHANCE ENGINE ────────────────────────────────────────────────
-function effectiveStopLevel(food){
-  if(food.neverBurns) return food.minLevel; // always succeeds
-  if(!food.stops) return null;
-  if(food.family==='karambwan') return food.stops.range ?? null; // gauntlets confirmed not to help
-  // Cooking gauntlets are worn equipment, active at ANY location — collect every candidate
-  // stop level that applies given the current location/gauntlets/diary state and take the
-  // best (lowest) one, rather than location dispatch short-circuiting before gauntlets is
-  // ever considered (a real bug an earlier version of this function had: gauntlets-only foods
-  // like Shark returned no stop level at all once the location branch was Rogues'/Hosidius).
-  const gauntletsActive = gauntletsOwned && food.gauntletsEligible && food.stops.gauntlets!=null;
-  const candidates=[];
+function chanceProfile(food){
+  if(food.neverBurns)return null;
+  const p=COOKING_CHANCES[food.name];
+  if(!p)return null;
+  const gauntlets=gauntletsOwned&&food.gauntletsEligible;
   if(currentLocation==='hosidius'){
-    if(gauntletsActive && eliteDiaryOwned && food.stops.gauntletsEliteHosidius!=null) candidates.push(food.stops.gauntletsEliteHosidius);
-    if(eliteDiaryOwned && food.stops.hosidius10!=null) candidates.push(food.stops.hosidius10);
-    if(food.stops.hosidius5!=null) candidates.push(food.stops.hosidius5);
-    // No food-specific verified Hosidius number beyond this point — range/gauntlets below
-    // still apply as a conservative fallback (Hosidius's real bonus would only be better).
-  }else if(currentLocation==='lumbridge' && food.stops.lumbridge!=null){
-    candidates.push(food.stops.lumbridge);
-  }else if(currentLocation==='rogues' && food.stops.fire!=null){
-    candidates.push(food.stops.fire);
+    if(eliteDiaryOwned&&gauntlets&&p.hos10Gauntlets)return p.hos10Gauntlets;
+    if(!eliteDiaryOwned&&gauntlets&&p.hos5Gauntlets)return p.hos5Gauntlets;
+    return (eliteDiaryOwned?p.hos10:p.hos5)||p.range||p.base||p.fire;
   }
-  if(food.stops.range!=null) candidates.push(food.stops.range);
-  if(gauntletsActive) candidates.push(food.stops.gauntlets);
-  return candidates.length ? Math.min(...candidates) : null;
+  if(currentLocation==='lumbridge'&&p.lumbridge)return p.lumbridge;
+  if(gauntlets&&p.gauntlets)return p.gauntlets;
+  if(currentLocation==='rogues')return p.fire||p.base||p.range;
+  return p.range||p.base||p.fire;
 }
-function successChance(food, level){
-  const stop=effectiveStopLevel(food);
-  if(stop===null||stop===undefined){
-    const t=Math.max(0,Math.min(1,(level-food.minLevel)/(99-food.minLevel)));
-    return Math.max(0, Math.min(COOKING_NEVER_STOPS_CAP, COOKING_ESTIMATE_START_CHANCE + (COOKING_NEVER_STOPS_CAP-COOKING_ESTIMATE_START_CHANCE)*t));
-  }
-  if(level>=stop) return 1;
-  if(stop<=food.minLevel) return 1;
-  const t=(level-food.minLevel)/(stop-food.minLevel);
-  return Math.max(0, Math.min(1, COOKING_ESTIMATE_START_CHANCE + (1-COOKING_ESTIMATE_START_CHANCE)*t));
+function successChance(food,level){
+  if(food.neverBurns)return 1;
+  const profile=chanceProfile(food);
+  if(!profile)return 0;
+  const l=Math.max(1,Math.min(99,level)),low=profile[0],high=profile[1];
+  const roll=Math.floor(low*((99-l)/98)+high*((l-1)/98)+0.5)+1;
+  return Math.max(0,Math.min(1,roll/256));
+}
+function effectiveStopLevel(food){
+  for(let level=food.minLevel;level<=99;level++)if(successChance(food,level)>=1)return level;
+  return null;
 }
 // Average chance across a level range — used because a route stop can span several levels
 // during which success chance keeps climbing; averaging the two endpoints is a reasonable,
@@ -669,7 +669,7 @@ function netGpPerXpFor(food, levelStart, levelEnd){
   const chance=avgSuccessChance(food, levelStart, levelEnd);
   const hasInput=priceOf(food.rawName)>0 && (!food.secondaryName || priceOf(food.secondaryName)>0);
   const hasOutput=outputCreditPerSuccess(food)>0 || food.family==='wine';
-  if(!hasInput || chance<=0) return Infinity;
+  if(!hasInput || !hasOutput || chance<=0) return Infinity;
   const expectedCostPerSuccess = inputCostPerAttempt(food)/chance - outputCreditPerSuccess(food);
   return expectedCostPerSuccess/food.xpPerSuccess;
 }
@@ -677,8 +677,8 @@ function netGpPerXpFor(food, levelStart, levelEnd){
 function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel)){
   let methods;
   if(speed==='fastest') methods=FOOD_POOL.filter(f=>false); // fastest handled specially below (karambwan-led), see buildFastestRoute
-  else if(speed==='cheapest') methods=FOOD_POOL;
-  else if(speed==='lowattention') methods = membersEnabled ? COOKING_LOWATTENTION_KARAMBWAN : COOKING_LOWATTENTION_FISH;
+  else if(speed==='cheapest') methods=[...FOOD_POOL,WINE,...(membersEnabled&&karambwanQuest?[COOKED_KARAMBWAN]:[])].map(m=>({...m,maxLevel:99}));
+  else if(speed==='lowattention') methods = membersEnabled&&karambwanQuest ? COOKING_LOWATTENTION_KARAMBWAN : COOKING_LOWATTENTION_FISH;
   else methods=COOKING_SIMPLE;
   if(!membersEnabled){
     methods=methods.filter(m=>!m.membersOnly);
@@ -767,7 +767,7 @@ function mergeStop(target, addition){
 function buildFastestRoute(startLevel, endLevel, startXp){
   if(!membersEnabled){
     // No 1-tick karambwan in F2P (Karamja/TBW is members content) — compare wines vs fish mathematically instead.
-    const pool=FOOD_POOL.filter(f=>!f.membersOnly);
+    const pool=[...FOOD_POOL.filter(f=>!f.membersOnly),WINE];
     return buildGreedyXpHrRoute(pool, startLevel, endLevel, startXp);
   }
   const stops=[];
@@ -780,11 +780,13 @@ function buildFastestRoute(startLevel, endLevel, startXp){
     stops.push(s);
     lvl=stopEnd;
   }
-  if(lvl<endLevel){
+  if(lvl<endLevel&&karambwanQuest){
     const xpStart=xpForLevel(lvl), xpEnd=xpForLevel(endLevel);
     const s=finalizeStop({...COOKED_KARAMBWAN, family:'karambwan', maxLevel:99}, lvl, endLevel, xpEnd-xpStart);
     s.intensity='1-tick / very high attention';
     stops.push(s);
+  }else if(lvl<endLevel){
+    return [...stops,...buildGreedyXpHrRoute([...FOOD_POOL,WINE],lvl,endLevel,xpForLevel(lvl))];
   }
   return stops;
 }
