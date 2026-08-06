@@ -200,9 +200,9 @@ Note: `seedName` is the sapling name (e.g. "Magic sapling"), NOT the seed name. 
 
 1. **4 Named Routes** (not just "fast/medium/slow"):
    - **Nuclear** — max XP/hr, ends on Menaphite remedy (200 XP each, level 88, highest XP standard potion in game)
-   - **Standard** — prayer potions → super restores → Saradomin brews → super combat
-   - **Mid-road** — Theoatrix's "cheap & fast" — ranging potions 72-81, staminas 81-90
-   - **Budget** — herb cleaning → prayer potions → super restores → extended antifire 84 (~3 gp/xp) → super combat
+   - **Standard** — prayer potions → super restores → Saradomin brews through 99; simple 14+14 inventories
+   - **Live Value** — dynamically compares practical unlocked potion methods using current GE prices and selects the lowest net GP/XP at each unlock point
+   - **Budget** — herb cleaning → prayer potions → super restores → extended antifire 84 → super combat 90; super combats live only here because their low GP/XP can justify the inventory-heavy method
 
 2. **Mastering Mixology tab** — completely separate mode (not a standard route):
    - Requires level 60 + Children of the Sun quest, level 81 for full efficiency (Mixalot)
@@ -227,7 +227,7 @@ Note: `seedName` is the sapling name (e.g. "Magic sapling"), NOT the seed name. 
 ### Verified XP per potion (from OSRS Wiki):
 - Attack: 25, Prayer: 87.5, Super attack: 100, Super energy: 117.5, Super strength: 125
 - Super restore: 142.5, Saradomin brew: 180, Ancient brew: 190, Menaphite remedy: 200
-- Extended antifire: 110, Stamina: 102, Ranging: 162.5
+- Extended antifire: 110, Stamina: 25.5 per dose (76.5 for the planner's 3-dose recipe), Ranging: 162.5
 - Super combat: 150 (NOT stackable — Torstol takes its own inventory slot)
 
 ### Actions per hour (from Wiki):
@@ -239,8 +239,8 @@ Note: `seedName` is the sapling name (e.g. "Magic sapling"), NOT the seed name. 
 ```js
 inputNames: ['Antifire potion(4)', {name:'Lava scale shard', qty:4}]
 // Extended antifire needs 4x lava scale shards per potion
-inputNames: ['Super energy(3)', {name:'Amylase crystal', qty:4}]
-// Stamina needs 4x amylase crystals per potion
+inputNames: ['Super energy(3)', {name:'Amylase crystal', qty:3}]
+// Stamina conversion is dose-for-dose: a 3-dose potion needs 3 crystals
 ```
 
 The `inCost` formula handles both string and `{name, qty}` object inputs:

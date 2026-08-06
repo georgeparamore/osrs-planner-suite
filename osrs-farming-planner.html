@@ -262,6 +262,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 </style>
+<link rel="stylesheet" href="suite-nav.css?v=15">
 </head>
 <body>
 <header>
@@ -282,9 +283,9 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
     <button class="skill-btn" onclick="location.href='osrs-herblore-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">Herblore</button>
     <button class="skill-btn" onclick="location.href='osrs-prayer-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">Prayer</button>
     <div class="skill-sep"></div>
-    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn" onclick="location.href='osrs-smithing-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing</button>
     <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">Fletching<span class="soon-badge">Soon</span></button>
-    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn" onclick="location.href='osrs-cooking-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking</button>
     <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">Crafting<span class="soon-badge">Soon</span></button>
   </nav>
 
@@ -576,7 +577,10 @@ const HERB_YIELD_PER_PATCH = 8.7; // average with ultracompost + magic secateurs
 // ── STATE ─────────────────────────────────────────────────
 let playerLevel=15, playerXp=xpForLevel(15), targetLevelVal=99;
 let currentSpeed='expensive';
-let isDark=true;
+const SUITE_THEME_KEY='osrs-suite-theme';
+let isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
+document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
 // Patch unlock state — keyed by category, each holding a count of EXTRA patches the player has unlocked (booleans per item)
 let unlockedExtras={regularTree:{}, fruitTree:{}, hardwood:{}, herb:{}};
 let herbsEnabledGlobal = true; // controls herb runs across ALL tiers (Expensive/Balanced/Cheap), not just Custom
@@ -784,6 +788,7 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
   isDark=!isDark;
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
   document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  localStorage.setItem(SUITE_THEME_KEY,isDark?'dark':'light');
 });
 
 // ── WISE OLD MAN LOOKUP ───────────────────────────────────
@@ -1006,6 +1011,7 @@ function fmtGp(n){
   else s=Math.round(abs).toLocaleString();
   return (n<0?'-':'')+s+' gp';
 }
+function fmtGpExact(n){return`${Math.round(n).toLocaleString()} gp`;}
 function fmtTime(min){
   if(min<60) return Math.round(min)+'m';
   const hrs=min/60;
@@ -1558,7 +1564,7 @@ function generateCustomPlan(){
         <div class="track-stat"><div class="track-stat-label">Daily XP</div><div class="track-stat-value" style="color:var(--gold);">${fmt(runDailyXp)}</div></div>
         <div class="track-stat"><div class="track-stat-label">Daily cost</div><div class="track-stat-value" style="color:var(--red);">${fmtGp(runDailyCost)}</div></div>
       </div>
-      <div class="track-card-note">Seed ${fmtGp(seedCost)} + ${protectionLabel(regularTier)} (${fmtGp(payCost)})</div>
+      <div class="track-card-note">Seed ${fmtGpExact(seedCost)} + ${protectionLabel(regularTier)} (${fmtGpExact(payCost)})</div>
     </div>`;
   }
 
@@ -1585,7 +1591,7 @@ function generateCustomPlan(){
         <div class="track-stat"><div class="track-stat-label">Daily XP</div><div class="track-stat-value" style="color:var(--gold);">${fmt(runDailyXp)}</div></div>
         <div class="track-stat"><div class="track-stat-label">Daily cost</div><div class="track-stat-value" style="color:var(--red);">${fmtGp(runDailyCost)}</div></div>
       </div>
-      <div class="track-card-note">Seed ${fmtGp(seedCost)} + ${protectionLabel(fruitTier)} (${fmtGp(payCost)})</div>
+      <div class="track-card-note">Seed ${fmtGpExact(seedCost)} + ${protectionLabel(fruitTier)} (${fmtGpExact(payCost)})</div>
     </div>`;
   }
 
@@ -1647,7 +1653,7 @@ function generateCustomPlan(){
         <div class="track-stat"><div class="track-stat-label">Daily XP</div><div class="track-stat-value" style="color:var(--gold);">${fmt(dailyHerbXp)}</div></div>
         <div class="track-stat"><div class="track-stat-label">Daily profit</div><div class="track-stat-value" style="color:${profitCls};">${fmtGp(dailyProfit)}</div></div>
       </div>
-      <div class="track-card-note">~${HERB_YIELD_PER_PATCH} herbs/patch at ${fmtGp(herbSellPrice)} each (grimy, instant-sell estimate) — assumes ultracompost + magic secateurs.</div>
+      <div class="track-card-note">~${HERB_YIELD_PER_PATCH} herbs/patch at ${fmtGpExact(herbSellPrice)} each (grimy, instant-sell estimate) — assumes ultracompost + magic secateurs.</div>
     </div>`;
   } else if(customState.herbsEnabled===false){
     html += `<div class="track-card" style="--accent:${accent};"><div class="track-card-empty">Herb runs disabled — toggle them on above to include in your plan.</div></div>`;
@@ -1893,5 +1899,6 @@ renderPatchToggles();
 generatePlan();
 loadPrices(); // kicks off live GE price fetch, re-renders plan + custom mode when done
 </script>
+<script src="suite-nav.js?v=20"></script>
 </body>
 </html>

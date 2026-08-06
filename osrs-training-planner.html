@@ -161,6 +161,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 </style>
+<link rel="stylesheet" href="suite-nav.css?v=15">
 </head>
 <body>
 <header>
@@ -181,9 +182,9 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
     <button class="skill-btn" onclick="location.href='osrs-herblore-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">Herblore</button>
     <button class="skill-btn" onclick="location.href='osrs-prayer-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">Prayer</button>
     <div class="skill-sep"></div>
-    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn" onclick="location.href='osrs-smithing-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing</button>
     <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">Fletching<span class="soon-badge">Soon</span></button>
-    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn" onclick="location.href='osrs-cooking-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking</button>
     <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">Crafting<span class="soon-badge">Soon</span></button>
   </nav>
 
@@ -327,13 +328,17 @@ function womSkill(data,skillKey){
 let currentSkillKey='construction';
 let playerLevel=1, playerXp=0, targetLevelVal=99;
 let currentSpeed='fastest';
-let isDark=true;
+const SUITE_THEME_KEY='osrs-suite-theme';
+let isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
+document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
 
 // ── THEME ─────────────────────────────────────────────────
 document.getElementById('themeBtn').addEventListener('click',()=>{
   isDark=!isDark;
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
   document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  localStorage.setItem(SUITE_THEME_KEY,isDark?'dark':'light');
 });
 
 // ── MANUAL TOGGLE ─────────────────────────────────────────
@@ -695,5 +700,6 @@ function fmt(n){
 updateStatusCard();
 generatePlan();
 </script>
+<script src="suite-nav.js?v=20"></script>
 </body>
 </html>
