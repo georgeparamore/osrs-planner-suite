@@ -138,6 +138,22 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
+/* OWNED UPGRADES (shared toggle-panel pattern with Crafting/Smithing) */
+.craft-toggle-row{display:flex;gap:18px;flex-wrap:wrap;align-items:center;}
+.craft-toggle-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;flex-shrink:0;}
+.craft-toggle-group{display:flex;flex-direction:column;gap:5px;}
+.craft-toggle-group>span{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);display:flex;align-items:center;gap:5px;}
+.upgrade-icon{width:16px;height:16px;object-fit:contain;}
+.craft-seg{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.craft-seg button{background:var(--surface2);border:0;border-right:1px solid var(--border);color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 12px;cursor:pointer;}
+.craft-seg button:last-child{border-right:0;}
+.craft-seg button.active{background:var(--gold);color:#000;font-weight:700;}
+.craft-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(74,126,255,.13);color:var(--blue);white-space:nowrap;}
+.upgrade-compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:8px;padding:12px 16px;margin-bottom:16px;}
+.upgrade-compare>div{display:flex;flex-direction:column;gap:2px;}
+.upgrade-compare span{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.upgrade-compare strong{font-family:'Share Tech Mono',monospace;font-size:15px;}
+body[data-suite-page="herblore"] .craft-toggle-panel{max-width:1120px;width:calc(100% - 36px);margin:14px auto 0;border:1px solid var(--border);border-radius:8px;box-sizing:border-box;}
 </style>
 <link rel="stylesheet" href="suite-nav.css?v=17">
 </head>
@@ -159,7 +175,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
     <button class="skill-btn active"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">Herblore</button>
     <button class="skill-btn" onclick="location.href='osrs-prayer-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">Prayer</button>
     <div class="skill-sep"></div>
-    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn" onclick="location.href='osrs-smithing-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing</button>
     <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">Fletching<span class="soon-badge">Soon</span></button>
     <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking<span class="soon-badge">Soon</span></button>
     <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">Crafting<span class="soon-badge">Soon</span></button>
@@ -205,6 +221,33 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
           <div class="status-progress-text"><span id="statusXpText">0 XP</span><span id="statusTargetText">Target: Level 99</span></div>
         </div>
         <div class="status-stat"><div class="status-stat-label">XP Remaining</div><div class="status-stat-value" id="statusXpRemaining">—</div></div>
+      </div>
+    </div>
+    <div class="craft-toggle-row craft-toggle-panel">
+      <div class="craft-toggle-group">
+        <span><img class="upgrade-icon" src="https://oldschool.runescape.wiki/images/Prescription_goggles.png" alt="">Prescription goggles</span>
+        <div class="craft-seg" id="gogglesToggle">
+          <button type="button" data-goggles="false" class="active">Not owned</button>
+          <button type="button" data-goggles="true">Owned</button>
+        </div>
+      </div>
+      <div class="craft-toggle-group">
+        <span><img class="upgrade-icon" src="https://oldschool.runescape.wiki/images/Alchemist%27s_amulet.png" alt="">Alchemist's amulet</span>
+        <div class="craft-seg" id="amuletToggle">
+          <button type="button" data-amulet="false" class="active">Not owned</button>
+          <button type="button" data-amulet="true">Owned</button>
+        </div>
+      </div>
+      <div class="craft-toggle-group" id="amuletChargesField" style="display:none;">
+        <span class="field-label">Current charges</span>
+        <input type="number" id="amuletChargesInput" min="0" max="5000" value="50" style="width:100px;">
+      </div>
+      <div class="craft-toggle-group">
+        <span><img class="upgrade-icon" src="https://oldschool.runescape.wiki/images/Reagent_pouch.png" alt="">Reagent pouch (81+)</span>
+        <div class="craft-seg" id="pouchToggle">
+          <button type="button" data-pouch="false" class="active">Not owned</button>
+          <button type="button" data-pouch="true">Owned</button>
+        </div>
       </div>
     </div>
     <div class="speed-panel">
@@ -260,59 +303,59 @@ const HERBLORE_METHODS = {
     // Uses Ancient brews 85-88 (190 xp, ~475k xp/hr) and Menaphite remedy 88-99 (200 xp, ~500k xp/hr).
     // Menaphite remedy is the highest xp/potion in standard non-tick-manipulation herblore (wiki confirmed).
     // This route prioritises maximum experience per hour over cost.
-    {name:'Attack potion',      minLevel:3,  maxLevel:38, xpPerAction:25,    actionsPerHr:2500, outputName:'Attack potion(3)',       inputNames:['Guam potion (unf)','Eye of newt']},
-    {name:'Prayer potion',      minLevel:38, maxLevel:45, xpPerAction:87.5,  actionsPerHr:2500, outputName:'Prayer potion(3)',       inputNames:['Ranarr potion (unf)','Snape grass']},
-    {name:'Super attack',       minLevel:45, maxLevel:52, xpPerAction:100,   actionsPerHr:2500, outputName:'Super attack(3)',        inputNames:['Irit potion (unf)','Eye of newt']},
-    {name:'Super energy',       minLevel:52, maxLevel:55, xpPerAction:117.5, actionsPerHr:2500, outputName:'Super energy(3)',        inputNames:['Avantoe potion (unf)','Mort myre fungus']},
-    {name:'Super strength',     minLevel:55, maxLevel:63, xpPerAction:125,   actionsPerHr:2500, outputName:'Super strength(3)',      inputNames:['Kwuarm potion (unf)','Limpwurt root']},
-    {name:'Super restore',      minLevel:63, maxLevel:81, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)',       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"]},
-    {name:'Saradomin brew',     minLevel:81, maxLevel:85, xpPerAction:180,   actionsPerHr:2500, outputName:'Saradomin brew(3)',      inputNames:['Toadflax potion (unf)','Crushed nest']},
-    {name:'Ancient brew',       minLevel:85, maxLevel:88, xpPerAction:190,   actionsPerHr:2500, outputName:'Ancient brew(3)',        inputNames:['Dwarf weed potion (unf)','Nihil dust'], note:'190 xp each (~475k xp/hr). Nihil dust is expensive — verify price before bulk buying.'},
-    {name:'Menaphite remedy',   minLevel:88, maxLevel:99, xpPerAction:200,   actionsPerHr:2500, outputName:'Menaphite remedy(3)',    inputNames:['Dwarf weed potion (unf)','Lily of the sands'], note:'200 xp each — highest xp/potion in standard herblore (wiki confirmed). ~500k xp/hr. Lily of the sands required.'},
+    {name:'Attack potion',      minLevel:3,  maxLevel:38, xpPerAction:25,    actionsPerHr:2500, outputName:'Attack potion(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,       inputNames:['Guam potion (unf)','Eye of newt']},
+    {name:'Prayer potion',      minLevel:38, maxLevel:45, xpPerAction:87.5,  actionsPerHr:2500, outputName:'Prayer potion(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,       inputNames:['Ranarr potion (unf)','Snape grass']},
+    {name:'Super attack',       minLevel:45, maxLevel:52, xpPerAction:100,   actionsPerHr:2500, outputName:'Super attack(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,        inputNames:['Irit potion (unf)','Eye of newt']},
+    {name:'Super energy',       minLevel:52, maxLevel:55, xpPerAction:117.5, actionsPerHr:2500, outputName:'Super energy(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,        inputNames:['Avantoe potion (unf)','Mort myre fungus']},
+    {name:'Super strength',     minLevel:55, maxLevel:63, xpPerAction:125,   actionsPerHr:2500, outputName:'Super strength(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,      inputNames:['Kwuarm potion (unf)','Limpwurt root']},
+    {name:'Super restore',      minLevel:63, maxLevel:81, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"]},
+    {name:'Saradomin brew',     minLevel:81, maxLevel:85, xpPerAction:180,   actionsPerHr:2500, outputName:'Saradomin brew(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,      inputNames:['Toadflax potion (unf)','Crushed nest']},
+    {name:'Ancient brew',       minLevel:85, maxLevel:88, xpPerAction:190,   actionsPerHr:2500, outputName:'Ancient brew(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:false,        inputNames:['Dwarf weed potion (unf)','Nihil dust'], note:'190 xp each (~475k xp/hr). Nihil dust is expensive — verify price before bulk buying.'},
+    {name:'Menaphite remedy',   minLevel:88, maxLevel:99, xpPerAction:200,   actionsPerHr:2500, outputName:'Menaphite remedy(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:false,    inputNames:['Dwarf weed potion (unf)','Lily of the sands'], note:'200 xp each — highest xp/potion in standard herblore (wiki confirmed). ~500k xp/hr. Lily of the sands required.'},
   ],
   standard: [
     // Straightforward 14+14 inventories: prayer potions to 63, super restores to 81,
     // then Saradomin brews through 99. No multi-potion inventory setup at high levels.
-    {name:'Attack potion',      minLevel:3,  maxLevel:38, xpPerAction:25,    actionsPerHr:2500, outputName:'Attack potion(3)',       inputNames:['Guam potion (unf)','Eye of newt']},
-    {name:'Prayer potion',      minLevel:38, maxLevel:63, xpPerAction:87.5,  actionsPerHr:2500, outputName:'Prayer potion(3)',       inputNames:['Ranarr potion (unf)','Snape grass'], note:'Highly tradeable — small losses or sometimes break-even. ~220k xp/hr.'},
-    {name:'Super restore',      minLevel:63, maxLevel:81, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)',       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"], note:'~355k xp/hr. High demand in raids makes these easy to sell.'},
-    {name:'Saradomin brew',     minLevel:81, maxLevel:99, xpPerAction:180,   actionsPerHr:2500, outputName:'Saradomin brew(3)',      inputNames:['Toadflax potion (unf)','Crushed nest'], note:'~450k xp/hr with a simple 14+14 inventory. High demand makes the finished potions easy to sell, but check the live GP/XP before buying in bulk.'},
+    {name:'Attack potion',      minLevel:3,  maxLevel:38, xpPerAction:25,    actionsPerHr:2500, outputName:'Attack potion(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,       inputNames:['Guam potion (unf)','Eye of newt']},
+    {name:'Prayer potion',      minLevel:38, maxLevel:63, xpPerAction:87.5,  actionsPerHr:2500, outputName:'Prayer potion(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,       inputNames:['Ranarr potion (unf)','Snape grass'], note:'Highly tradeable — small losses or sometimes break-even. ~220k xp/hr.'},
+    {name:'Super restore',      minLevel:63, maxLevel:81, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"], note:'~355k xp/hr. High demand in raids makes these easy to sell.'},
+    {name:'Saradomin brew',     minLevel:81, maxLevel:99, xpPerAction:180,   actionsPerHr:2500, outputName:'Saradomin brew(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,      inputNames:['Toadflax potion (unf)','Crushed nest'], note:'~450k xp/hr with a simple 14+14 inventory. High demand makes the finished potions easy to sell, but check the live GP/XP before buying in bulk.'},
   ],
   value: [
     // Unlike the fixed routes, every unlocked method remains eligible through 99.
     // buildRoute() reevaluates these at each unlock using the current net GE cost per XP.
-    {name:'Attack potion',       minLevel:3,  maxLevel:99, xpPerAction:25,    actionsPerHr:2500, outputName:'Attack potion(3)',       inputNames:['Guam potion (unf)','Eye of newt']},
-    {name:'Energy potion',       minLevel:26, maxLevel:99, xpPerAction:67.5,  actionsPerHr:2500, outputName:'Energy potion(3)',       inputNames:['Harralander potion (unf)','Chocolate dust']},
-    {name:'Prayer potion',       minLevel:38, maxLevel:99, xpPerAction:87.5,  actionsPerHr:2500, outputName:'Prayer potion(3)',       inputNames:['Ranarr potion (unf)','Snape grass']},
-    {name:'Super attack',        minLevel:45, maxLevel:99, xpPerAction:100,   actionsPerHr:2500, outputName:'Super attack(3)',        inputNames:['Irit potion (unf)','Eye of newt']},
-    {name:'Super energy',        minLevel:52, maxLevel:99, xpPerAction:117.5, actionsPerHr:2500, outputName:'Super energy(3)',        inputNames:['Avantoe potion (unf)','Mort myre fungus']},
-    {name:'Super strength',      minLevel:55, maxLevel:99, xpPerAction:125,   actionsPerHr:2500, outputName:'Super strength(3)',      inputNames:['Kwuarm potion (unf)','Limpwurt root']},
-    {name:'Goading potion',      minLevel:54, maxLevel:99, xpPerAction:132,   actionsPerHr:2500, outputName:'Goading potion(3)',      inputNames:['Harralander potion (unf)','Aldarium']},
-    {name:'Prayer regeneration', minLevel:58, maxLevel:99, xpPerAction:132,   actionsPerHr:2500, outputName:'Prayer regeneration potion(3)', inputNames:['Huasca potion (unf)','Aldarium']},
-    {name:'Super restore',       minLevel:63, maxLevel:99, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)',       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"]},
-    {name:'Ranging potion',      minLevel:72, maxLevel:99, xpPerAction:162.5, actionsPerHr:2500, outputName:'Ranging potion(3)',      inputNames:['Dwarf weed potion (unf)','Wine of zamorak']},
-    {name:'Stamina potion',      minLevel:77, maxLevel:99, xpPerAction:76.5,  actionsPerHr:2750, outputName:'Stamina potion(3)',      inputNames:['Super energy(3)',{name:'Amylase crystal',qty:3}]},
-    {name:'Saradomin brew',      minLevel:81, maxLevel:99, xpPerAction:180,   actionsPerHr:2500, outputName:'Saradomin brew(3)',      inputNames:['Toadflax potion (unf)','Crushed nest']},
-    {name:'Extended antifire',   minLevel:84, maxLevel:99, xpPerAction:110,   actionsPerHr:2750, outputName:'Extended antifire(4)',   inputNames:['Antifire potion(4)',{name:'Lava scale shard',qty:4}]},
-    {name:'Ancient brew',        minLevel:85, maxLevel:99, xpPerAction:190,   actionsPerHr:2500, outputName:'Ancient brew(3)',        inputNames:['Dwarf weed potion (unf)','Nihil dust']},
-    {name:'Menaphite remedy',    minLevel:88, maxLevel:99, xpPerAction:200,   actionsPerHr:2500, outputName:'Menaphite remedy(3)',    inputNames:['Dwarf weed potion (unf)','Lily of the sands']},
-    {name:'Forgotten brew',      minLevel:91, maxLevel:99, xpPerAction:108,   actionsPerHr:1833, outputName:'Forgotten brew(3)',      inputNames:['Ancient brew(3)',{name:'Ancient essence',qty:60}]},
-    {name:'Anti-venom+',         minLevel:94, maxLevel:99, xpPerAction:125,   actionsPerHr:1833, outputName:'Anti-venom+(4)',         inputNames:['Anti-venom(4)','Torstol']},
+    {name:'Attack potion',       minLevel:3,  maxLevel:99, xpPerAction:25,    actionsPerHr:2500, outputName:'Attack potion(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,       inputNames:['Guam potion (unf)','Eye of newt']},
+    {name:'Energy potion',       minLevel:26, maxLevel:99, xpPerAction:67.5,  actionsPerHr:2500, outputName:'Energy potion(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,       inputNames:['Harralander potion (unf)','Chocolate dust']},
+    {name:'Prayer potion',       minLevel:38, maxLevel:99, xpPerAction:87.5,  actionsPerHr:2500, outputName:'Prayer potion(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,       inputNames:['Ranarr potion (unf)','Snape grass']},
+    {name:'Super attack',        minLevel:45, maxLevel:99, xpPerAction:100,   actionsPerHr:2500, outputName:'Super attack(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,        inputNames:['Irit potion (unf)','Eye of newt']},
+    {name:'Super energy',        minLevel:52, maxLevel:99, xpPerAction:117.5, actionsPerHr:2500, outputName:'Super energy(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,        inputNames:['Avantoe potion (unf)','Mort myre fungus']},
+    {name:'Super strength',      minLevel:55, maxLevel:99, xpPerAction:125,   actionsPerHr:2500, outputName:'Super strength(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,      inputNames:['Kwuarm potion (unf)','Limpwurt root']},
+    {name:'Goading potion',      minLevel:54, maxLevel:99, xpPerAction:132,   actionsPerHr:2500, outputName:'Goading potion(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,      inputNames:['Harralander potion (unf)','Aldarium']},
+    {name:'Prayer regeneration', minLevel:58, maxLevel:99, xpPerAction:132,   actionsPerHr:2500, outputName:'Prayer regeneration potion(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true, inputNames:['Huasca potion (unf)','Aldarium']},
+    {name:'Super restore',       minLevel:63, maxLevel:99, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"]},
+    {name:'Ranging potion',      minLevel:72, maxLevel:99, xpPerAction:162.5, actionsPerHr:2500, outputName:'Ranging potion(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,      inputNames:['Dwarf weed potion (unf)','Wine of zamorak']},
+    {name:'Stamina potion',      minLevel:77, maxLevel:99, xpPerAction:76.5,  actionsPerHr:2750, outputName:'Stamina potion(3)', gogglesEligible:false, amuletEligible:true, pouchEligible:false,      inputNames:['Super energy(3)',{name:'Amylase crystal',qty:3}]},
+    {name:'Saradomin brew',      minLevel:81, maxLevel:99, xpPerAction:180,   actionsPerHr:2500, outputName:'Saradomin brew(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,      inputNames:['Toadflax potion (unf)','Crushed nest']},
+    {name:'Extended antifire',   minLevel:84, maxLevel:99, xpPerAction:110,   actionsPerHr:2750, outputName:'Extended antifire(4)', gogglesEligible:false, amuletEligible:false, pouchEligible:false,   inputNames:['Antifire potion(4)',{name:'Lava scale shard',qty:4}]},
+    {name:'Ancient brew',        minLevel:85, maxLevel:99, xpPerAction:190,   actionsPerHr:2500, outputName:'Ancient brew(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:false,        inputNames:['Dwarf weed potion (unf)','Nihil dust']},
+    {name:'Menaphite remedy',    minLevel:88, maxLevel:99, xpPerAction:200,   actionsPerHr:2500, outputName:'Menaphite remedy(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:false,    inputNames:['Dwarf weed potion (unf)','Lily of the sands']},
+    {name:'Forgotten brew',      minLevel:91, maxLevel:99, xpPerAction:108,   actionsPerHr:1833, outputName:'Forgotten brew(3)', gogglesEligible:false, amuletEligible:true, pouchEligible:false,      inputNames:['Ancient brew(3)',{name:'Ancient essence',qty:60}]},
+    {name:'Anti-venom+',         minLevel:94, maxLevel:99, xpPerAction:125,   actionsPerHr:1833, outputName:'Anti-venom+(4)', gogglesEligible:true, amuletEligible:false, pouchEligible:false,         inputNames:['Anti-venom(4)','Torstol']},
   ],
   budget: [
     // Minimum spend. Herb cleaning early (profitable), prayer potions, super restores,
     // then Extended antifire 84-90. Super combat stays only in this route because its low
     // GP/XP can justify the more tedious 7-potion inventory for cost-focused players.
-    {name:'Clean guam leaf',    minLevel:3,  maxLevel:5,  xpPerAction:2.5,   actionsPerHr:5000, outputName:'Guam leaf',              inputNames:['Grimy guam leaf'], note:'Requires level 3 Herblore. Cleaning margins fluctuate, so compare the live grimy and clean prices before buying.'},
-    {name:'Clean marrentill',   minLevel:5,  maxLevel:11, xpPerAction:3.8,   actionsPerHr:5000, outputName:'Marrentill',             inputNames:['Grimy marrentill'], note:'Requires level 5 Herblore. Cleaning margins fluctuate, so compare the live grimy and clean prices before buying.'},
-    {name:'Clean tarromin',     minLevel:11, maxLevel:20, xpPerAction:5,     actionsPerHr:5000, outputName:'Tarromin',               inputNames:['Grimy tarromin'], note:'Requires level 11 Herblore. Cleaning margins fluctuate, so compare the live grimy and clean prices before buying.'},
-    {name:'Clean harralander',  minLevel:20, maxLevel:25, xpPerAction:6.3,   actionsPerHr:5000, outputName:'Harralander',            inputNames:['Grimy harralander'], note:'Requires level 20 Herblore. Cleaning margins fluctuate, so compare the live grimy and clean prices before buying.'},
-    {name:'Clean ranarr weed',  minLevel:25, maxLevel:30, xpPerAction:7.5,   actionsPerHr:5000, outputName:'Ranarr weed',            inputNames:['Grimy ranarr weed'], note:'Requires level 25 Herblore. Cleaning margins fluctuate, so compare the live grimy and clean prices before buying.'},
-    {name:'Clean toadflax',     minLevel:30, maxLevel:38, xpPerAction:8,     actionsPerHr:5000, outputName:'Toadflax',               inputNames:['Grimy toadflax'], note:'Requires level 30 Herblore. Cleaning margins fluctuate, so compare the live grimy and clean prices before buying.'},
-    {name:'Prayer potion',      minLevel:38, maxLevel:63, xpPerAction:87.5,  actionsPerHr:2500, outputName:'Prayer potion(3)',       inputNames:['Ranarr potion (unf)','Snape grass'], note:'~4 gp/xp historically, often the cheapest potion method. Switch here once herb cleaning margins dry up.'},
-    {name:'Super restore',      minLevel:63, maxLevel:84, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)',       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"], note:'Stay on these until level 84 — cheaper per xp than Saradomin brews across this entire range.'},
-    {name:'Extended antifire',  minLevel:84, maxLevel:90, xpPerAction:110,   actionsPerHr:2750, outputName:'Extended antifire(4)',   inputNames:['Antifire potion(4)',{name:'Lava scale shard',qty:4}], note:'Lava scale shards are stackable: 27 antifires plus one shard stack fills the inventory. Check the live GP/XP before buying in bulk.'},
-    {name:'Super combat',       minLevel:90, maxLevel:99, xpPerAction:150,   actionsPerHr:2166, outputName:'Super combat potion(4)', inputNames:['Super attack(4)','Super strength(4)','Super defence(4)','Torstol'], note:'Usually attractive on GP/XP, but inventory-heavy: only 7 potions per inventory because all four ingredients are unstackable. Use Standard if you prefer simpler banking.'},
+    {name:'Clean guam leaf',    minLevel:3,  maxLevel:5,  xpPerAction:2.5,   actionsPerHr:5000, outputName:'Guam leaf', gogglesEligible:false, amuletEligible:false, pouchEligible:false,              inputNames:['Grimy guam leaf'], note:'Requires level 3 Herblore. Cleaning margins fluctuate, so compare the live grimy and clean prices before buying.'},
+    {name:'Clean marrentill',   minLevel:5,  maxLevel:11, xpPerAction:3.8,   actionsPerHr:5000, outputName:'Marrentill', gogglesEligible:false, amuletEligible:false, pouchEligible:false,             inputNames:['Grimy marrentill'], note:'Requires level 5 Herblore. Cleaning margins fluctuate, so compare the live grimy and clean prices before buying.'},
+    {name:'Clean tarromin',     minLevel:11, maxLevel:20, xpPerAction:5,     actionsPerHr:5000, outputName:'Tarromin', gogglesEligible:false, amuletEligible:false, pouchEligible:false,               inputNames:['Grimy tarromin'], note:'Requires level 11 Herblore. Cleaning margins fluctuate, so compare the live grimy and clean prices before buying.'},
+    {name:'Clean harralander',  minLevel:20, maxLevel:25, xpPerAction:6.3,   actionsPerHr:5000, outputName:'Harralander', gogglesEligible:false, amuletEligible:false, pouchEligible:false,            inputNames:['Grimy harralander'], note:'Requires level 20 Herblore. Cleaning margins fluctuate, so compare the live grimy and clean prices before buying.'},
+    {name:'Clean ranarr weed',  minLevel:25, maxLevel:30, xpPerAction:7.5,   actionsPerHr:5000, outputName:'Ranarr weed', gogglesEligible:false, amuletEligible:false, pouchEligible:false,            inputNames:['Grimy ranarr weed'], note:'Requires level 25 Herblore. Cleaning margins fluctuate, so compare the live grimy and clean prices before buying.'},
+    {name:'Clean toadflax',     minLevel:30, maxLevel:38, xpPerAction:8,     actionsPerHr:5000, outputName:'Toadflax', gogglesEligible:false, amuletEligible:false, pouchEligible:false,               inputNames:['Grimy toadflax'], note:'Requires level 30 Herblore. Cleaning margins fluctuate, so compare the live grimy and clean prices before buying.'},
+    {name:'Prayer potion',      minLevel:38, maxLevel:63, xpPerAction:87.5,  actionsPerHr:2500, outputName:'Prayer potion(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,       inputNames:['Ranarr potion (unf)','Snape grass'], note:'~4 gp/xp historically, often the cheapest potion method. Switch here once herb cleaning margins dry up.'},
+    {name:'Super restore',      minLevel:63, maxLevel:84, xpPerAction:142.5, actionsPerHr:2500, outputName:'Super restore(3)', gogglesEligible:true, amuletEligible:true, pouchEligible:true,       inputNames:["Snapdragon potion (unf)","Red spiders' eggs"], note:'Stay on these until level 84 — cheaper per xp than Saradomin brews across this entire range.'},
+    {name:'Extended antifire',  minLevel:84, maxLevel:90, xpPerAction:110,   actionsPerHr:2750, outputName:'Extended antifire(4)', gogglesEligible:false, amuletEligible:false, pouchEligible:false,   inputNames:['Antifire potion(4)',{name:'Lava scale shard',qty:4}], note:'Lava scale shards are stackable: 27 antifires plus one shard stack fills the inventory. Check the live GP/XP before buying in bulk.'},
+    {name:'Super combat',       minLevel:90, maxLevel:99, xpPerAction:150,   actionsPerHr:2166, outputName:'Super combat potion(4)', gogglesEligible:false, amuletEligible:false, pouchEligible:false, inputNames:['Super attack(4)','Super strength(4)','Super defence(4)','Torstol'], note:'Usually attractive on GP/XP, but inventory-heavy: only 7 potions per inventory because all four ingredients are unstackable. Use Standard if you prefer simpler banking.'},
   ],
 };
 
@@ -367,6 +410,9 @@ async function loadPrices(){
 // ── STATE ───────────────────────────────────────────────────────────────────────
 const SUITE_THEME_KEY='osrs-suite-theme';
 let playerLevel=3, playerXp=0, targetLevelVal=99, currentSpeed='standard', isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
+// Owned upgrades — Mastering Mixology reputation-shop items that affect ordinary potion-making.
+let gogglesOwned=false, amuletOwned=false, amuletCharges=50, pouchOwned=false;
+const REAGENT_POUCH_MIN_LEVEL=81;
 document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
 document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
 
@@ -375,6 +421,24 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
   document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
   localStorage.setItem(SUITE_THEME_KEY,isDark?'dark':'light');
+});
+
+function wireUpgradeSeg(hostId, dataAttr, setter){
+  document.getElementById(hostId).addEventListener('click',e=>{
+    const btn=e.target.closest(`button[data-${dataAttr}]`);
+    if(!btn) return;
+    document.querySelectorAll(`#${hostId} button`).forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    setter(btn.dataset[dataAttr]);
+    generatePlan();
+  });
+}
+wireUpgradeSeg('gogglesToggle','goggles', v=>gogglesOwned = v==='true');
+wireUpgradeSeg('amuletToggle','amulet', v=>{ amuletOwned = v==='true'; document.getElementById('amuletChargesField').style.display = amuletOwned?'flex':'none'; });
+wireUpgradeSeg('pouchToggle','pouch', v=>pouchOwned = v==='true');
+document.getElementById('amuletChargesInput').addEventListener('change',e=>{
+  amuletCharges = Math.max(0, Math.min(5000, parseInt(e.target.value)||0));
+  generatePlan();
 });
 
 // ── WISE OLD MAN LOOKUP ───────────────────────────────────────────────────────
@@ -528,7 +592,7 @@ function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel))
     const xpStart=lvl===startLevel?Math.max(xpForLevel(lvl),startXp):xpForLevel(lvl), xpEnd=xpForLevel(stopEnd);
     const xpNeeded=xpEnd-xpStart;
     const actionsNeeded=Math.ceil(xpNeeded/method.xpPerAction);
-    const hoursNeeded=actionsNeeded/method.actionsPerHr;
+    const hoursNeeded=actionsNeeded/actionsPerHrForHerb(method,lvl);
 
     const totalCost=pricesLoaded?netCostPerAction(method)*actionsNeeded:0;
     const previous=stops[stops.length-1];
@@ -536,7 +600,7 @@ function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel))
       previous.levelEnd=stopEnd;
       previous.xpNeeded+=xpNeeded;
       previous.actionsNeeded=Math.ceil(previous.xpNeeded/method.xpPerAction);
-      previous.hoursNeeded=previous.actionsNeeded/method.actionsPerHr;
+      previous.hoursNeeded=previous.actionsNeeded/actionsPerHrForHerb(method,lvl);
       previous.totalCost=netCostPerAction(method)*previous.actionsNeeded;
     }else{
       const liveValueNote=isLiveValue
@@ -549,13 +613,39 @@ function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel))
   return stops;
 }
 
+// ── OWNED UPGRADES: MATH HELPERS ────────────────────────────────────────────────
+// By convention in HERBLORE_METHODS, inputNames[0] is always the base/unf potion (or grimy
+// herb) consumed once per action; inputNames[1], when present, is "the secondary" that
+// Prescription goggles can save. Recipes with more than two inputs (Super combat) are not
+// modeled for goggles savings in v1 — see Super combat's gogglesEligible:false — because the
+// 10% save would need to apply per-ingredient across several items rather than one secondary.
+function baseDosesOf(method){
+  const m=/\((\d+)\)$/.exec(method.outputName||'');
+  return m?parseInt(m[1],10):1;
+}
+function secondaryDiscountFactor(method){ return (gogglesOwned && method.gogglesEligible) ? 0.90 : 1; }
+// Dose-normalized revenue multiplier: a 15% chance of one extra dose on an N-dose potion is
+// worth (N+0.15)/N of the potion's listed (N-dose) sell price, on average. This credits the
+// exact expected dose value without ever treating a proc as a whole extra potion.
+function doseRevenueFactor(method){
+  if(!(amuletOwned && method.amuletEligible)) return 1;
+  const doses=baseDosesOf(method);
+  return (doses+0.15)/doses;
+}
+// Continuous (non-ceiling) approximation used only for method comparison/ordering — Cheapest's
+// sort and the speed-tab live summaries. It ignores the amulet's currentCharges starting
+// allowance (a one-time constant that doesn't meaningfully change relative ordering between
+// methods). Exact, ceiling-rounded per-stop totals are computed separately by
+// computeStopFinancials() for the numbers actually shown to the user.
 function netCostPerAction(method){
-  const inputCost=(method.inputNames||[]).reduce((sum,n)=>{
+  const inputCost=(method.inputNames||[]).reduce((sum,n,idx)=>{
     const itemName=typeof n==='string'?n:n.name;
     const qty=typeof n==='object'&&n.qty?n.qty:1;
-    return sum+priceOf(itemName)*qty;
+    const mult=idx===1?secondaryDiscountFactor(method):1;
+    return sum+priceOf(itemName)*qty*mult;
   },0);
-  return inputCost-sellPriceOf(method.outputName);
+  const rechargeCostPerAction=(amuletOwned && method.amuletEligible) ? (0.15/10)*priceOf('Amulet of chemistry') : 0;
+  return inputCost + rechargeCostPerAction - sellPriceOf(method.outputName)*doseRevenueFactor(method);
 }
 
 function netGpPerXp(method){
@@ -564,7 +654,69 @@ function netGpPerXp(method){
   return hasOutput&&hasAllInputs?netCostPerAction(method)/method.xpPerAction:Infinity;
 }
 
+// actionsPerHr change from the Reagent pouch — throughput only, never xp/action or quantities.
+// Only applies to eligible ordinary 14+14 (2,500/hr) methods at level 81+; intentionally does
+// not touch 2,750/hr stackable-secondary methods, per the handoff.
+function actionsPerHrForHerb(method, curLevel){
+  if(pouchOwned && method.pouchEligible && curLevel>=REAGENT_POUCH_MIN_LEVEL && method.actionsPerHr===2500) return 2700;
+  return method.actionsPerHr;
+}
+
+// Exact per-stop totals with ceiling-rounded goggles savings and sequential amulet-charge
+// tracking (chargesState.remaining is consumed across stops in route order — the player's
+// current charges are treated as a one-time starting pool used by the first eligible stop).
+function computeStopFinancials(stop, chargesState){
+  const actionsNeeded=stop.actionsNeeded;
+  const inputs=(stop.inputNames||[]).map((n,idx)=>{
+    const name=typeof n==='string'?n:n.name;
+    const baseQty=typeof n==='object'&&n.qty?n.qty:1;
+    const applyGoggles=gogglesOwned && stop.gogglesEligible && idx===1;
+    const rawQty=actionsNeeded*baseQty;
+    const qty=applyGoggles?Math.ceil(rawQty*0.90):rawQty;
+    return {name, qty, savedQty:applyGoggles?(rawQty-qty):0, unitCost:priceOf(name)};
+  });
+  const baseDoses=baseDosesOf(stop);
+  const amuletActive=amuletOwned && stop.amuletEligible;
+  const expectedProcs=amuletActive?actionsNeeded*0.15:0;
+  let rechargeQty=0, rechargeCost=0;
+  if(amuletActive){
+    const needed=Math.max(0, expectedProcs - chargesState.remaining);
+    chargesState.remaining=Math.max(0, chargesState.remaining - expectedProcs);
+    rechargeQty=Math.ceil(needed/10);
+    rechargeCost=rechargeQty*priceOf('Amulet of chemistry');
+    if(rechargeQty>0) inputs.push({name:'Amulet of chemistry', qty:rechargeQty, savedQty:0, unitCost:priceOf('Amulet of chemistry')});
+  }
+  const inputCost=inputs.reduce((s,i)=>s+i.qty*i.unitCost,0);
+  const credit=sellPriceOf(stop.outputName)*actionsNeeded*(amuletActive?(baseDoses+0.15)/baseDoses:1);
+  const pouchActive=pouchOwned && stop.pouchEligible && levelForXp(playerXp)>=REAGENT_POUCH_MIN_LEVEL && stop.actionsPerHr===2500;
+  return {inputs, expectedProcs, rechargeQty, rechargeCost, credit, totalCost:inputCost-credit, baseDoses, amuletActive, pouchActive, gogglesActive:gogglesOwned && stop.gogglesEligible};
+}
+
+// Attaches exact per-stop financials (ceiling-rounded goggles savings, sequential amulet-charge
+// tracking) to a route's stops in place, and returns the same array for chaining.
+function finalizeStops(stops){
+  const chargesState={remaining:amuletCharges};
+  stops.forEach(stop=>{
+    const fin=computeStopFinancials(stop,chargesState);
+    stop.financials=fin;
+    stop.totalCost=fin.totalCost;
+  });
+  return stops;
+}
+function computeRouteTotals(curLevel,targetLevel,speed){
+  const stops=finalizeStops(buildRoute(curLevel,targetLevel,speed,playerXp));
+  return {stops, totalCost:stops.reduce((s,x)=>s+x.totalCost,0), totalHrs:stops.reduce((s,x)=>s+x.hoursNeeded,0)};
+}
+// Runs a callback with all three upgrade toggles forced off, then restores the real state —
+// used to compute the "Without upgrades" comparison baseline without duplicating buildRoute.
+function withUpgradesDisabled(fn){
+  const g=gogglesOwned, a=amuletOwned, p=pouchOwned;
+  gogglesOwned=false; amuletOwned=false; pouchOwned=false;
+  try{ return fn(); }finally{ gogglesOwned=g; amuletOwned=a; pouchOwned=p; }
+}
+
 function fmt(n){if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
+function fmtExact(n){return Math.ceil(n).toLocaleString();} // whole-number counts (shopping quantities) — never abbreviated with K/M
 function fmtGp(n){const abs=Math.abs(n);let s;if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';else s=Math.round(abs).toLocaleString();return(n<0?'-':'')+s+' gp';}
 function fmtHrs(h){if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixed(1)+' hrs';return(h/24).toFixed(1)+' days';}
 
@@ -951,7 +1103,7 @@ function generatePlan(){
     return;
   }
 
-  const stops=buildRoute(curLevel,targetLevelVal,currentSpeed,playerXp);
+  const stops=finalizeStops(buildRoute(curLevel,targetLevelVal,currentSpeed,playerXp));
   if(!stops.length){
     planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);">No route available for this level range and speed setting.</div>`;
     return;
@@ -961,23 +1113,31 @@ function generatePlan(){
   const totalHrs=stops.reduce((s,x)=>s+x.hoursNeeded,0);
   const totalCost=stops.reduce((s,x)=>s+x.totalCost,0); // net cost = ingredients - sell value
   const totalPotions=stops.reduce((s,x)=>s+x.actionsNeeded,0);
+  const anyUpgradeOwned = gogglesOwned || amuletOwned || pouchOwned;
 
   // Also compute gross upfront capital separately — players need this much cash in hand before selling
   let grossIngredientCost = 0;
   let grossSellValue = 0;
   if(pricesLoaded){
     stops.forEach(stop=>{
-      const inCostPerPotion=(stop.inputNames||[]).reduce((s,n)=>{
-        const itemName=typeof n==='string'?n:n.name;
-        const qty=typeof n==='object'&&n.qty?n.qty:1;
-        return s+(priceOf(itemName)||0)*qty;
-      },0);
-      grossIngredientCost += inCostPerPotion * stop.actionsNeeded;
-      grossSellValue += (sellPriceOf(stop.outputName)||0) * stop.actionsNeeded;
+      grossIngredientCost += stop.financials.inputs.reduce((s,i)=>s+i.qty*i.unitCost,0);
+      grossSellValue += stop.financials.credit;
     });
   }
 
-  let html=`<div class="focus-summary">
+  let html='';
+  if(pricesLoaded && anyUpgradeOwned){
+    const baseline=withUpgradesDisabled(()=>computeRouteTotals(curLevel,targetLevelVal,currentSpeed));
+    const savings=baseline.totalCost-totalCost, timeSaved=baseline.totalHrs-totalHrs;
+    html+=`<div class="upgrade-compare">
+      <div><span>Without upgrades</span><strong>${fmtGp(Math.abs(baseline.totalCost))} · ${fmtHrs(baseline.totalHrs)}</strong></div>
+      <div><span>With selected upgrades</span><strong>${fmtGp(Math.abs(totalCost))} · ${fmtHrs(totalHrs)}</strong></div>
+      <div><span>Estimated savings</span><strong style="color:${savings>=0?'#2ecc71':'#e74c3c'};">${fmtGp(Math.abs(savings))}${savings<0?' more':''}</strong></div>
+      <div><span>Estimated time saved</span><strong style="color:${timeSaved>=0?'#2ecc71':'#e74c3c'};">${timeSaved>=0?fmtHrs(timeSaved):'+'+fmtHrs(Math.abs(timeSaved))}</strong></div>
+    </div>`;
+  }
+
+  html+=`<div class="focus-summary">
     <div><span>${totalCost>=0?'Net cost':'Net profit'}</span><strong style="color:${totalCost>=0?'#e74c3c':'#2ecc71'};">${pricesLoaded?fmtGp(Math.abs(totalCost)):'Loading…'}</strong></div>
     <div><span>Time</span><strong>${fmtHrs(totalHrs)}</strong></div>
     <div><span>Potions</span><strong>${fmt(totalPotions)}</strong></div>
@@ -987,12 +1147,22 @@ function generatePlan(){
   html+=`<div class="focus-route-list" style="--accent:${accent};">`;
   stops.forEach(stop=>{
     const ingList=(stop.inputNames||[]).map(n=>typeof n==='string'?n:`${n.name}${n.qty>1?` ×${n.qty}`:''}`).join(' + ');
+    const fin=stop.financials;
+    const badges=[
+      fin.gogglesActive?`<span class="craft-badge">🥽 goggles</span>`:'',
+      fin.amuletActive?`<span class="craft-badge">📿 amulet</span>`:'',
+      fin.pouchActive?`<span class="craft-badge">🎒 pouch</span>`:'',
+    ].join('');
+    const upgradeNotes=[
+      fin.gogglesActive&&pricesLoaded?`Expected saved: ${Math.ceil(fin.inputs[1]?.savedQty||0).toLocaleString()}`:'',
+      fin.amuletActive?`≈${Math.round(fin.expectedProcs).toLocaleString()} expected extra doses${fin.rechargeQty>0?`, ${fin.rechargeQty.toLocaleString()} Amulets of chemistry`:''}`:'',
+    ].filter(Boolean).join(' · ');
     html+=`<article class="focus-route-row">
       <div class="focus-levels"><span>${stop.levelStart}</span><span>→</span><span>${stop.levelEnd}</span></div>
       <div class="focus-method">
-        <h3>${stop.name}</h3>
+        <h3>${stop.name} ${badges}</h3>
         <p>${ingList || '—'}</p>
-        <small>${fmt(stop.xpPerAction*stop.actionsPerHr)} xp/hr · ${fmtHrs(stop.hoursNeeded)}</small>
+        <small>${fmt(stop.xpPerAction*actionsPerHrForHerb(stop,stop.levelStart))} xp/hr · ${fmtHrs(stop.hoursNeeded)}${upgradeNotes?' · '+upgradeNotes:''}</small>
       </div>
       <div class="focus-route-stat"><strong>${stop.actionsNeeded.toLocaleString()}</strong><span>potions</span></div>
       <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded?fmtGp(Math.abs(stop.totalCost)).replace(' gp',''):'—'}</strong><span>${stop.totalCost<0?'net profit':'net cost'}</span></div>
@@ -1011,27 +1181,23 @@ function generatePlan(){
 
     let shoppingBody = '';
     stops.forEach(stop=>{
-      if(!stop.inputNames||!stop.inputNames.length) return;
+      const stopInputs=stop.financials.inputs;
+      if(!stopInputs.length) return;
       let stopRows = '';
-      let stopTotal = 0;
-      stop.inputNames.forEach(input=>{
-        const inputName = typeof input === 'string' ? input : input.name;
-        const ingQtyMult = typeof input === 'object' && input.qty ? input.qty : 1;
-        const qty = stop.actionsNeeded * ingQtyMult;
-        const unitCost = priceOf(inputName);
-        const lineCost = unitCost * qty;
-        stopTotal += lineCost;
+      stopInputs.forEach(input=>{
+        const lineCost = input.unitCost * input.qty;
         // accumulate into grand total
-        if(!grandTotals.has(inputName)) grandTotals.set(inputName,{qty:0,unitCost});
-        grandTotals.get(inputName).qty += qty;
-        const icon = nameToIcon[inputName.toLowerCase()]
-          ? `<img class="shopping-icon" src="https://oldschool.runescape.wiki/images/${encodeURIComponent(nameToIcon[inputName.toLowerCase()].replace(/ /g,'_'))}" alt="">`
+        if(!grandTotals.has(input.name)) grandTotals.set(input.name,{qty:0,unitCost:input.unitCost});
+        grandTotals.get(input.name).qty += input.qty;
+        const icon = nameToIcon[input.name.toLowerCase()]
+          ? `<img class="shopping-icon" src="https://oldschool.runescape.wiki/images/${encodeURIComponent(nameToIcon[input.name.toLowerCase()].replace(/ /g,'_'))}" alt="">`
           : '';
+        const savedNote = input.savedQty>0 ? ` <span style="color:var(--green);">(≈${Math.ceil(input.savedQty).toLocaleString()} saved by goggles)</span>` : '';
         stopRows += `<tr>
-          <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(inputName.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${inputName}${ingQtyMult>1?` ×${ingQtyMult}`:''}</a></td>
-          <td class="mono">${fmt(qty)}</td>
-          <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
-          <td class="mono">${unitCost>0?fmtGp(lineCost):'—'}</td>
+          <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(input.name.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${input.name}</a>${savedNote}</td>
+          <td class="mono">${fmtExact(input.qty)}</td>
+          <td class="mono">${input.unitCost>0?fmtGp(input.unitCost):'—'}</td>
+          <td class="mono">${input.unitCost>0?fmtGp(lineCost):'—'}</td>
         </tr>`;
       });
       shoppingBody += `<div class="shopping-section" style="--accent:${accent};">
@@ -1043,7 +1209,9 @@ function generatePlan(){
       </div>`;
     });
 
-    // Grand total aggregation across all stops
+    // Grand total aggregation across all stops. Quantities can carry a fractional ≈ marker
+    // when goggles/amulet math is in play, but the displayed count itself is always a whole,
+    // unabbreviated number via fmt()/fmtExact-style rounding (never K/M).
     let grandRows = '';
     let grandTotal = 0;
     grandTotals.forEach(({qty,unitCost},name)=>{
@@ -1054,29 +1222,31 @@ function generatePlan(){
         : '';
       grandRows += `<tr>
         <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(name.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${name}</a></td>
-        <td class="mono">${fmt(qty)}</td>
+        <td class="mono">${fmtExact(qty)}</td>
         <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
         <td class="mono">${unitCost>0?fmtGp(unitCost*qty):'—'}</td>
       </tr>`;
     });
 
-    // Sell-back credit row
+    // Sell-back credit row. Uses each stop's dose-normalized financials.credit directly rather
+    // than a flat unit price, since the amulet changes expected revenue per potion.
     const outTotals = new Map();
     stops.forEach(stop=>{
       if(!stop.outputName) return;
-      const sp = sellPriceOf(stop.outputName);
-      if(!outTotals.has(stop.outputName)) outTotals.set(stop.outputName,{qty:0,sp});
-      outTotals.get(stop.outputName).qty += stop.actionsNeeded;
+      if(!outTotals.has(stop.outputName)) outTotals.set(stop.outputName,{qty:0,credit:0});
+      const entry=outTotals.get(stop.outputName);
+      entry.qty += stop.actionsNeeded;
+      entry.credit += stop.financials.credit;
     });
     let sellCredit = 0;
     let sellRows = '';
-    outTotals.forEach(({qty,sp},name)=>{
-      const total = sp*qty;
-      sellCredit += total;
+    outTotals.forEach(({qty,credit},name)=>{
+      sellCredit += credit;
+      const avgPrice = qty>0 ? credit/qty : 0;
       sellRows += `<tr style="color:var(--green);">
-        <td colspan="2" style="color:var(--green);">${name} ×${fmt(qty)}</td>
-        <td class="mono" style="color:var(--green);">${fmtGp(sp)}</td>
-        <td class="mono" style="color:var(--green);">−${fmtGp(total)}</td>
+        <td colspan="2" style="color:var(--green);">${name} ×${fmtExact(qty)}</td>
+        <td class="mono" style="color:var(--green);">${fmtGp(avgPrice)}</td>
+        <td class="mono" style="color:var(--green);">−${fmtGp(credit)}</td>
       </tr>`;
     });
 
