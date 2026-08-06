@@ -298,10 +298,10 @@ const DRIFTNET = [
   {family:'driftnet', name:'Drift net', minLevel:26, maxLevel:99, xpPerAction:60, actionsPerHr:1000, outputName:'Drift net', inputNames:[{name:'Jute fibre',qty:2}], membersOnly:true, note:'Requires access to Land’s End drift net fishing. Rate reflects roughly 1,000 nets/hour.'},
 ];
 const AMETHYST = [
-  {family:'amethyst', name:'Amethyst bolt tips',  minLevel:83, maxLevel:85, xpPerAction:60, actionsPerHr:2750, outputName:'Amethyst bolt tips',  inputNames:['Amethyst'], membersOnly:true, note:'Verify exact output quantity per amethyst before bulk buying.'},
-  {family:'amethyst', name:'Amethyst arrowtips',  minLevel:85, maxLevel:87, xpPerAction:60, actionsPerHr:2750, outputName:'Amethyst arrowtips',  inputNames:['Amethyst'], membersOnly:true, note:'Verify exact output quantity per amethyst before bulk buying.'},
-  {family:'amethyst', name:'Amethyst javelin heads',minLevel:87, maxLevel:89, xpPerAction:60, actionsPerHr:2750, outputName:'Amethyst javelin heads', inputNames:['Amethyst'], membersOnly:true, note:'Verify exact output quantity per amethyst before bulk buying.'},
-  {family:'amethyst', name:'Amethyst dart tips',  minLevel:89, maxLevel:99, xpPerAction:60, actionsPerHr:2750, outputName:'Amethyst dart tips',  inputNames:['Amethyst'], membersOnly:true, note:'Verify exact output quantity per amethyst before bulk buying.'},
+  {family:'amethyst', name:'Amethyst bolt tips',  minLevel:83, maxLevel:85, xpPerAction:60, actionsPerHr:2750, outputName:'Amethyst bolt tips', outputQty:15, inputNames:['Amethyst'], membersOnly:true},
+  {family:'amethyst', name:'Amethyst arrowtips',  minLevel:85, maxLevel:87, xpPerAction:60, actionsPerHr:2750, outputName:'Amethyst arrowtips', outputQty:15, inputNames:['Amethyst'], membersOnly:true},
+  {family:'amethyst', name:'Amethyst javelin heads',minLevel:87, maxLevel:89, xpPerAction:60, actionsPerHr:2750, outputName:'Amethyst javelin heads', outputQty:5, inputNames:['Amethyst'], membersOnly:true},
+  {family:'amethyst', name:'Amethyst dart tips',  minLevel:89, maxLevel:99, xpPerAction:60, actionsPerHr:2750, outputName:'Amethyst dart tips', outputQty:8, inputNames:['Amethyst'], membersOnly:true},
 ];
 
 // Fastest only compares the families that can plausibly lead on raw XP/hour: leather,
@@ -326,11 +326,8 @@ const CRAFTING_SIMPLE = [
   {family:'gem', name:'Cut diamond',     minLevel:43, maxLevel:54, xpPerAction:107.5, actionsPerHr:2780, outputName:'Diamond',     inputNames:['Uncut diamond']},
   {family:'battlestaff', name:'Water battlestaff', minLevel:54, maxLevel:58, xpPerAction:100,   actionsPerHr:2450, outputName:'Water battlestaff', inputNames:['Water orb','Battlestaff'], membersOnly:true, highAlch:9300},
   {family:'battlestaff', name:'Earth battlestaff', minLevel:58, maxLevel:62, xpPerAction:112.5, actionsPerHr:2450, outputName:'Earth battlestaff', inputNames:['Earth orb','Battlestaff'], membersOnly:true, highAlch:9300},
-  {family:'battlestaff', name:'Fire battlestaff',  minLevel:62, maxLevel:63, xpPerAction:125,   actionsPerHr:2450, outputName:'Fire battlestaff',  inputNames:['Fire orb','Battlestaff'],  membersOnly:true, highAlch:9300, note:'Cut short one level early to move straight to Green dragonhide bodies, skipping Air battlestaff for a simpler four-tier dragonhide finish.'},
-  {family:'dhide', name:'Green dragonhide body', minLevel:63, maxLevel:71, xpPerAction:186, actionsPerHr:DHIDE_NORMAL_RATE, needleActionsPerHr:DHIDE_NEEDLE_RATE, outputName:'Green dragonhide body', inputNames:[{name:'Green dragon leather',qty:3}], membersOnly:true, highAlch:4680},
-  {family:'dhide', name:'Blue dragonhide body',  minLevel:71, maxLevel:77, xpPerAction:210, actionsPerHr:DHIDE_NORMAL_RATE, needleActionsPerHr:DHIDE_NEEDLE_RATE, outputName:'Blue dragonhide body',  inputNames:[{name:'Blue dragon leather',qty:3}],  membersOnly:true, highAlch:5616},
-  {family:'dhide', name:'Red dragonhide body',   minLevel:77, maxLevel:84, xpPerAction:234, actionsPerHr:DHIDE_NORMAL_RATE, needleActionsPerHr:DHIDE_NEEDLE_RATE, outputName:'Red dragonhide body',   inputNames:[{name:'Red dragon leather',qty:3}],   membersOnly:true, highAlch:6738},
-  {family:'dhide', name:'Black dragonhide body', minLevel:84, maxLevel:99, xpPerAction:258, actionsPerHr:DHIDE_NORMAL_RATE, needleActionsPerHr:DHIDE_NEEDLE_RATE, outputName:'Black dragonhide body', inputNames:[{name:'Black dragon leather',qty:3}], membersOnly:true, highAlch:8088},
+  {family:'battlestaff', name:'Fire battlestaff',  minLevel:62, maxLevel:66, xpPerAction:125,   actionsPerHr:2450, outputName:'Fire battlestaff',  inputNames:['Fire orb','Battlestaff'],  membersOnly:true, highAlch:9300},
+  {family:'battlestaff', name:'Air battlestaff',   minLevel:66, maxLevel:99, xpPerAction:137.5, actionsPerHr:2450, outputName:'Air battlestaff',   inputNames:['Air orb','Battlestaff'],   membersOnly:true, highAlch:9300, note:'A consistent bank-standing finish that keeps the Simple route predictable through level 99.'},
 ];
 
 // Low Attention — molten glass end to end, centered on unpowered orbs from 46 as requested.
@@ -547,15 +544,21 @@ function actionsPerHrFor(method){
   return method.actionsPerHr;
 }
 function xpPerHrFor(method){ return method.xpPerAction * actionsPerHrFor(method); }
+function outputQtyFor(method){ return method.outputQty || 1; }
+function effectiveInputs(method){
+  const inputs=[...(method.inputNames||[])];
+  if(outputHandling==='alch' && method.highAlch) inputs.push('Nature rune');
+  return inputs;
+}
 
 function creditFor(method){
   if(outputHandling==='alch' && method.highAlch){
-    return Math.max(0, method.highAlch - priceOf('Nature rune'));
+    return method.highAlch;
   }
-  return sellPriceOf(method.outputName);
+  return sellPriceOf(method.outputName) * outputQtyFor(method);
 }
 function netCostPerAction(method){
-  const inputCost=(method.inputNames||[]).reduce((sum,n)=>{
+  const inputCost=effectiveInputs(method).reduce((sum,n)=>{
     const itemName=typeof n==='string'?n:n.name;
     const qty=typeof n==='object'&&n.qty?n.qty:1;
     return sum+priceOf(itemName)*qty;
@@ -564,13 +567,15 @@ function netCostPerAction(method){
 }
 function netGpPerXp(method){
   const hasOutput=creditFor(method)>0;
-  const hasAllInputs=(method.inputNames||[]).every(n=>priceOf(typeof n==='string'?n:n.name)>0);
+  const hasAllInputs=effectiveInputs(method).every(n=>priceOf(typeof n==='string'?n:n.name)>0);
   return hasOutput&&hasAllInputs?netCostPerAction(method)/method.xpPerAction:Infinity;
 }
 
 function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel)){
   let methods = CRAFTING_ROUTES[speed] || [];
-  if(!membersEnabled) methods = methods.filter(m=>!m.membersOnly);
+  if(!membersEnabled){
+    methods = methods.filter(m=>!m.membersOnly).map(m=>speed==='simple'&&m.name==='Cut diamond'?{...m,maxLevel:99,note:'Reliable Free-to-play method through level 99.'}:m);
+  }
   const isPool = speed==='fastest' || speed==='cheapest';
   const stops=[];
   let lvl=startLevel;
@@ -586,7 +591,8 @@ function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel))
       method=candidates.slice().sort((a,b)=>xpPerHrFor(b)-xpPerHrFor(a))[0];
     }else if(speed==='cheapest'){
       const withFloor = cheapestFloorEnabled ? candidates.filter(m=>xpPerHrFor(m)>=CHEAPEST_XPHR_FLOOR) : candidates;
-      const pool = withFloor.length ? withFloor : candidates;
+      const pool = (withFloor.length ? withFloor : candidates).filter(m=>Number.isFinite(netGpPerXp(m)));
+      if(!pool.length) break;
       method=pool.slice().sort((a,b)=>netGpPerXp(a)-netGpPerXp(b))[0];
     }else{
       method=candidates.slice().sort((a,b)=>b.maxLevel-a.maxLevel)[0];
@@ -621,6 +627,7 @@ function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel))
 }
 
 function fmt(n){if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
+function fmtExact(n){return Math.ceil(n).toLocaleString();}
 function fmtGp(n){const abs=Math.abs(n);let s;if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';else s=Math.round(abs).toLocaleString();return(n<0?'-':'')+s+' gp';}
 function fmtHrs(h){if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixed(1)+' hrs';return(h/24).toFixed(1)+' days';}
 
@@ -672,7 +679,7 @@ function generatePlan(){
   let grossSellValue = 0;
   if(pricesLoaded){
     stops.forEach(stop=>{
-      const inCostPerAction=(stop.inputNames||[]).reduce((s,n)=>{
+      const inCostPerAction=effectiveInputs(stop).reduce((s,n)=>{
         const itemName=typeof n==='string'?n:n.name;
         const qty=typeof n==='object'&&n.qty?n.qty:1;
         return s+(priceOf(itemName)||0)*qty;
@@ -690,7 +697,7 @@ function generatePlan(){
   html+=`<div class="focus-summary">
     <div><span>${totalCost>=0?'Net cost':'Net profit'}</span><strong style="color:${totalCost>=0?'#e74c3c':'#2ecc71'};">${pricesLoaded?fmtGp(Math.abs(totalCost)):'Loading…'}</strong></div>
     <div><span>Time</span><strong>${fmtHrs(totalHrs)}</strong></div>
-    <div><span>Actions</span><strong>${fmt(totalActions)}</strong></div>
+    <div><span>Actions</span><strong>${fmtExact(totalActions)}</strong></div>
     <div><span>Upfront</span><strong>${pricesLoaded?fmtGp(grossIngredientCost):'Loading…'}</strong></div>
   </div>`;
 
@@ -718,9 +725,10 @@ function generatePlan(){
     const grandTotals = new Map();
     let shoppingBody = '';
     stops.forEach(stop=>{
-      if(!stop.inputNames||!stop.inputNames.length) return;
+      const stopInputs=effectiveInputs(stop);
+      if(!stopInputs.length) return;
       let stopRows = '';
-      stop.inputNames.forEach(input=>{
+      stopInputs.forEach(input=>{
         const inputName = typeof input === 'string' ? input : input.name;
         const ingQtyMult = typeof input === 'object' && input.qty ? input.qty : 1;
         const qty = Math.ceil(stop.actionsNeeded * ingQtyMult);
@@ -733,7 +741,7 @@ function generatePlan(){
           : '';
         stopRows += `<tr>
           <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(inputName.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${inputName}${ingQtyMult!==1?` ×${ingQtyMult}`:''}</a></td>
-          <td class="mono">${fmt(qty)}</td>
+          <td class="mono">${fmtExact(qty)}</td>
           <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
           <td class="mono">${unitCost>0?fmtGp(lineCost):'—'}</td>
         </tr>`;
@@ -757,7 +765,7 @@ function generatePlan(){
         : '';
       grandRows += `<tr>
         <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(name.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${name}</a></td>
-        <td class="mono">${fmt(qty)}</td>
+        <td class="mono">${fmtExact(qty)}</td>
         <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
         <td class="mono">${unitCost>0?fmtGp(unitCost*qty):'—'}</td>
       </tr>`;
@@ -766,9 +774,9 @@ function generatePlan(){
     const outTotals = new Map();
     stops.forEach(stop=>{
       if(!stop.outputName) return;
-      const sp = creditFor(stop);
+      const sp = creditFor(stop) / outputQtyFor(stop);
       if(!outTotals.has(stop.outputName)) outTotals.set(stop.outputName,{qty:0,sp});
-      outTotals.get(stop.outputName).qty += stop.actionsNeeded;
+      outTotals.get(stop.outputName).qty += stop.actionsNeeded * outputQtyFor(stop);
     });
     let sellCredit = 0;
     let sellRows = '';
@@ -776,7 +784,7 @@ function generatePlan(){
       const total = sp*qty;
       sellCredit += total;
       sellRows += `<tr style="color:var(--green);">
-        <td colspan="2" style="color:var(--green);">${name} ×${fmt(qty)}</td>
+        <td colspan="2" style="color:var(--green);">${name} ×${fmtExact(qty)}</td>
         <td class="mono" style="color:var(--green);">${fmtGp(sp)}</td>
         <td class="mono" style="color:var(--green);">−${fmtGp(total)}</td>
       </tr>`;
