@@ -17,7 +17,7 @@
   const header=document.querySelector('header');
   const logo=header?.querySelector('.logo');
   if(!header||!logo) return;
-  logo.textContent='OSRS Tools';
+  logo.textContent='OSRS Toolbox';
   const groups=['Market tool','Training planner'];
   const menuHtml=groups.map(group=>`<div class="suite-menu-group"><div class="suite-menu-title">${group==='Market tool'?'Market tools':'Training planners'}</div>${tools.filter(tool=>tool.group===group).map(tool=>`<a class="suite-menu-link${tool.file===currentFile?' current':''}" href="${tool.file}"><img src="${tool.icon}" alt=""><strong>${tool.name}</strong><small>${tool.description}</small></a>`).join('')}</div>`).join('');
   const host=document.createElement('div');
@@ -55,7 +55,7 @@
 
       const levelStrip=document.createElement('section');
       levelStrip.className='focused-level-strip';
-      levelStrip.innerHTML='<label class="focused-level-start"><span>From level</span></label><label class="focused-xp-start"><span>Current Herblore XP</span></label><i>&rarr;</i><label><span>To level</span></label>';
+      levelStrip.innerHTML=`<label class="focused-level-start"><span>From level</span></label><label class="focused-xp-start"><span>Current ${current.name} XP</span></label><i>&rarr;</i><label><span>To level</span></label>`;
       levelStrip.querySelector('.focused-level-start').append(fromInput);
       levelStrip.querySelector('label:last-of-type').append(toInput);
       updateButton.textContent='Update plan';

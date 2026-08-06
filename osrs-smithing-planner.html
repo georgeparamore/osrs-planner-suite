@@ -104,6 +104,12 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .craft-seg button:last-child{border-right:0;}
 .craft-seg button.active{background:var(--gold);color:#000;font-weight:700;}
 .craft-toggle-group select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 10px;}
+.smith-item-check{display:grid;grid-template-columns:auto 28px 1fr;align-items:center;gap:8px;min-width:170px;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--text);font-size:12px;}
+.smith-item-check:has(input:checked){border-color:var(--gold-dim);background:rgba(200,168,75,.09);}
+.smith-item-check input{accent-color:var(--gold);width:15px;height:15px;}
+.smith-item-check img{width:24px;height:24px;object-fit:contain;image-rendering:auto;}
+.smith-item-check span{display:flex;flex-direction:column;line-height:1.2;}
+.smith-item-check small{color:var(--text-dim);font-size:9px;margin-top:3px;}
 .craft-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(74,126,255,.13);color:var(--blue);white-space:nowrap;}
 .craft-badge.members{background:rgba(155,111,214,.15);color:var(--purple);}
 .craft-badge.req{background:rgba(231,76,60,.13);color:var(--red);}
@@ -207,25 +213,16 @@ body[data-suite-page="smithing"] .craft-toggle-panel{max-width:1120px;width:calc
         </div>
       </div>
       <div class="craft-toggle-group">
-        <span>Goldsmith gauntlets (Family Crest)</span>
-        <div class="craft-seg" id="gauntletsToggle">
-          <button type="button" data-gauntlets="true" class="active">Owned</button>
-          <button type="button" data-gauntlets="false">Not owned</button>
-        </div>
+        <span>Owned items</span>
+        <label class="smith-item-check"><input type="checkbox" id="gauntletsToggle" checked><img src="https://oldschool.runescape.wiki/images/Goldsmith_gauntlets.png" alt=""><span>Goldsmith gauntlets<small>Family Crest</small></span></label>
       </div>
       <div class="craft-toggle-group">
-        <span>Coal bag</span>
-        <div class="craft-seg" id="coalBagToggle">
-          <button type="button" data-coalbag="true" class="active">Equipped</button>
-          <button type="button" data-coalbag="false">Not equipped</button>
-        </div>
+        <span>&nbsp;</span>
+        <label class="smith-item-check"><input type="checkbox" id="coalBagToggle" checked><img src="https://oldschool.runescape.wiki/images/Coal_bag.png" alt=""><span>Coal bag<small>Improves Blast Furnace rates</small></span></label>
       </div>
       <div class="craft-toggle-group">
-        <span>Smiths' Uniform</span>
-        <div class="craft-seg" id="uniformToggle">
-          <button type="button" data-uniform="true" class="active">Full uniform</button>
-          <button type="button" data-uniform="false">None</button>
-        </div>
+        <span>&nbsp;</span>
+        <label class="smith-item-check"><input type="checkbox" id="uniformToggle" checked><img src="https://oldschool.runescape.wiki/images/Smiths_tunic.png" alt=""><span>Smiths' Uniform<small>Full outfit</small></span></label>
       </div>
       <div class="craft-toggle-group">
         <span>Optimal anvil (Prifddinas)</span>
@@ -235,11 +232,8 @@ body[data-suite-page="smithing"] .craft-toggle-panel{max-width:1120px;width:calc
         </div>
       </div>
       <div class="craft-toggle-group">
-        <span>Double ammo mould</span>
-        <div class="craft-seg" id="doubleMouldToggle">
-          <button type="button" data-double="false" class="active">Normal</button>
-          <button type="button" data-double="true">Double</button>
-        </div>
+        <span>&nbsp;</span>
+        <label class="smith-item-check"><input type="checkbox" id="doubleMouldToggle"><img src="https://oldschool.runescape.wiki/images/Double_ammo_mould.png" alt=""><span>Double ammo mould<small>2,000 Foundry reputation</small></span></label>
       </div>
       <div class="craft-toggle-group">
         <span>Output handling</span>
@@ -283,7 +277,7 @@ body[data-suite-page="smithing"] .craft-toggle-panel{max-width:1120px;width:calc
         </div>
         <div class="speed-tab" data-speed="cheapest" style="--accent:#2ecc71;">
           <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#2ecc71;"></span>Cheapest</div>
-          <div class="speed-tab-sub">Lowest live net GP/XP among eligible methods, reevaluated at every level</div>
+          <div class="speed-tab-sub">Lowest live net GP/XP — profitable Blast Furnace bars may win, but require active play</div>
         </div>
         <div class="speed-tab" data-speed="lowattention" style="--accent:#4a9eff;">
           <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#4a9eff;"></span>Low Attention</div>
@@ -338,7 +332,7 @@ const PLATEBODY_TIERS = [
 ];
 // Blast Furnace gold: 6,400 bars/hr is a transparent baseline, not the wiki's cited maximum.
 // XP/action switches with the Goldsmith gauntlets toggle (56.2 with, 22.5 without).
-const BLAST_FURNACE_GOLD = {family:'bfgold', name:'Blast Furnace gold bars', minLevel:40, maxLevel:99, actionsPerHr:6400, inputNames:[{name:'Gold ore',qty:1}], outputName:'Gold bar', membersOnly:true, requirements:['Family Crest (for gauntlets)'], note:'6,400 bars/hr is a documented baseline, not the wiki\'s cited maximum solo rate (up to ~6,600). Includes the 72,000 gp/hr official-world fee and, if enabled, a ~40 stamina-dose/hr assumption.'};
+const BLAST_FURNACE_GOLD = {family:'bfgold', name:'Blast Furnace gold bars', minLevel:40, maxLevel:99, actionsPerHr:6400, inputNames:[{name:'Gold ore',qty:1}], outputName:'Gold bar', membersOnly:true, requirements:['Family Crest (for gauntlets)','Ice gloves or Smiths gloves (i)'], note:'6,400 bars/hr is a documented baseline, not the wiki\'s cited maximum solo rate (up to ~6,600). Includes the 72,000 gp/hr official-world fee and, if enabled, a ~40 stamina-dose/hr assumption.'};
 // Blast Furnace coal-saving bars (Cheapest's members pool). No-coal-bag rates are a labeled
 // -30% estimate — the wiki does not publish a specific no-coal-bag figure.
 const BLAST_FURNACE_BARS = [
@@ -348,6 +342,7 @@ const BLAST_FURNACE_BARS = [
   {family:'bfbar', name:'Blast Furnace adamantite bars', minLevel:70, maxLevel:99, xpPerAction:37.5, actionsPerHrCoalBag:2700, actionsPerHrNoCoalBag:1890, inputNames:[{name:'Adamantite ore',qty:1},{name:'Coal',qty:3}],   outputName:'Adamantite bar', membersOnly:true},
   {family:'bfbar', name:'Blast Furnace runite bars',     minLevel:85, maxLevel:99, xpPerAction:50,   actionsPerHrCoalBag:2160, actionsPerHrNoCoalBag:1512, inputNames:[{name:'Runite ore',qty:1},{name:'Coal',qty:4}],       outputName:'Runite bar',     membersOnly:true},
 ];
+BLAST_FURNACE_BARS.forEach(method=>method.requirements=['Ice gloves or Smiths gloves (i)']);
 // Dart tips: 1,060 actions/hr without Smiths' Uniform, 1,300 with (10,600 / 13,000 tips per
 // hour ÷ 10 tips per bar). Requires The Tourist Trap.
 const DART_TIPS = [
@@ -483,12 +478,12 @@ function wireSeg(hostId, dataAttr, setter){
   });
 }
 wireSeg('membersToggle','members', v=>membersEnabled = v==='true');
-wireSeg('gauntletsToggle','gauntlets', v=>gauntletsEnabled = v==='true');
-wireSeg('coalBagToggle','coalbag', v=>coalBagEnabled = v==='true');
-wireSeg('uniformToggle','uniform', v=>uniformEnabled = v==='true');
 wireSeg('optimalAnvilToggle','optimal', v=>optimalAnvilEnabled = v==='true');
-wireSeg('doubleMouldToggle','double', v=>doubleMouldEnabled = v==='true');
 wireSeg('lowAttentionPref','pref', v=>lowAttentionPref = v);
+document.getElementById('gauntletsToggle').addEventListener('change',e=>{ gauntletsEnabled=e.target.checked; generatePlan(); });
+document.getElementById('coalBagToggle').addEventListener('change',e=>{ coalBagEnabled=e.target.checked; generatePlan(); });
+document.getElementById('uniformToggle').addEventListener('change',e=>{ uniformEnabled=e.target.checked; generatePlan(); });
+document.getElementById('doubleMouldToggle').addEventListener('change',e=>{ doubleMouldEnabled=e.target.checked; generatePlan(); });
 document.getElementById('outputHandling').addEventListener('change',e=>{ outputHandling = e.target.value; generatePlan(); });
 document.getElementById('staminaToggle').addEventListener('change',e=>{ staminaEnabled = e.target.checked; generatePlan(); });
 document.getElementById('cheapestFloorToggle').addEventListener('change',e=>{ cheapestFloorEnabled = e.target.checked; generatePlan(); });
@@ -1094,6 +1089,6 @@ updateStatusCard();
 generatePlan();
 loadPrices();
 </script>
-<script src="suite-nav.js?v=19"></script>
+<script src="suite-nav.js?v=20"></script>
 </body>
 </html>
