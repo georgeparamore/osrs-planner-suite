@@ -2,7 +2,7 @@
 
 This is the first file both **Claude Code and Codex must read before making changes**. It is the living handoff for switching agents, including when George continues from mobile.
 
-Last updated: 2026-08-05 by Claude Code  
+Last updated: 2026-08-05 by Codex
 Repository: https://github.com/georgeparamore/osrs-planner-suite.git  
 Live site: https://georgeparamore.github.io/osrs-planner-suite/  
 Active branch: `main` (built on `claude/osrs-tool-suite-ap8t4k`, which tracks `main` and is pushed after every session)
@@ -12,7 +12,7 @@ Active branch: `main` (built on `claude/osrs-tool-suite-ap8t4k`, which tracks `m
 Before coding:
 
 1. Read this file completely.
-2. Read the newest dated handoff named `CLAUDE_HANDOFF_YYYY-MM-DD.md`.
+2. Read the newest task-specific dated handoff. The current assignment is `CLAUDE_SMITHING_HANDOFF_2026-08-05.md`.
 3. Inspect `git status` and recent commits; never assume the working tree is clean.
 4. Treat current code and the newest dated handoff as authoritative over older handoff files.
 
@@ -29,9 +29,11 @@ Do not delete previous dated handoffs. They provide history. Older `PROJECT_HAND
 
 ## Current task
 
-**Owner:** Codex (next) — or Claude Code, whichever George opens next  
-**Status:** Crafting Training Planner built and locally verified; not yet pushed/deployed from this session's sandbox (no outbound internet to GitHub here — see "How this session verified it" below). Push and watch GitHub Pages before treating it as live.  
-**Assignment for whoever picks this up:** Push the branch, confirm GitHub Pages deploys cleanly, and spot-check the live page with real GE prices (this session could only test against mocked prices).
+**Owner:** Claude Code
+**Status:** Crafting Training Planner is merged and live. Smithing research and implementation planning are complete; Smithing coding has not started.
+**Assignment for whoever picks this up:** Read `CLAUDE_SMITHING_HANDOFF_2026-08-05.md`, build the Smithing planner on a feature branch, test it, and open a PR without merging it.
+
+Full Smithing specification: `CLAUDE_SMITHING_HANDOFF_2026-08-05.md`.
 
 Full original build specification: `CLAUDE_HANDOFF_2026-08-05.md`. Note that a few implementation choices below **intentionally deviate** from that spec's suggested routes, because the real Wiki-sourced XP/hr numbers didn't support the originally-assumed breakpoints. Treat this README as authoritative over the original spec for those points.
 
