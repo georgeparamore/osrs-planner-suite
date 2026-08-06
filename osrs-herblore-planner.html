@@ -144,6 +144,12 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .craft-toggle-group{display:flex;flex-direction:column;gap:5px;}
 .craft-toggle-group>span{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);display:flex;align-items:center;gap:5px;}
 .upgrade-icon{width:16px;height:16px;object-fit:contain;}
+.herb-item-check{display:grid;grid-template-columns:auto 28px 1fr;align-items:center;gap:8px;min-width:190px;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--text);font-size:12px;}
+.herb-item-check:has(input:checked){border-color:var(--gold-dim);background:rgba(200,168,75,.09);}
+.herb-item-check input{accent-color:var(--gold);width:15px;height:15px;margin:0;}
+.herb-item-check img{width:24px;height:24px;object-fit:contain;image-rendering:auto;}
+.herb-item-check span{display:flex;flex-direction:column;line-height:1.2;}
+.herb-item-check small{color:var(--text-dim);font-size:9px;margin-top:3px;}
 .craft-seg{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
 .craft-seg button{background:var(--surface2);border:0;border-right:1px solid var(--border);color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 12px;cursor:pointer;}
 .craft-seg button:last-child{border-right:0;}
@@ -225,29 +231,20 @@ body[data-suite-page="herblore"] .craft-toggle-panel{max-width:1120px;width:calc
     </div>
     <div class="craft-toggle-row craft-toggle-panel">
       <div class="craft-toggle-group">
-        <span><img class="upgrade-icon" src="https://oldschool.runescape.wiki/images/Prescription_goggles_%28focused%29.png" alt="">Prescription goggles</span>
-        <div class="craft-seg" id="gogglesToggle">
-          <button type="button" data-goggles="false" class="active">Not owned</button>
-          <button type="button" data-goggles="true">Owned</button>
-        </div>
+        <span>Owned items</span>
+        <label class="herb-item-check"><input type="checkbox" id="gogglesToggle"><img src="https://oldschool.runescape.wiki/images/Prescription_goggles_%28focused%29.png" alt=""><span>Prescription goggles<small>Save secondary ingredients</small></span></label>
       </div>
       <div class="craft-toggle-group">
-        <span><img class="upgrade-icon" src="https://oldschool.runescape.wiki/images/Alchemist%27s_amulet_%28charged%29.png" alt="">Alchemist's amulet</span>
-        <div class="craft-seg" id="amuletToggle">
-          <button type="button" data-amulet="false" class="active">Not owned</button>
-          <button type="button" data-amulet="true">Owned</button>
-        </div>
+        <span>&nbsp;</span>
+        <label class="herb-item-check"><input type="checkbox" id="amuletToggle"><img src="https://oldschool.runescape.wiki/images/Alchemist%27s_amulet_%28charged%29.png" alt=""><span>Alchemist's amulet<small>Chance for an extra dose</small></span></label>
       </div>
       <div class="craft-toggle-group" id="amuletChargesField" style="display:none;">
         <span class="field-label">Current charges</span>
         <input type="number" id="amuletChargesInput" min="0" max="5000" value="50" style="width:100px;">
       </div>
       <div class="craft-toggle-group">
-        <span><img class="upgrade-icon" src="https://oldschool.runescape.wiki/images/Reagent_pouch.png" alt="">Reagent pouch (81+)</span>
-        <div class="craft-seg" id="pouchToggle">
-          <button type="button" data-pouch="false" class="active">Not owned</button>
-          <button type="button" data-pouch="true">Owned</button>
-        </div>
+        <span>&nbsp;</span>
+        <label class="herb-item-check"><input type="checkbox" id="pouchToggle"><img src="https://oldschool.runescape.wiki/images/Reagent_pouch.png" alt=""><span>Reagent pouch<small>Improves eligible methods at 81+</small></span></label>
       </div>
     </div>
     <div class="speed-panel">
@@ -423,19 +420,9 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
   localStorage.setItem(SUITE_THEME_KEY,isDark?'dark':'light');
 });
 
-function wireUpgradeSeg(hostId, dataAttr, setter){
-  document.getElementById(hostId).addEventListener('click',e=>{
-    const btn=e.target.closest(`button[data-${dataAttr}]`);
-    if(!btn) return;
-    document.querySelectorAll(`#${hostId} button`).forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    setter(btn.dataset[dataAttr]);
-    generatePlan();
-  });
-}
-wireUpgradeSeg('gogglesToggle','goggles', v=>gogglesOwned = v==='true');
-wireUpgradeSeg('amuletToggle','amulet', v=>{ amuletOwned = v==='true'; document.getElementById('amuletChargesField').style.display = amuletOwned?'flex':'none'; });
-wireUpgradeSeg('pouchToggle','pouch', v=>pouchOwned = v==='true');
+document.getElementById('gogglesToggle').addEventListener('change',e=>{gogglesOwned=e.target.checked;generatePlan();});
+document.getElementById('amuletToggle').addEventListener('change',e=>{amuletOwned=e.target.checked;document.getElementById('amuletChargesField').style.display=amuletOwned?'flex':'none';generatePlan();});
+document.getElementById('pouchToggle').addEventListener('change',e=>{pouchOwned=e.target.checked;generatePlan();});
 document.getElementById('amuletChargesInput').addEventListener('change',e=>{
   amuletCharges = Math.max(0, Math.min(5000, parseInt(e.target.value)||0));
   generatePlan();

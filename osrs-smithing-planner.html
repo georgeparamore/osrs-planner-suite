@@ -104,6 +104,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .craft-seg button:last-child{border-right:0;}
 .craft-seg button.active{background:var(--gold);color:#000;font-weight:700;}
 .craft-toggle-group select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 10px;}
+.optimal-anvil-group{flex:0 0 auto;width:max-content;}
+.optimal-anvil-group .craft-seg{align-self:flex-start;}
 .smith-item-check{display:grid;grid-template-columns:auto 28px 1fr;align-items:center;gap:8px;min-width:170px;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--text);font-size:12px;}
 .smith-item-check:has(input:checked){border-color:var(--gold-dim);background:rgba(200,168,75,.09);}
 .smith-item-check input{accent-color:var(--gold);width:15px;height:15px;}
@@ -224,7 +226,7 @@ body[data-suite-page="smithing"] .craft-toggle-panel{max-width:1120px;width:calc
         <span>&nbsp;</span>
         <label class="smith-item-check"><input type="checkbox" id="uniformToggle" checked><img src="https://oldschool.runescape.wiki/images/Smiths_tunic.png" alt=""><span>Smiths' Uniform<small>Full outfit</small></span></label>
       </div>
-      <div class="craft-toggle-group">
+      <div class="craft-toggle-group optimal-anvil-group">
         <span>Optimal anvil (Prifddinas)</span>
         <div class="craft-seg" id="optimalAnvilToggle">
           <button type="button" data-optimal="false" class="active">Off</button>
