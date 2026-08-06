@@ -44,6 +44,7 @@
     const priceStatus=document.getElementById('priceStatus');
     const fetchStatus=document.getElementById('womStatus');
     const statusCard=document.getElementById('statusCard');
+    const upgradePanel=document.getElementById('upgradePanel');
     if(content&&oldPanel&&speedPanel&&username&&fetchButton&&fromInput&&toInput&&updateButton){
       const focusedHead=document.createElement('section');
       focusedHead.className='focused-page-head';
@@ -79,6 +80,10 @@
       content.insertBefore(focusedHead,oldPanel);
       focusedHead.insertAdjacentElement('afterend',levelStrip);
       levelStrip.insertAdjacentElement('afterend',meta);
+      if(upgradePanel){
+        upgradePanel.classList.add('focused-upgrade-panel');
+        meta.insertAdjacentElement('afterend',upgradePanel);
+      }
       oldPanel.remove();
 
       const syncHeading=()=>{
