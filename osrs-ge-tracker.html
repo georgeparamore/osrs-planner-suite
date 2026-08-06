@@ -1716,7 +1716,7 @@ async function loadChart(id,tf){
     } else if(tf==='5m'){step='5m';cutoff=now-4*3600;merge=1;}
     else if(tf==='10m'){step='5m';cutoff=now-8*3600;merge=2;}
     else if(tf==='15m'){step='5m';cutoff=now-12*3600;merge=3;}
-    else if(tf==='1h'){step='5m';cutoff=now-24*3600;merge=12;}
+    else if(tf==='1h'){step='1h';cutoff=now-15*24*3600;merge=1;}
     else if(tf==='6h'){step='1h';cutoff=now-7*24*3600;merge=1;}
     else if(tf==='24h'){step='1h';cutoff=now-24*3600;merge=1;}
     else if(tf==='week'){step='6h';cutoff=now-7*24*3600;merge=1;}
