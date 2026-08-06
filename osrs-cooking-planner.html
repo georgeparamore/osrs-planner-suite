@@ -104,7 +104,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .craft-seg button:last-child{border-right:0;}
 .craft-seg button.active{background:var(--gold);color:#000;font-weight:700;}
 .craft-toggle-group select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 10px;}
-.control-help{max-width:220px;color:var(--text-dim);font-size:9px;line-height:1.35;}
+.control-help{flex:1 0 100%;color:var(--text-dim);font-size:10px;line-height:1.4;padding-top:2px;}
 .smith-item-check{display:grid;grid-template-columns:auto 28px 1fr;align-items:center;gap:8px;min-width:170px;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--text);font-size:12px;}
 .smith-item-check:has(input:checked){border-color:var(--gold-dim);background:rgba(200,168,75,.09);}
 .smith-item-check input{accent-color:var(--gold);width:15px;height:15px;}
@@ -206,7 +206,6 @@ body[data-suite-page="cooking"] .craft-toggle-panel{max-width:1120px;width:calc(
           <option value="0.02">+2% raw food</option>
           <option value="0.05">+5% raw food</option>
         </select>
-        <small class="control-help">Adds extra raw food to the shopping list in case you burn more than the statistical estimate. It only changes purchases and upfront cost.</small>
       </div>
       <div class="craft-toggle-group">
         <span>Owned items &amp; optional locations</span>
@@ -239,6 +238,7 @@ body[data-suite-page="cooking"] .craft-toggle-panel{max-width:1120px;width:calc(
           Skip methods slower than 75k xp/hr
         </label>
       </div>
+      <div class="control-help"><strong>Safety buffer:</strong> adds extra raw food to the shopping list in case you burn more than the statistical estimate. It only changes purchases and upfront cost.</div>
     </div>
     <div class="speed-panel">
       <div class="speed-panel-label">Route</div>
