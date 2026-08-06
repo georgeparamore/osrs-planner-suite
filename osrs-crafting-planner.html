@@ -629,6 +629,7 @@ function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel))
 function fmt(n){if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
 function fmtExact(n){return Math.ceil(n).toLocaleString();}
 function fmtGp(n){const abs=Math.abs(n);let s;if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';else s=Math.round(abs).toLocaleString();return(n<0?'-':'')+s+' gp';}
+function fmtGpExact(n){return`${Math.round(n).toLocaleString()} gp`;}
 function fmtHrs(h){if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixed(1)+' hrs';return(h/24).toFixed(1)+' days';}
 
 function updateRouteTabMetrics(startLevel,endLevel){
@@ -742,8 +743,8 @@ function generatePlan(){
         stopRows += `<tr>
           <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(inputName.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${inputName}${ingQtyMult!==1?` ×${ingQtyMult}`:''}</a></td>
           <td class="mono">${fmtExact(qty)}</td>
-          <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
-          <td class="mono">${unitCost>0?fmtGp(lineCost):'—'}</td>
+          <td class="mono">${unitCost>0?fmtGpExact(unitCost):'—'}</td>
+          <td class="mono">${unitCost>0?fmtGpExact(lineCost):'—'}</td>
         </tr>`;
       });
       shoppingBody += `<div class="shopping-section" style="--accent:${accent};">
@@ -766,8 +767,8 @@ function generatePlan(){
       grandRows += `<tr>
         <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(name.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${name}</a></td>
         <td class="mono">${fmtExact(qty)}</td>
-        <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
-        <td class="mono">${unitCost>0?fmtGp(unitCost*qty):'—'}</td>
+        <td class="mono">${unitCost>0?fmtGpExact(unitCost):'—'}</td>
+        <td class="mono">${unitCost>0?fmtGpExact(unitCost*qty):'—'}</td>
       </tr>`;
     });
 
@@ -785,8 +786,8 @@ function generatePlan(){
       sellCredit += total;
       sellRows += `<tr style="color:var(--green);">
         <td colspan="2" style="color:var(--green);">${name} ×${fmtExact(qty)}</td>
-        <td class="mono" style="color:var(--green);">${fmtGp(sp)}</td>
-        <td class="mono" style="color:var(--green);">−${fmtGp(total)}</td>
+        <td class="mono" style="color:var(--green);">${fmtGpExact(sp)}</td>
+        <td class="mono" style="color:var(--green);">−${fmtGpExact(total)}</td>
       </tr>`;
     });
 

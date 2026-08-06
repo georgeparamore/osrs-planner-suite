@@ -714,6 +714,7 @@ function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel))
 function fmt(n){if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
 function fmtExact(n){return Math.ceil(n).toLocaleString();}
 function fmtGp(n){const abs=Math.abs(n);let s;if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';else s=Math.round(abs).toLocaleString();return(n<0?'-':'')+s+' gp';}
+function fmtGpExact(n){return`${Math.round(n).toLocaleString()} gp`;}
 function fmtHrs(h){if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixed(1)+' hrs';return(h/24).toFixed(1)+' days';}
 
 function requirementBadges(stop){
@@ -797,13 +798,13 @@ function renderRouteStops(stops, accent, curLevel){
         stopRows += `<tr>
           <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(input.name.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${input.name}</a></td>
           <td class="mono">${fmtExact(qty)}</td>
-          <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
-          <td class="mono">${unitCost>0?fmtGp(lineCost):'—'}</td>
+          <td class="mono">${unitCost>0?fmtGpExact(unitCost):'—'}</td>
+          <td class="mono">${unitCost>0?fmtGpExact(lineCost):'—'}</td>
         </tr>`;
       });
       const feeTotal = furnaceFeePerAction(stop) * stop.actionsNeeded;
       if(feeTotal>0){
-        stopRows += `<tr><td colspan="2" style="color:var(--text-dim);">Blast Furnace world fee (72,000 gp/hr)</td><td class="mono">—</td><td class="mono">${fmtGp(feeTotal)}</td></tr>`;
+        stopRows += `<tr><td colspan="2" style="color:var(--text-dim);">Blast Furnace world fee (72,000 gp/hr)</td><td class="mono">—</td><td class="mono">${fmtGpExact(feeTotal)}</td></tr>`;
       }
       shoppingBody += `<div class="shopping-section" style="--accent:${accent};">
         <div class="shopping-section-title">Lvl ${stop.levelStart} → ${stop.levelEnd}: ${stop.name}</div>
@@ -825,8 +826,8 @@ function renderRouteStops(stops, accent, curLevel){
       grandRows += `<tr>
         <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(name.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${name}</a></td>
         <td class="mono">${fmtExact(qty)}</td>
-        <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
-        <td class="mono">${unitCost>0?fmtGp(unitCost*qty):'—'}</td>
+        <td class="mono">${unitCost>0?fmtGpExact(unitCost):'—'}</td>
+        <td class="mono">${unitCost>0?fmtGpExact(unitCost*qty):'—'}</td>
       </tr>`;
     });
     const totalFees = stops.reduce((s,stop)=>s+furnaceFeePerAction(stop)*stop.actionsNeeded,0);
@@ -846,8 +847,8 @@ function renderRouteStops(stops, accent, curLevel){
       sellCredit += total;
       sellRows += `<tr style="color:var(--green);">
         <td colspan="2" style="color:var(--green);">${name} ×${fmtExact(qty)}</td>
-        <td class="mono" style="color:var(--green);">${fmtGp(sp)}</td>
-        <td class="mono" style="color:var(--green);">−${fmtGp(total)}</td>
+        <td class="mono" style="color:var(--green);">${fmtGpExact(sp)}</td>
+        <td class="mono" style="color:var(--green);">−${fmtGpExact(total)}</td>
       </tr>`;
     });
 
@@ -864,7 +865,7 @@ function renderRouteStops(stops, accent, curLevel){
           <div class="shopping-section-title" style="color:var(--text);">📦 Grand Total — Everything You Need</div>
           <table class="shopping-table">
             <thead><tr><th>Item</th><th class="r">Total Qty</th><th class="r">Each</th><th class="r">Total Cost</th></tr></thead>
-            <tbody>${grandRows}${totalFees>0?`<tr><td colspan="2" style="color:var(--text-dim);">Blast Furnace world fees</td><td class="mono">—</td><td class="mono">${fmtGp(totalFees)}</td></tr>`:''}${sellRows}</tbody>
+            <tbody>${grandRows}${totalFees>0?`<tr><td colspan="2" style="color:var(--text-dim);">Blast Furnace world fees</td><td class="mono">—</td><td class="mono">${fmtGpExact(totalFees)}</td></tr>`:''}${sellRows}</tbody>
           </table>
           <div class="shopping-grand-total" style="flex-direction:column;align-items:stretch;gap:8px;">
             <div style="display:flex;justify-content:space-between;align-items:center;">
