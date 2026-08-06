@@ -31,7 +31,7 @@ Do not delete previous dated handoffs. They provide history. Older `PROJECT_HAND
 
 **Owner:** Claude Code
 **Status:** Crafting Training Planner is merged and live. Smithing research and implementation planning are complete; Smithing coding has not started.
-**Assignment for whoever picks this up:** Read `CLAUDE_SMITHING_HANDOFF_2026-08-05.md`, build the Smithing planner on a feature branch, test it, and open a PR without merging it.
+**Assignment for whoever picks this up:** Read `CLAUDE_SMITHING_HANDOFF_2026-08-05.md`, build the Smithing planner and the specified Herblore Mixology-upgrade toggles on a feature branch, test both, and open a PR without merging it.
 
 Full Smithing specification: `CLAUDE_SMITHING_HANDOFF_2026-08-05.md`.
 

@@ -308,6 +308,91 @@ Show Family Crest, Tourist Trap, Dwarf Cannon, Sleeping Giants, and Song of the 
 
 ## Sources reviewed
 
+## Secondary assignment — Mastering Mixology upgrades in Herblore
+
+In the same PR, enhance `osrs-herblore-planner.html` with an **Owned upgrades** control group. Add three independent toggles with small item images:
+
+- **Prescription goggles**
+- **Alchemist’s amulet**
+- **Reagent pouch**
+
+Do not add training-effect toggles for the alchemist outfit, potion storage, or chugging barrel. The outfit is cosmetic; storage and the barrel improve bank organization or potion use, not potion-making XP/cost.
+
+### Prescription goggles
+
+- Exact effect: 10% chance not to consume a supported secondary ingredient.
+- This does not provide extra XP. The number of potion-making actions needed for the level remains unchanged.
+- For `N` actions and an eligible secondary quantity `q` per action, estimated consumption is `ceil(N × q × 0.90)`.
+- Mark material quantities and savings as **estimated** because actual saves are random.
+- Upfront and net-cost summaries must use the reduced expected secondary quantity, not reduce every input. Unfinished/base potions are still consumed once per action.
+- The shopping list should show the expected saved amount, for example `Expected saved: 1,234`, and retain a note about randomness.
+- Add a per-method `gogglesEligible` flag. Do not assume every second-stage ingredient is supported. Verify each method represented in the planner against the current Wiki/calculator behavior. The Wiki explicitly describes the effect as working for “most (but not all)” potions.
+- Cleaning herbs and Mastering Mixology itself receive no benefit.
+
+### Alchemist’s amulet
+
+- Exact effect: 15% chance to create one extra dose, with no extra XP. A charge is consumed only when the extra dose is created.
+- The item starts with 50 charges when purchased. Each Amulet of chemistry adds 10 charges, up to 5,000.
+- Add an optional **Current charges** numeric field when the toggle is enabled.
+- For standard 3-dose potion creation, expected output doses are `N × 3.15`. After decanting, expected 4-dose output quantity is `(N × 3.15) / 4`, compared with `N × 3 / 4` without the amulet.
+- Expected procs/charges consumed are `N × 0.15`. Additional Amulets of chemistry needed are `ceil(max(0, expectedProcs - currentCharges) / 10)`.
+- Add those recharge amulets to upfront cost and the shopping list. Do not treat amulet charges as free beyond the entered current charges.
+- Revenue must be dose-normalized. Do not incorrectly credit one full extra potion for each proc.
+- Add a per-method `amuletEligible` flag. The effect does not work on outputs that always produce four doses, including antidote+, antidote++, anti-venom+, super combat potion, and super antifire. It also does not trigger for Guthix rest.
+- For variable-dose upgrades, it triggers only when the input potion has fewer than four doses. Current planner recipes such as Extended antifire using `Antifire potion(4)` therefore receive no amulet benefit unless the recipe model is deliberately changed to lower-dose inputs.
+- Stamina, anti-venom, extended antifire, forgotten brew, extended anti-venom+, and divine-type recipes require dose-aware handling. Never apply a blanket 15% output multiplier.
+- Because processing 1- or 2-dose inputs can increase yield but take materially longer, v1 should preserve the planner’s existing input-dose recipe and apply the amulet only where that exact recipe is eligible.
+
+### Reagent pouch
+
+- Requires 81 Herblore to use and stores up to 26 of each supported secondary.
+- Supported secondary ingredients can be consumed directly from the open pouch, allowing up to 26 potions per inventory instead of the normal 14.
+- This changes estimated actions/hour and banking frequency only. It does not change XP/action, inputs/action, outputs/action, or GP/action.
+- Add a per-method `pouchEligible` flag and hide/disable the toggle below level 81 with a clear requirement.
+- For ordinary 14+14 bank-standing potions currently modeled at 2,500/hour, use a conservative **2,700/hour estimated** pouch rate. This is intentionally below the planner’s 2,750/hour stackable-secondary rate and must be labeled as an estimate because the Wiki notes pouch rates are not comprehensively tested.
+- Do not increase methods already modeled at 2,750/hour for stackable secondaries unless a verified method-specific rate supports it.
+- Do not apply it to cleaning, Mixology, inventory-heavy multi-input recipes such as super combat, or unsupported secondaries.
+
+### Combined behavior and UI
+
+- The goggles and amulet can be enabled together: calculate reduced expected secondary consumption and increased expected dose revenue independently, then include amulet recharge cost.
+- The pouch may be combined with either item but changes time only.
+- Add a compact comparison beneath the route summary when any upgrade is enabled:
+  - `Without upgrades` net cost and time
+  - `With selected upgrades` net cost and time
+  - `Estimated savings` and `Estimated time saved`
+- Route selection for Cheapest must be recalculated using the selected upgrades. Fastest may change only when the pouch changes eligible throughput. Curated Simple stays curated while its totals update.
+- Per-step rows should show small badges for each active applicable upgrade. Do not show a badge when an enabled item does not affect that recipe.
+- Expected quantities can include an `≈` marker, but the underlying displayed whole count must not use K/M abbreviations.
+- Preserve all current Mixology level/reward modes and reward images.
+
+### Herblore upgrade acceptance tests
+
+1. Goggles reduce only eligible secondary quantities by an expected 10%; action count and XP stay unchanged.
+2. For 10,000 eligible one-secondary potions, the expected shopping quantity is 9,000 and expected saved quantity is 1,000.
+3. Amulet on 10,000 eligible 3-dose potions produces an expected 31,500 doses, consumes 1,500 expected charges, and requires 145 Amulets of chemistry when starting with 50 charges.
+4. Amulet revenue is calculated by dose and decanting, not by treating 1,500 bonus doses as 1,500 four-dose potions.
+5. Super combat potion and other always-four-dose outputs receive no amulet benefit.
+6. A four-dose-input Extended antifire recipe receives no amulet benefit.
+7. Reagent pouch changes eligible ordinary potion throughput from 2,500 to the labeled 2,700/hour estimate and does not alter materials.
+8. Pouch has no effect on existing 2,750/hour stackable-secondary methods, cleaning, Mixology, or super combats.
+9. Combined goggles + amulet + pouch totals equal the independent material, revenue, recharge, and time effects.
+10. Cheapest route re-evaluates after toggles change; missing prices still cannot appear free.
+11. Upgrade states persist during recalculation and switching between Herblore routes.
+12. Mobile controls do not overflow at 390px and remain understandable on first visit.
+
+Herblore upgrade sources:
+
+- https://oldschool.runescape.wiki/w/Mastering_Mixology
+- https://oldschool.runescape.wiki/w/Prescription_goggles
+- https://oldschool.runescape.wiki/w/Alchemist%27s_amulet
+- https://oldschool.runescape.wiki/w/Reagent_pouch
+- https://oldschool.runescape.wiki/w/Herblore_training
+
+Important: potion support exceptions are easy to model incorrectly. Use explicit eligibility flags and verify every current planner recipe rather than inferring support from ingredient shape.
+
+## Smithing sources reviewed
+
 - https://oldschool.runescape.wiki/w/Smithing
 - https://oldschool.runescape.wiki/w/Smithing/Experience_table
 - https://oldschool.runescape.wiki/w/Pay-to-play_Smithing_training
