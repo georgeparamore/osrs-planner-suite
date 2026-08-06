@@ -18,13 +18,9 @@ Cooking planner: implemented on branch `claude/osrs-cooking-planner`, PR open ag
 
 ## Current assignments
 
-### Claude Code — Cooking planner: done, PR open, not merged
+### Cooking and Fletching planners
 
-Implemented `CLAUDE_COOKING_HANDOFF_2026-08-05.md` on branch `claude/osrs-cooking-planner`. PR opened against `main`; intentionally **not merged** per the handoff — for George/Codex to review and test.
-
-### Codex — Fletching planner
-
-Still should not begin implementation until Claude's Cooking PR is reviewed/merged and navigation conflicts are resolved (this PR adds Cooking to `suite-nav.js` immediately after Smithing and touches every sidebar file — Fletching's PR will conflict with those same lines if it lands first). The research and implementation plan is `CODEX_FLETCHING_PLAN_2026-08-05.md`.
+Fletching is merged and live. Cooking was implemented from `CLAUDE_COOKING_HANDOFF_2026-08-05.md`, reviewed and corrected by Codex, and is ready to merge alongside the reconciled shared navigation.
 
 ## Cooking planner status
 
@@ -49,11 +45,11 @@ Still should not begin implementation until Claude's Cooking PR is reviewed/merg
 
 **How this session verified it:** this sandbox has no outbound internet to `prices.runescape.wiki`/`api.wiseoldman.net`, so all testing used Playwright + Chromium with injected mock GE prices. Verified directly against the handoff's acceptance-test numbers: Shark exactly 100% at level 94 with gauntlets (and <100% at 93); gauntlets provably don't change karambwan's effective stop level; Hosidius=1,365/hr, Myths'/Rogues'=1,435/hr; `expectedRawAttempts` matches `ceil(successfulNeeded/chance)` exactly; 1-tick karambwan=5,000/hr, cook-all karambwan=1,385/hr (Hosidius, through 95)/1,435/hr (bank); wine=200xp with two inputs; safety buffer changes only shopping quantity, never successful-cook count; GE tax reduces sell price below the raw high/low spread; a food with no valid sell price (mocked Jug of wine at 0/0) shows zero credit rather than crashing or being treated as free; profitable routes render "Net Profit" not negative "Net Cost"; F2P Fastest/Simple/Low Attention all reach exactly level 99 with zero members-only rows. No console/page errors on any of the four routes, no horizontal overflow at 390px.
 
-**Next agent:** review the PR, pull the branch, and spot-check against real GE prices and the live Wise Old Man API (only mocked here). If it looks good, merge — then Codex can start on Fletching.
+**Fletching status:** merged and live with six routes, live prices, exact quantities, Wise Old Man lookup, owned-item controls, and both level and combined-reward planning for Vale Totems. Its research and implementation plan is `CODEX_FLETCHING_PLAN_2026-08-05.md`.
 
 ## Current production state
 
-PR #5 was merged on 2026-08-05. The public suite includes (Cooking ships once its PR merges):
+The public suite includes:
 
 - Landing page and player lookup branded **OSRS Toolbox**
 - GE Tracker
