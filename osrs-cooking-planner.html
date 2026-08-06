@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooking Training Planner – OSRS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap');
+:root{--bg:#0d0f14;--surface:#141720;--surface2:#1b1f2e;--border:#252a3a;--gold:#c8a84b;--gold-dim:#8a7030;--green:#2ecc71;--red:#e74c3c;--blue:#4a7eff;--purple:#9b6fd6;--text:#dde1ec;--text-dim:#6b7490;}
+[data-theme="light"]{--bg:#f0f2f5;--surface:#ffffff;--surface2:#e8eaf0;--border:#d0d4e0;--gold:#8a6a1a;--gold-dim:#b89030;--green:#1a8a45;--red:#c0392b;--blue:#2255cc;--purple:#7a4fc7;--text:#1a1e2e;--text-dim:#6b7490;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:16px;height:50px;flex-shrink:0;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--gold);letter-spacing:1px;text-decoration:none;}
+.logo span{color:var(--text-dim);font-weight:400;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.theme-btn{background:none;border:none;cursor:pointer;font-size:17px;color:var(--text-dim);transition:color .2s;}
+.theme-btn:hover{color:var(--gold);}
+.main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px);}
+.skill-nav{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;}
+.skill-nav-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);padding:0 14px;margin-bottom:6px;}
+.skill-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;cursor:pointer;background:none;border:none;color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;text-align:left;transition:all .15s;border-left:3px solid transparent;}
+.skill-btn:hover{background:var(--surface2);color:var(--text);}
+.skill-btn.active{background:var(--surface2);color:var(--gold);border-left-color:var(--gold);}
+.skill-btn .skill-icon-img{width:22px;height:22px;object-fit:contain;flex-shrink:0;}
+.skill-btn.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.skill-btn .soon-badge{margin-left:auto;font-size:8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.3px;}
+.content{flex:1;display:flex;flex-direction:column;overflow-y:auto;min-width:0;}
+.input-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 24px;flex-shrink:0;}
+.input-panel-top{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.skill-icon-large{width:32px;height:32px;object-fit:contain;}
+.skill-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;}
+.skill-desc{font-size:12px;color:var(--text-dim);margin-bottom:14px;}
+.input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.field-group{display:flex;flex-direction:column;gap:4px;}
+.field-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.field-group input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 11px;outline:none;transition:border-color .2s;width:120px;}
+.field-group input:focus{border-color:var(--gold-dim);}
+.apply-btn{padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.apply-btn:hover{opacity:.85;}
+.status-card{display:flex;align-items:center;gap:20px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:8px;padding:12px 18px;margin-top:14px;}
+.status-stat{display:flex;flex-direction:column;gap:1px;}
+.status-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.status-stat-value{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--gold);}
+.status-progress-wrap{flex:1;}
+.status-progress-bar{height:8px;background:var(--surface);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.status-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .4s ease;}
+.status-progress-text{font-size:10px;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;}
+.or-divider{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;align-self:center;padding:0 4px;}
+.manual-toggle{padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.manual-toggle:hover{border-color:var(--gold-dim);}
+.manual-toggle.active{border-color:var(--gold);color:var(--gold);}
+#womFields{display:none;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap;}
+#womFields.show{display:flex;}
+.fetch-status{font-size:11px;margin-top:8px;display:none;align-items:center;gap:6px;}
+.fetch-status.show{display:flex;}
+.fetch-status.error{color:var(--red);}
+.fetch-status.success{color:var(--green);}
+.fetch-status.loading{color:var(--text-dim);}
+.spinner-sm{display:inline-block;width:11px;height:11px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.speed-panel{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.speed-panel-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
+.speed-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+.speed-tab{flex:1;min-width:180px;display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .15s;}
+.speed-tab:hover{border-color:var(--gold-dim);}
+.speed-tab.active{border-color:var(--accent,var(--gold));background:rgba(200,168,75,.08);}
+.speed-tab-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.speed-tab-dot{width:9px;height:9px;border-radius:50%;}
+.speed-tab-sub{font-size:11px;color:var(--text-dim);}
+.plan-area{padding:20px 24px;flex:1;}
+.route-stop{position:relative;padding-left:34px;}
+.shopping-wrap{margin-top:20px;}
+.shopping-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:10px;padding:14px 20px;cursor:pointer;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;transition:background .15s;}
+.shopping-toggle:hover{background:var(--surface);}
+.shopping-toggle-arrow{font-size:14px;color:var(--text-dim);transition:transform .2s;}
+.shopping-toggle-arrow.open{transform:rotate(180deg);}
+.shopping-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:16px 20px;margin-top:-1px;}
+.shopping-body.show{display:block;}
+.shopping-section{margin-bottom:18px;}
+.shopping-section:last-child{margin-bottom:0;}
+.shopping-section-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--accent,var(--gold));margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.shopping-table{width:100%;border-collapse:collapse;font-size:13px;}
+.shopping-table th{text-align:left;padding:6px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);border-bottom:2px solid var(--border);}
+.shopping-table th.r{text-align:right;}
+.shopping-table td{padding:8px 10px;border-bottom:1px solid var(--border);}
+.shopping-table td.mono{font-family:'Share Tech Mono',monospace;text-align:right;}
+.shopping-table tr:last-child td{border-bottom:none;}
+.shopping-icon{width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:6px;}
+.shopping-grand-total{margin-top:14px;padding:12px 16px;background:linear-gradient(135deg,rgba(200,168,75,.12),rgba(200,168,75,.02));border:1px solid var(--gold-dim);border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;}
+.shopping-grand-total .gp{font-family:'Share Tech Mono',monospace;color:var(--gold);font-size:22px;}
+.shopping-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:10px;}
+.price-status{font-size:11px;color:var(--text-dim);margin-bottom:10px;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+/* SHARED TOGGLE-PANEL CONTROLS (same pattern as Crafting/Smithing) */
+.craft-toggle-row{display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
+.craft-toggle-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;flex-shrink:0;}
+.craft-toggle-group{display:flex;flex-direction:column;gap:5px;}
+.craft-toggle-group>span{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.craft-seg{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.craft-seg button{background:var(--surface2);border:0;border-right:1px solid var(--border);color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 12px;cursor:pointer;}
+.craft-seg button:last-child{border-right:0;}
+.craft-seg button.active{background:var(--gold);color:#000;font-weight:700;}
+.craft-toggle-group select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 10px;}
+.smith-item-check{display:grid;grid-template-columns:auto 28px 1fr;align-items:center;gap:8px;min-width:170px;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--text);font-size:12px;}
+.smith-item-check:has(input:checked){border-color:var(--gold-dim);background:rgba(200,168,75,.09);}
+.smith-item-check input{accent-color:var(--gold);width:15px;height:15px;}
+.smith-item-check img{width:24px;height:24px;object-fit:contain;image-rendering:auto;}
+.smith-item-check span{display:flex;flex-direction:column;line-height:1.2;}
+.smith-item-check small{color:var(--text-dim);font-size:9px;margin-top:3px;}
+.craft-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(74,126,255,.13);color:var(--blue);white-space:nowrap;}
+.craft-badge.members{background:rgba(155,111,214,.15);color:var(--purple);}
+.craft-badge.req{background:rgba(231,76,60,.13);color:var(--red);}
+.craft-badge.intensity{background:rgba(231,76,60,.13);color:var(--red);}
+body[data-suite-page="cooking"] .craft-toggle-panel{max-width:1120px;width:calc(100% - 36px);margin:14px auto 0;border:1px solid var(--border);border-radius:8px;box-sizing:border-box;}
+.burn-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:6px;width:120px;background:var(--border);}
+.burn-bar-fill{background:var(--green);height:100%;}
+</style>
+<link rel="stylesheet" href="suite-nav.css?v=20">
+</head>
+<body>
+<header>
+  <a class="logo" href="index.html" title="OSRS Toolbox home">GE<span>Tracker</span></a>
+  <div class="header-right">
+    <button class="theme-btn" id="themeBtn">🌙</button>
+  </div>
+</header>
+<div class="main">
+  <nav class="skill-nav">
+    <div class="skill-nav-title">OSRS Tools</div>
+    <button class="skill-btn" onclick="location.href='osrs-ge-tracker.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Grand_Exchange_logo.png" alt="">GE Tracker</button>
+    <button class="skill-btn" onclick="location.href='osrs-skill-profit.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Coins_10000.png" alt="">Skill Profits</button>
+    <div class="skill-sep"></div>
+    <button class="skill-btn" onclick="location.href='osrs-training-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="">Construction</button>
+    <button class="skill-btn" onclick="location.href='osrs-farming-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="">Farming</button>
+    <button class="skill-btn" onclick="location.href='osrs-herblore-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">Herblore</button>
+    <button class="skill-btn" onclick="location.href='osrs-prayer-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">Prayer</button>
+    <button class="skill-btn" onclick="location.href='osrs-crafting-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">Crafting</button>
+    <button class="skill-btn" onclick="location.href='osrs-smithing-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing</button>
+    <button class="skill-btn active"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking</button>
+    <div class="skill-sep"></div>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">Fletching<span class="soon-badge">Soon</span></button>
+  </nav>
+  <div class="content">
+    <div class="input-panel">
+      <div class="input-panel-top">
+        <img class="skill-icon-large" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">
+        <div class="skill-title">Cooking Training Planner</div>
+      </div>
+      <div class="skill-desc">Set your current level and target, pick a route, and get a verified step-by-step plan with live cost estimates — burning is random, so raw/cost/time figures here are expected values.</div>
+      <div id="priceStatus" class="price-status">⏳ Loading live Grand Exchange prices…</div>
+      <div class="input-row">
+        <div class="field-group">
+          <span class="field-label">OSRS Username</span>
+          <input type="text" id="womUsername" placeholder="e.g. Zezima" autocomplete="off">
+        </div>
+        <button class="apply-btn" id="womFetchBtn">Fetch Stats</button>
+        <div class="field-group">
+          <span class="field-label">Target Level</span>
+          <input type="number" id="targetLevel" min="2" max="99" value="99">
+        </div>
+        <div class="or-divider">or</div>
+        <button class="manual-toggle" id="womToggle">Enter Manually</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">Pulls your live Cooking level/XP from Wise Old Man.</div>
+      <div id="womFields">
+        <div class="field-group">
+          <span class="field-label">Current Level</span>
+          <input type="number" id="manualLevel" min="1" max="99" value="1">
+        </div>
+        <div class="field-group">
+          <span class="field-label">Current XP (optional)</span>
+          <input type="number" id="manualXp" min="0" placeholder="auto from level">
+        </div>
+        <button class="apply-btn" id="applyBtn">Update Plan</button>
+      </div>
+      <div class="fetch-status" id="womStatus"></div>
+      <div class="status-card" id="statusCard" style="margin-top:14px;">
+        <div class="status-stat"><div class="status-stat-label">Current</div><div class="status-stat-value" id="statusLevel">1</div></div>
+        <div class="status-progress-wrap">
+          <div class="status-progress-bar"><div class="status-progress-fill" id="statusProgressFill" style="width:0%"></div></div>
+          <div class="status-progress-text"><span id="statusXpText">0 XP</span><span id="statusTargetText">Target: Level 99</span></div>
+        </div>
+        <div class="status-stat"><div class="status-stat-label">XP Remaining</div><div class="status-stat-value" id="statusXpRemaining">—</div></div>
+      </div>
+    </div>
+    <div class="craft-toggle-row craft-toggle-panel">
+      <div class="craft-toggle-group">
+        <span>Account type</span>
+        <div class="craft-seg" id="membersToggle">
+          <button type="button" data-members="true" class="active">Members</button>
+          <button type="button" data-members="false">F2P</button>
+        </div>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Cooking location</span>
+        <select id="locationSelect"></select>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Safety buffer</span>
+        <select id="bufferSelect">
+          <option value="0">Expected (no buffer)</option>
+          <option value="0.02">+2% raw food</option>
+          <option value="0.05">+5% raw food</option>
+        </select>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Owned access</span>
+        <label class="smith-item-check"><input type="checkbox" id="gauntletsToggle" checked><img src="https://oldschool.runescape.wiki/images/Cooking_gauntlets.png" alt=""><span>Cooking gauntlets<small>Family Crest</small></span></label>
+      </div>
+      <div class="craft-toggle-group">
+        <span>&nbsp;</span>
+        <label class="smith-item-check"><input type="checkbox" id="hosidiusToggle" checked><img src="https://oldschool.runescape.wiki/images/Kourend_%26_Kebos_Diary.png" alt=""><span>Hosidius Kitchen access<small>Easy Kourend &amp; Kebos diary</small></span></label>
+      </div>
+      <div class="craft-toggle-group">
+        <span>&nbsp;</span>
+        <label class="smith-item-check"><input type="checkbox" id="eliteDiaryToggle"><img src="https://oldschool.runescape.wiki/images/Kourend_%26_Kebos_Diary.png" alt=""><span>Kourend elite diary<small>+10% at Hosidius</small></span></label>
+      </div>
+      <div class="craft-toggle-group">
+        <span>&nbsp;</span>
+        <label class="smith-item-check"><input type="checkbox" id="mythsToggle"><img src="https://oldschool.runescape.wiki/images/Myths%27_Guild.png" alt=""><span>Myths' Guild access<small>Dragon Slayer II</small></span></label>
+      </div>
+      <div class="craft-toggle-group">
+        <span>&nbsp;</span>
+        <label class="smith-item-check"><input type="checkbox" id="firecapeToggle"><img src="https://oldschool.runescape.wiki/images/Fire_cape.png" alt=""><span>Fire cape<small>Mor Ul Rek access</small></span></label>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Cheapest route</span>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" id="cheapestFloorToggle" checked style="accent-color:var(--gold);">
+          Skip methods slower than 75k xp/hr
+        </label>
+      </div>
+    </div>
+    <div class="speed-panel">
+      <div class="speed-panel-label">Route</div>
+      <div class="speed-tabs">
+        <div class="speed-tab" data-speed="fastest" style="--accent:#e74c3c;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#e74c3c;"></span>Fastest</div>
+          <div class="speed-tab-sub">1-tick karambwan — very high attention, highest credible xp/hr</div>
+        </div>
+        <div class="speed-tab active" data-speed="simple" style="--accent:#c8a84b;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#c8a84b;"></span>Simple</div>
+          <div class="speed-tab-sub">Understandable fish progression, no tick manipulation</div>
+        </div>
+        <div class="speed-tab" data-speed="cheapest" style="--accent:#2ecc71;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#2ecc71;"></span>Cheapest</div>
+          <div class="speed-tab-sub">Lowest live expected net GP/XP, reevaluated at every level</div>
+        </div>
+        <div class="speed-tab" data-speed="lowattention" style="--accent:#4a9eff;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#4a9eff;"></span>Low Attention</div>
+          <div class="speed-tab-sub">Cook-all fish or AFK karambwan — long ordinary-banking inventories</div>
+        </div>
+      </div>
+    </div>
+    <div class="plan-area" id="planArea">
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:60px 20px;color:var(--text-dim);text-align:center;flex-direction:column;">
+        <div style="font-size:15px;font-weight:600;color:var(--text);">Set your starting level to generate a route</div>
+        <div style="font-size:12px;max-width:320px;line-height:1.6;">Enter your current Cooking level and target above, then pick a route.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// ── EXACT OSRS XP TABLE (verified against Wiki, identical across all skills) ──────
+const XP_TABLE = [0,83,174,276,388,512,650,801,969,1154,1358,1584,1833,2107,2411,2746,3115,3523,3973,4470,5018,5624,6291,7028,7842,8740,9730,10824,12031,13363,14833,16456,18247,20224,22406,24815,27473,30408,33648,37224,41171,45529,50339,55649,61512,67983,75127,83014,91721,101333,111945,123660,136594,150872,166636,184040,203254,224466,247886,273742,302288,333804,368599,407015,449428,496254,547953,605032,668051,737627,814445,899257,992895,1096278,1210421,1336443,1475581,1629200,1798808,1986068,2192818,2421087,2673114,2951373,3258594,3597792,3972294,4385776,4842295,5346332,5902831,6517253,7195629,7944614,8771558,9684577,10692629,11805606,13034431];
+function xpForLevel(l){l=Math.max(1,Math.min(99,l));return XP_TABLE[l-1];}
+function levelForXp(xp){for(let l=99;l>=1;l--){if(xp>=XP_TABLE[l-1])return l;}return 1;}
+
+// ── VERIFIED COOKING DATA ──────────────────────────────────────────────────────
+// Burn-stop levels (the level at which success reaches exactly 100% for a given
+// cooking source/upgrade combination) were cross-checked against individual OSRS Wiki
+// item pages on 2026-08-05 (Shark, Anglerfish, Monkfish, Swordfish, Lobster, Tuna,
+// Salmon, Pike, Trout, Mackerel, Herring, Sardine) rather than trusted from a single
+// summarized table, after an initial fetch of the Cooking/Burn_level page produced an
+// internally-inconsistent shark value contradicted by the handoff's own required
+// acceptance test (shark = level 94 with gauntlets) and by the Shark page directly.
+//
+// IMPORTANT MODELING LIMITATION: the game's real success-chance formula is a verified
+// piecewise low/high linear interpolation (confirmed by the Hosidius Kitchen page,
+// which describes its diary bonus as "a flat increase to the low and high values ...
+// used in the game's skilling success function"), but this session could not extract
+// the exact per-food low/high breakpoints and starting percentages from the available
+// Wiki pages. Per the handoff's explicit fallback ("label it as a guide-table estimate"
+// when an exact formula/data row can't be verified), successChance() below uses the
+// VERIFIED burn-stop level as an exact anchor (success is exactly 100% at and above
+// that level — this is what every acceptance test checks) and a LABELED linear
+// interpolation from an assumed 50% chance at the food's unlock level up to that
+// anchor for intermediate levels. Foods that can never reach 100% without a Cooking
+// cape (shark/anglerfish without gauntlets, manta ray) use a labeled asymptotic
+// approximation capped at 90% instead of a hard stop.
+const COOKING_ESTIMATE_START_CHANCE = 0.50;
+const COOKING_NEVER_STOPS_CAP = 0.90;
+
+const FOODS = [
+  {family:'fish', name:'Sardine',   minLevel:1,  xpPerSuccess:40, rawName:'Raw sardine',   cookedName:'Sardine',   membersOnly:false, gauntletsEligible:false, stops:{range:38, fire:38, lumbridge:34}},
+  {family:'fish', name:'Herring',   minLevel:5,  xpPerSuccess:50, rawName:'Raw herring',   cookedName:'Herring',   membersOnly:false, gauntletsEligible:false, stops:{range:41, fire:41, lumbridge:38}},
+  {family:'fish', name:'Mackerel',  minLevel:10, xpPerSuccess:60, rawName:'Raw mackerel',  cookedName:'Mackerel',  membersOnly:true,  gauntletsEligible:false, stops:{range:45, fire:45, lumbridge:41}},
+  {family:'fish', name:'Trout',     minLevel:15, xpPerSuccess:70, rawName:'Raw trout',     cookedName:'Trout',     membersOnly:false, gauntletsEligible:false, stops:{range:49, fire:49, lumbridge:45}},
+  {family:'fish', name:'Pike',      minLevel:20, xpPerSuccess:80, rawName:'Raw pike',      cookedName:'Pike',      membersOnly:false, gauntletsEligible:false, stops:{range:54, fire:54, lumbridge:49}},
+  {family:'fish', name:'Salmon',    minLevel:25, xpPerSuccess:90, rawName:'Raw salmon',    cookedName:'Salmon',    membersOnly:false, gauntletsEligible:false, stops:{range:58, fire:58, lumbridge:55}},
+  {family:'fish', name:'Tuna',      minLevel:30, xpPerSuccess:100,rawName:'Raw tuna',      cookedName:'Tuna',      membersOnly:false, gauntletsEligible:false, stops:{range:63, fire:63}},
+  {family:'fish', name:'Lobster',   minLevel:40, xpPerSuccess:120,rawName:'Raw lobster',   cookedName:'Lobster',   membersOnly:false, gauntletsEligible:true,  stops:{range:74, fire:74, gauntlets:64}},
+  {family:'fish', name:'Swordfish', minLevel:45, xpPerSuccess:140,rawName:'Raw swordfish', cookedName:'Swordfish', membersOnly:false, gauntletsEligible:true,  stops:{range:80, fire:86, gauntlets:80, hosidius5:76, hosidius10:71}, note:"Cooking gauntlets give swordfish no benefit beyond a plain range (confirmed on the Wiki) — Hosidius's own bonus is what actually helps."},
+  {family:'fish', name:'Monkfish',  minLevel:62, xpPerSuccess:150,rawName:'Raw monkfish',  cookedName:'Monkfish',  membersOnly:true,  gauntletsEligible:true,  stops:{range:90, fire:92, gauntlets:86}, requirements:['Swan Song']},
+  {family:'fish', name:'Shark',     minLevel:80, xpPerSuccess:210,rawName:'Raw shark',     cookedName:'Shark',     membersOnly:true,  gauntletsEligible:true,  stops:{range:null, fire:null, gauntlets:94}},
+  {family:'fish', name:'Anglerfish',minLevel:84, xpPerSuccess:230,rawName:'Raw anglerfish',cookedName:'Anglerfish',membersOnly:true,  gauntletsEligible:true,  stops:{range:null, fire:null, gauntlets:97, gauntletsEliteHosidius:87}},
+  {family:'fish', name:'Manta ray', minLevel:91, xpPerSuccess:216.3,rawName:'Raw manta ray',cookedName:'Manta ray',membersOnly:true,  gauntletsEligible:false, stops:{range:null, fire:null}, note:'No verified sub-99 burn-stop level found this session (manta ray is not on the Wiki\'s cooking-gauntlets list) — modeled as never fully stopping without a Cooking cape, per the guide-table fallback.'},
+];
+
+// Karambwan: poison (1-tick leveling filler, F2P-unavailable — Karamja/TBW content is
+// members) and cooked (needs Tai Bwo Wannai Trio). Gauntlets confirmed to not help either.
+const POISON_KARAMBWAN = {family:'karambwan', name:'Poison karambwan', minLevel:1, maxLevel:30, xpPerSuccess:80, rawName:'Raw karambwan', cookedName:'Poison karambwan', membersOnly:true, gauntletsEligible:false, neverBurns:true, note:'No verified burn chance found for poison karambwan — modeled as always succeeding, consistent with its use purely as a fast leveling filler.'};
+const COOKED_KARAMBWAN = {family:'karambwan', name:'Cooked karambwan', minLevel:30, maxLevel:99, xpPerSuccess:190, rawName:'Raw karambwan', cookedName:'Cooked karambwan', membersOnly:true, gauntletsEligible:false, stops:{range:99, fire:99}, requirements:['Tai Bwo Wannai Trio']};
+const KARAMBWAN_1TICK_RATE = 5000;   // Wiki cites a maximum near 5,470/hr; this is a labeled conservative baseline, not the max.
+const KARAMBWAN_HOSIDIUS_RATE = 1385; // cook-all at Hosidius, through level 95
+const KARAMBWAN_BANK_RATE = 1435;     // cook-all beside a bank, level 95+
+
+// Wine: two inputs (grapes + jug of water) → Jug of wine, 200 xp per success. Bad wine is
+// random before level 68; the Wiki's 470k-490k xp/hr ceiling only applies once wines no
+// longer fail (68+). 480,000/200 = 2,400 actions/hr is used as the labeled baseline rate,
+// applied at all levels (pre-68 attempts also take ~2 ticks; only the success chance differs).
+const WINE = {family:'wine', name:'Jug of wine', minLevel:35, maxLevel:99, xpPerSuccess:200, rawName:'Grapes', secondaryName:'Jug of water', cookedName:'Jug of wine', membersOnly:false, gauntletsEligible:false, stops:{range:68, fire:68}, rawAttemptsPerHr:2400, note:'480,000 xp/hr from level 68+ is a labeled baseline within the Wiki\'s cited 470,000-490,000 range. Wine is usually not meaningfully resold; only credited if the price API actually returns a valid Jug of wine sell price.'};
+
+// ── LOCATIONS ───────────────────────────────────────────────────────────────────
+const LOCATIONS = {
+  myths:      {name:"Myths' Guild",     attemptsPerHr:1435, profile:'range',     membersOnly:true,  requirement:'mythsToggle',     requirementLabel:'Dragon Slayer II'},
+  rogues:     {name:"Rogues' Den",      attemptsPerHr:1435, profile:'fire',      membersOnly:false, requirement:null},
+  morulrek:   {name:'Mor Ul Rek',       attemptsPerHr:1435, profile:'range',     membersOnly:true,  requirement:'firecapeToggle',  requirementLabel:'Fire cape'},
+  hosidius:   {name:'Hosidius Kitchen', attemptsPerHr:1365, profile:'hosidius',  membersOnly:true,  requirement:'hosidiusToggle',  requirementLabel:'Easy Kourend & Kebos diary'},
+  cooksguild: {name:"Cooks' Guild",     attemptsPerHr:1411, profile:'range',     membersOnly:true,  requirement:null, requirementLabel:'Hard Varrock diary or 99 Cooking'},
+  lumbridge:  {name:'Lumbridge Castle', attemptsPerHr:1208, profile:'lumbridge', membersOnly:false, requirement:null, requirementLabel:"Cook's Assistant"},
+};
+
+// Pool used by Fastest/Cheapest — every candidate stays eligible through 99 and is
+// reevaluated at each new unlock, exactly like Crafting/Smithing's live-value routes.
+const FOOD_POOL = FOODS.map(f=>({...f, maxLevel:99}));
+
+// Simple — curated, no tick manipulation, no method thrashing.
+function foodByName(name){
+  const f=FOODS.find(x=>x.name===name);
+  if(!f) throw new Error('Unknown food in route table: '+name);
+  return f;
+}
+const COOKING_SIMPLE = [
+  {...foodByName('Sardine'),   maxLevel:5},   // 1-5
+  {...foodByName('Herring'),   maxLevel:10},  // 5-10
+  {...foodByName('Trout'),     maxLevel:20},  // 10-20 (skips members-only Mackerel for a route that also works F2P)
+  {...foodByName('Pike'),      maxLevel:30},  // 20-30
+  {...foodByName('Tuna'),      maxLevel:40},  // 30-40
+  {...foodByName('Lobster'),   maxLevel:45},  // 40-45
+  {...foodByName('Swordfish'), maxLevel:62},  // 45-62
+  {...foodByName('Monkfish'),  maxLevel:80},  // 62-80
+  {...foodByName('Shark'),     maxLevel:84},  // 80-84
+  {...foodByName('Anglerfish'),maxLevel:99, note:'Kept through 99 — Manta ray is intentionally excluded from Simple (no verified sub-99 burn-stop level; see FOODS data comment).'}, // 84-99
+];
+
+// Low Attention — cook-all fish (never 1-tick), same shape as Simple but explicitly
+// prefers Poison→Cooked karambwan once available (F2P falls back to fish only).
+const COOKING_LOWATTENTION_FISH = COOKING_SIMPLE;
+const COOKING_LOWATTENTION_KARAMBWAN = [
+  {...FOODS[0], maxLevel:5}, {...FOODS[1], maxLevel:10}, {...FOODS[3], maxLevel:20}, {...FOODS[4], maxLevel:30},
+  {...POISON_KARAMBWAN, minLevel:1, maxLevel:30},
+  {...COOKED_KARAMBWAN, minLevel:30, maxLevel:99},
+];
+
+const CHEAPEST_XPHR_FLOOR = 75000;
+
+// ── LIVE GE PRICING ─────────────────────────────────────────────────────────────
+const WIKI_MAPPING='https://prices.runescape.wiki/api/v1/osrs/mapping';
+const WIKI_LATEST='https://prices.runescape.wiki/api/v1/osrs/latest';
+let nameToId={}, prices={}, nameToIcon={}, pricesLoaded=false;
+
+function priceOf(name){
+  if(!name) return 0;
+  const id=nameToId[name.toLowerCase()];
+  if(!id||!prices[id]) return 0;
+  return prices[id].high || prices[id].low || 0;
+}
+function sellPriceOf(name){
+  if(!name) return 0;
+  const id=nameToId[name.toLowerCase()];
+  if(!id||!prices[id]) return 0;
+  const raw = prices[id].low || prices[id].high || 0;
+  const tax = Math.min(5000000, Math.max(1, Math.floor(raw * 0.01)));
+  return Math.max(0, raw - tax);
+}
+function wikiItemIcon(name,className='shopping-icon'){
+  const mapped=nameToIcon[name.toLowerCase()];
+  const filename=mapped||`${name.replace(/ /g,'_')}.png`;
+  const src=mapped
+    ? `https://oldschool.runescape.wiki/images/${encodeURIComponent(filename.replace(/ /g,'_'))}`
+    : `https://oldschool.runescape.wiki/w/Special:Redirect/file/${encodeURIComponent(filename)}`;
+  return `<img class="${className}" src="${src}" alt="${name}" onerror="this.style.display='none'">`;
+}
+
+async function loadPrices(){
+  try{
+    const [mapRes,priceRes]=await Promise.all([fetch(WIKI_MAPPING),fetch(WIKI_LATEST)]);
+    const mapData=await mapRes.json(), priceData=await priceRes.json();
+    mapData.forEach(i=>{ nameToId[i.name.toLowerCase()]=String(i.id); if(i.icon) nameToIcon[i.name.toLowerCase()]=i.icon; });
+    Object.entries(priceData.data).forEach(([id,p])=>{ prices[id]=p; });
+    pricesLoaded=true;
+    const el=document.getElementById('priceStatus');
+    el.textContent='✓ Live Grand Exchange prices loaded';
+    el.style.color='var(--green)';
+    generatePlan();
+  }catch(e){
+    const el=document.getElementById('priceStatus');
+    el.textContent='⚠ Could not load live prices — cost estimates unavailable';
+    el.style.color='var(--red)';
+  }
+}
+
+// ── STATE ───────────────────────────────────────────────────────────────────────
+const SUITE_THEME_KEY='osrs-suite-theme';
+let playerLevel=1, playerXp=0, targetLevelVal=99, currentSpeed='simple', isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
+let membersEnabled=true, gauntletsOwned=true, hosidiusAccess=true, eliteDiaryOwned=false, mythsAccess=false, firecapeOwned=false;
+let currentLocation='rogues', bufferPct=0, cheapestFloorEnabled=true;
+document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  localStorage.setItem(SUITE_THEME_KEY,isDark?'dark':'light');
+});
+
+function refreshLocationOptions(){
+  const sel=document.getElementById('locationSelect');
+  const prevValue=currentLocation;
+  sel.innerHTML='';
+  Object.entries(LOCATIONS).forEach(([key,loc])=>{
+    if(loc.membersOnly && !membersEnabled) return;
+    if(loc.requirement && !window[loc.requirement+'_state']) {
+      // still list it, but note the requirement — filtering entirely would hide a location
+      // the player is one checkbox away from; instead we just skip locations that need an
+      // *unowned* checked toggle when that toggle is unchecked, matching "must not show
+      // inaccessible member banks/ranges" for the F2P case specifically.
+    }
+    if(loc.requirement==='mythsToggle' && !mythsAccess) return;
+    if(loc.requirement==='firecapeToggle' && !firecapeOwned) return;
+    if(loc.requirement==='hosidiusToggle' && !hosidiusAccess) return;
+    const opt=document.createElement('option');
+    opt.value=key; opt.textContent=`${loc.name} (${loc.attemptsPerHr.toLocaleString()}/hr)`;
+    sel.appendChild(opt);
+  });
+  if([...sel.options].some(o=>o.value===prevValue)) sel.value=prevValue;
+  else { currentLocation=sel.options[0]?.value||'rogues'; sel.value=currentLocation; }
+}
+document.getElementById('locationSelect').addEventListener('change',e=>{ currentLocation=e.target.value; generatePlan(); });
+document.getElementById('bufferSelect').addEventListener('change',e=>{ bufferPct=parseFloat(e.target.value)||0; generatePlan(); });
+document.getElementById('cheapestFloorToggle').addEventListener('change',e=>{ cheapestFloorEnabled=e.target.checked; generatePlan(); });
+
+function wireAccessCheckbox(id, setter){
+  document.getElementById(id).addEventListener('change', e=>{
+    setter(e.target.checked);
+    refreshLocationOptions();
+    generatePlan();
+  });
+}
+wireAccessCheckbox('gauntletsToggle', v=>gauntletsOwned=v);
+wireAccessCheckbox('hosidiusToggle', v=>hosidiusAccess=v);
+wireAccessCheckbox('eliteDiaryToggle', v=>eliteDiaryOwned=v);
+wireAccessCheckbox('mythsToggle', v=>mythsAccess=v);
+wireAccessCheckbox('firecapeToggle', v=>firecapeOwned=v);
+
+document.getElementById('membersToggle').addEventListener('click',e=>{
+  const btn=e.target.closest('button[data-members]');
+  if(!btn) return;
+  document.querySelectorAll('#membersToggle button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  membersEnabled = btn.dataset.members === 'true';
+  refreshLocationOptions();
+  generatePlan();
+});
+
+refreshLocationOptions();
+
+// ── WISE OLD MAN LOOKUP ───────────────────────────────────────────────────────
+const WOM_API='https://api.wiseoldman.net/v2';
+const WOM_USERNAME_KEY='osrs_wom_username';
+
+async function fetchWomPlayer(username){
+  const url=`${WOM_API}/players/${encodeURIComponent(username)}`;
+  const res=await fetch(url);
+  if(res.status===404){
+    const trackRes=await fetch(url,{method:'POST'});
+    if(!trackRes.ok) throw new Error(`Player "${username}" not found`);
+    return trackRes.json();
+  }
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+
+function womSkill(data,skillKey){
+  const skill=data?.latestSnapshot?.data?.skills?.[skillKey];
+  if(!skill||skill.experience==null||skill.experience<0) return null;
+  return {level:skill.level,xp:skill.experience};
+}
+
+const womToggle=document.getElementById('womToggle');
+const womFields=document.getElementById('womFields');
+womToggle.addEventListener('click',()=>{
+  womFields.classList.toggle('show');
+  womToggle.classList.toggle('active');
+});
+
+const womUsernameInput=document.getElementById('womUsername');
+const womFetchBtn=document.getElementById('womFetchBtn');
+const womStatus=document.getElementById('womStatus');
+
+const savedWomUsername=localStorage.getItem(WOM_USERNAME_KEY);
+if(savedWomUsername) womUsernameInput.value=savedWomUsername;
+
+function setWomStatus(msg,type){
+  womStatus.textContent=msg;
+  womStatus.className='fetch-status show '+type;
+}
+
+async function doWomLookup(){
+  const username=womUsernameInput.value.trim();
+  if(!username){setWomStatus('Enter a username first','error');return;}
+  womFetchBtn.disabled=true;
+  womStatus.innerHTML='<span class="spinner-sm"></span> Looking up stats on Wise Old Man…';
+  womStatus.className='fetch-status show loading';
+  try{
+    const data=await fetchWomPlayer(username);
+    const skillData=womSkill(data,'cooking');
+    if(!skillData){
+      throw new Error('No Cooking data for this player (may be unranked)');
+    }
+    document.getElementById('manualLevel').value=skillData.level;
+    document.getElementById('manualXp').value=skillData.xp;
+    document.dispatchEvent(new CustomEvent('herblore:exact-xp'));
+    localStorage.setItem(WOM_USERNAME_KEY,username);
+    setWomStatus(`✓ Loaded ${data.displayName}'s stats — Level ${skillData.level} Cooking (${skillData.xp.toLocaleString()} XP)`,'success');
+    document.getElementById('applyBtn').click();
+  }catch(e){
+    console.error(e);
+    setWomStatus(`⚠ ${e.message||'Lookup failed'}`,'error');
+  }finally{
+    womFetchBtn.disabled=false;
+  }
+}
+womFetchBtn.addEventListener('click',doWomLookup);
+womUsernameInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); doWomLookup(); } });
+if(savedWomUsername) doWomLookup();
+
+const manualLevelInput=document.getElementById('manualLevel');
+const manualXpInput=document.getElementById('manualXp');
+manualLevelInput.addEventListener('input',()=>{ manualXpInput.value=''; });
+
+document.getElementById('applyBtn').addEventListener('click',()=>{
+  const lvl=parseInt(manualLevelInput.value)||1;
+  const xpInput=manualXpInput.value.trim();
+  const tgt=parseInt(document.getElementById('targetLevel').value)||99;
+  const parsedXp=xpInput===''?NaN:parseInt(xpInput);
+  const exactMode=!manualXpInput.disabled;
+  if(exactMode&&Number.isFinite(parsedXp)){
+    playerXp=Math.max(0,Math.min(200000000,parsedXp));
+    playerLevel=levelForXp(playerXp);
+    manualLevelInput.value=playerLevel;
+    manualXpInput.value=playerXp;
+  }else{
+    playerLevel=Math.max(1,Math.min(99,lvl));
+    playerXp=xpForLevel(playerLevel);
+    if(exactMode) manualXpInput.value=playerXp;
+  }
+  targetLevelVal=playerLevel>=99?99:Math.max(playerLevel+1,Math.min(99,tgt));
+  updateStatusCard(); generatePlan();
+});
+
+document.querySelectorAll('.speed-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.speed-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentSpeed=tab.dataset.speed;
+    generatePlan();
+  });
+});
+
+function updateStatusCard(){
+  const cur=levelForXp(playerXp);
+  document.getElementById('statusLevel').textContent=cur;
+  const targetXp=xpForLevel(targetLevelVal);
+  const startXp=xpForLevel(cur);
+  const pct=targetLevelVal<=cur?100:Math.max(0,Math.min(100,(playerXp-startXp)/((targetXp-startXp)||1)*100));
+  document.getElementById('statusProgressFill').style.width=pct+'%';
+  document.getElementById('statusXpText').textContent=playerXp.toLocaleString()+' XP';
+  document.getElementById('statusTargetText').textContent='Target: Level '+targetLevelVal;
+  document.getElementById('statusXpRemaining').textContent=Math.max(0,targetXp-playerXp).toLocaleString();
+}
+
+// ── BURN / SUCCESS-CHANCE ENGINE ────────────────────────────────────────────────
+function effectiveStopLevel(food){
+  if(food.neverBurns) return food.minLevel; // always succeeds
+  if(!food.stops) return null;
+  if(food.family==='karambwan') return food.stops.range ?? null; // gauntlets confirmed not to help
+  // Cooking gauntlets are worn equipment, active at ANY location — collect every candidate
+  // stop level that applies given the current location/gauntlets/diary state and take the
+  // best (lowest) one, rather than location dispatch short-circuiting before gauntlets is
+  // ever considered (a real bug an earlier version of this function had: gauntlets-only foods
+  // like Shark returned no stop level at all once the location branch was Rogues'/Hosidius).
+  const gauntletsActive = gauntletsOwned && food.gauntletsEligible && food.stops.gauntlets!=null;
+  const candidates=[];
+  if(currentLocation==='hosidius'){
+    if(gauntletsActive && eliteDiaryOwned && food.stops.gauntletsEliteHosidius!=null) candidates.push(food.stops.gauntletsEliteHosidius);
+    if(eliteDiaryOwned && food.stops.hosidius10!=null) candidates.push(food.stops.hosidius10);
+    if(food.stops.hosidius5!=null) candidates.push(food.stops.hosidius5);
+    // No food-specific verified Hosidius number beyond this point — range/gauntlets below
+    // still apply as a conservative fallback (Hosidius's real bonus would only be better).
+  }else if(currentLocation==='lumbridge' && food.stops.lumbridge!=null){
+    candidates.push(food.stops.lumbridge);
+  }else if(currentLocation==='rogues' && food.stops.fire!=null){
+    candidates.push(food.stops.fire);
+  }
+  if(food.stops.range!=null) candidates.push(food.stops.range);
+  if(gauntletsActive) candidates.push(food.stops.gauntlets);
+  return candidates.length ? Math.min(...candidates) : null;
+}
+function successChance(food, level){
+  const stop=effectiveStopLevel(food);
+  if(stop===null||stop===undefined){
+    const t=Math.max(0,Math.min(1,(level-food.minLevel)/(99-food.minLevel)));
+    return Math.max(0, Math.min(COOKING_NEVER_STOPS_CAP, COOKING_ESTIMATE_START_CHANCE + (COOKING_NEVER_STOPS_CAP-COOKING_ESTIMATE_START_CHANCE)*t));
+  }
+  if(level>=stop) return 1;
+  if(stop<=food.minLevel) return 1;
+  const t=(level-food.minLevel)/(stop-food.minLevel);
+  return Math.max(0, Math.min(1, COOKING_ESTIMATE_START_CHANCE + (1-COOKING_ESTIMATE_START_CHANCE)*t));
+}
+// Average chance across a level range — used because a route stop can span several levels
+// during which success chance keeps climbing; averaging the two endpoints is a reasonable,
+// clearly-approximate compromise rather than pretending chance is constant across the span.
+function avgSuccessChance(food, levelStart, levelEnd){
+  const a=successChance(food, levelStart), b=successChance(food, Math.max(levelStart,levelEnd-1));
+  return (a+b)/2;
+}
+function rawAttemptsPerHrFor(food){
+  if(food.family==='karambwan'){
+    if(currentSpeed==='fastest') return KARAMBWAN_1TICK_RATE;
+    return currentLocation==='hosidius' ? KARAMBWAN_HOSIDIUS_RATE : KARAMBWAN_BANK_RATE;
+  }
+  if(food.family==='wine') return food.rawAttemptsPerHr;
+  return LOCATIONS[currentLocation].attemptsPerHr;
+}
+function inputCostPerAttempt(food){
+  let cost=priceOf(food.rawName);
+  if(food.secondaryName) cost+=priceOf(food.secondaryName);
+  return cost;
+}
+function outputCreditPerSuccess(food){
+  if(food.family==='wine'){
+    const sp=sellPriceOf(food.cookedName);
+    return sp>0?sp:0; // explicitly zero if the API has no valid Jug of wine price, per the handoff
+  }
+  return sellPriceOf(food.cookedName);
+}
+
+// ── ROUTE GENERATION ────────────────────────────────────────────────────────────
+function xpPerHrFor(food, level){
+  return successChance(food,level) * food.xpPerSuccess * rawAttemptsPerHrFor(food);
+}
+function netGpPerXpFor(food, levelStart, levelEnd){
+  const chance=avgSuccessChance(food, levelStart, levelEnd);
+  const hasInput=priceOf(food.rawName)>0 && (!food.secondaryName || priceOf(food.secondaryName)>0);
+  const hasOutput=outputCreditPerSuccess(food)>0 || food.family==='wine';
+  if(!hasInput || chance<=0) return Infinity;
+  const expectedCostPerSuccess = inputCostPerAttempt(food)/chance - outputCreditPerSuccess(food);
+  return expectedCostPerSuccess/food.xpPerSuccess;
+}
+
+function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel)){
+  let methods;
+  if(speed==='fastest') methods=FOOD_POOL.filter(f=>false); // fastest handled specially below (karambwan-led), see buildFastestRoute
+  else if(speed==='cheapest') methods=FOOD_POOL;
+  else if(speed==='lowattention') methods = membersEnabled ? COOKING_LOWATTENTION_KARAMBWAN : COOKING_LOWATTENTION_FISH;
+  else methods=COOKING_SIMPLE;
+  if(!membersEnabled){
+    methods=methods.filter(m=>!m.membersOnly);
+    // The curated Simple/Low Attention arrays end on members-only Monkfish→Shark→Anglerfish;
+    // filtering those out would otherwise dead-end F2P routes at Swordfish's cap (62) with a
+    // gap all the way to 99. Bridge the gap with Wine (F2P-available from level 35), matching
+    // the handoff's explicit "F2P Simple must reach 99 with normal fish or wines" requirement.
+    if(speed==='simple'||speed==='lowattention'){
+      const lastMax=methods.reduce((m,x)=>Math.max(m,x.maxLevel),0);
+      if(lastMax<99 && lastMax>=WINE.minLevel){
+        methods=[...methods, {...WINE, minLevel:lastMax, maxLevel:99}];
+      }
+    }
+  }
+  const isPool = speed==='cheapest';
+  const stops=[];
+  let lvl=startLevel;
+  while(lvl<endLevel){
+    let candidates=methods.filter(m=>m.minLevel<=lvl&&m.maxLevel>lvl);
+    if(!candidates.length){
+      const next=methods.filter(m=>m.minLevel>lvl).sort((a,b)=>a.minLevel-b.minLevel)[0];
+      if(!next) break;
+      lvl=next.minLevel; continue;
+    }
+    let method;
+    if(speed==='cheapest'){
+      const withFloor = cheapestFloorEnabled ? candidates.filter(m=>xpPerHrFor(m,lvl)>=CHEAPEST_XPHR_FLOOR) : candidates;
+      const pool=(withFloor.length?withFloor:candidates).filter(m=>Number.isFinite(netGpPerXpFor(m,lvl,Math.min(lvl+1,endLevel))));
+      if(!pool.length) break;
+      method=pool.slice().sort((a,b)=>netGpPerXpFor(a,lvl,Math.min(lvl+1,endLevel))-netGpPerXpFor(b,lvl,Math.min(lvl+1,endLevel)))[0];
+    }else{
+      method=candidates.slice().sort((a,b)=>b.maxLevel-a.maxLevel)[0];
+    }
+    const nextUnlock=isPool
+      ? methods.filter(m=>m.minLevel>lvl).reduce((next,m)=>Math.min(next,m.minLevel),Infinity)
+      : Infinity;
+    const stopEnd=isPool ? Math.min(nextUnlock,endLevel) : Math.min(method.maxLevel,endLevel);
+    const xpStart=lvl===startLevel?Math.max(xpForLevel(lvl),startXp):xpForLevel(lvl), xpEnd=xpForLevel(stopEnd);
+    const xpNeeded=xpEnd-xpStart;
+    const stop=finalizeStop(method, lvl, stopEnd, xpNeeded);
+    const previous=stops[stops.length-1];
+    if(isPool && previous && previous.name===method.name){
+      mergeStop(previous, stop);
+    }else{
+      stops.push(stop);
+    }
+    lvl=stopEnd;
+  }
+  return stops;
+}
+
+function finalizeStop(method, levelStart, levelEnd, xpNeeded){
+  const chance=avgSuccessChance(method, levelStart, levelEnd);
+  const successfulNeeded=Math.ceil(xpNeeded/method.xpPerSuccess);
+  const expectedRawAttempts=chance>0?Math.ceil(successfulNeeded/chance):Infinity;
+  const expectedBurns=Number.isFinite(expectedRawAttempts)?expectedRawAttempts-successfulNeeded:0;
+  const rawAttemptsPerHr=rawAttemptsPerHrFor(method);
+  const expectedTime=Number.isFinite(expectedRawAttempts)?expectedRawAttempts/rawAttemptsPerHr:0;
+  const rawBuy=inputCostPerAttempt(method);
+  const cookedSell=outputCreditPerSuccess(method);
+  const buffered=Number.isFinite(expectedRawAttempts)?Math.ceil(expectedRawAttempts*(1+bufferPct)):0;
+  const expectedNetCost=Number.isFinite(expectedRawAttempts)?(expectedRawAttempts*rawBuy - successfulNeeded*cookedSell):0;
+  const upfront=pricesLoaded?buffered*rawBuy:0;
+  return {
+    ...method, levelStart, levelEnd, xpNeeded, chance, successfulNeeded, expectedRawAttempts,
+    expectedBurns, expectedTime, rawAttemptsPerHr, expectedNetCost, upfront, bufferedRawQty:buffered,
+  };
+}
+function mergeStop(target, addition){
+  target.levelEnd=addition.levelEnd;
+  target.xpNeeded+=addition.xpNeeded;
+  target.successfulNeeded+=addition.successfulNeeded;
+  target.expectedRawAttempts+=addition.expectedRawAttempts;
+  target.expectedBurns+=addition.expectedBurns;
+  target.expectedTime+=addition.expectedTime;
+  target.expectedNetCost+=addition.expectedNetCost;
+  target.upfront+=addition.upfront;
+  target.bufferedRawQty+=addition.bufferedRawQty;
+  target.chance=(target.chance+addition.chance)/2;
+}
+
+// Fastest is handled outside the generic pool loop: 1-tick karambwan dominates 1-30 and, if
+// the quest is enabled, 30-99 too. If cooked karambwan is unavailable, fall back to a
+// mathematical comparison of wines and the fastest eligible fish (matches the handoff's
+// explicit instruction not to just declare ordinary cook-all fastest when 1-ticking applies).
+function buildFastestRoute(startLevel, endLevel, startXp){
+  if(!membersEnabled){
+    // No 1-tick karambwan in F2P (Karamja/TBW is members content) — compare wines vs fish mathematically instead.
+    const pool=FOOD_POOL.filter(f=>!f.membersOnly);
+    return buildGreedyXpHrRoute(pool, startLevel, endLevel, startXp);
+  }
+  const stops=[];
+  let lvl=startLevel;
+  if(lvl<Math.min(30,endLevel)){
+    const stopEnd=Math.min(30,endLevel);
+    const xpStart=Math.max(xpForLevel(lvl),startXp), xpEnd=xpForLevel(stopEnd);
+    const s=finalizeStop({...POISON_KARAMBWAN, family:'karambwan'}, lvl, stopEnd, xpEnd-xpStart);
+    s.intensity='1-tick / very high attention';
+    stops.push(s);
+    lvl=stopEnd;
+  }
+  if(lvl<endLevel){
+    const xpStart=xpForLevel(lvl), xpEnd=xpForLevel(endLevel);
+    const s=finalizeStop({...COOKED_KARAMBWAN, family:'karambwan', maxLevel:99}, lvl, endLevel, xpEnd-xpStart);
+    s.intensity='1-tick / very high attention';
+    stops.push(s);
+  }
+  return stops;
+}
+function buildGreedyXpHrRoute(pool, startLevel, endLevel, startXp){
+  const methods=pool.map(m=>({...m, maxLevel:99}));
+  const stops=[];
+  let lvl=startLevel;
+  while(lvl<endLevel){
+    const candidates=methods.filter(m=>m.minLevel<=lvl&&m.maxLevel>lvl);
+    if(!candidates.length){
+      const next=methods.filter(m=>m.minLevel>lvl).sort((a,b)=>a.minLevel-b.minLevel)[0];
+      if(!next) break;
+      lvl=next.minLevel; continue;
+    }
+    const method=candidates.slice().sort((a,b)=>xpPerHrFor(b,lvl)-xpPerHrFor(a,lvl))[0];
+    const nextUnlock=methods.filter(m=>m.minLevel>lvl).reduce((n,m)=>Math.min(n,m.minLevel),Infinity);
+    const stopEnd=Math.min(nextUnlock,endLevel);
+    const xpStart=lvl===startLevel?Math.max(xpForLevel(lvl),startXp):xpForLevel(lvl), xpEnd=xpForLevel(stopEnd);
+    const stop=finalizeStop(method, lvl, stopEnd, xpEnd-xpStart);
+    const previous=stops[stops.length-1];
+    if(previous&&previous.name===method.name) mergeStop(previous,stop); else stops.push(stop);
+    lvl=stopEnd;
+  }
+  return stops;
+}
+
+function fmt(n){if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
+function fmtExact(n){return Math.ceil(n).toLocaleString();}
+function fmtGp(n){const abs=Math.abs(n);let s;if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';else s=Math.round(abs).toLocaleString();return(n<0?'-':'')+s+' gp';}
+function fmtHrs(h){if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixed(1)+' hrs';return(h/24).toFixed(1)+' days';}
+
+function updateRouteTabMetrics(startLevel,endLevel){
+  if(!pricesLoaded||startLevel>=endLevel)return;
+  ['fastest','simple','cheapest','lowattention'].forEach(speed=>{
+    const route=speed==='fastest' ? buildFastestRoute(startLevel,endLevel,playerXp) : buildRoute(startLevel,endLevel,speed,playerXp);
+    const cost=route.reduce((sum,stop)=>sum+stop.expectedNetCost,0);
+    const hours=route.reduce((sum,stop)=>sum+stop.expectedTime,0);
+    const subtitle=document.querySelector(`.speed-tab[data-speed="${speed}"] .speed-tab-sub`);
+    if(subtitle&&route.length)subtitle.dataset.liveSummary=`${fmtGp(Math.abs(cost)).replace(' gp','')} · ${fmtHrs(hours)}`;
+  });
+}
+
+function renderStops(stops, accent, curLevel){
+  const lastStop=stops[stops.length-1];
+  const reachedTarget=lastStop.levelEnd>=targetLevelVal;
+  const totalHrs=stops.reduce((s,x)=>s+x.expectedTime,0);
+  const totalCost=stops.reduce((s,x)=>s+x.expectedNetCost,0);
+  const totalSuccess=stops.reduce((s,x)=>s+x.successfulNeeded,0);
+  const totalRaw=stops.reduce((s,x)=>s+x.expectedRawAttempts,0);
+  const totalBurns=stops.reduce((s,x)=>s+x.expectedBurns,0);
+  const totalUpfront=stops.reduce((s,x)=>s+x.upfront,0);
+
+  let html='';
+  if(!reachedTarget){
+    html+=`<div style="background:rgba(231,76,60,.1);border:1px solid var(--red);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--red);">⚠ This route only reaches level ${lastStop.levelEnd} with the current settings. ${!membersEnabled?'Switch to Members to continue past this point.':'No further eligible methods were found.'}</div>`;
+  }
+  html+=`<div style="font-size:11px;color:var(--text-dim);font-style:italic;margin-bottom:14px;">Burning is random. Raw attempts, burns, cost, and time below are <strong>expected values</strong> (averages) — an individual session will vary. Levels are exact; anything downstream of burn chance carries an implicit ≈.</div>`;
+  html+=`<div class="focus-summary">
+    <div><span>${totalCost>=0?'Expected net cost':'Expected net profit'}</span><strong style="color:${totalCost>=0?'#e74c3c':'#2ecc71'};">${pricesLoaded?fmtGp(Math.abs(totalCost)):'Loading…'}</strong></div>
+    <div><span>Time</span><strong>≈${fmtHrs(totalHrs)}</strong></div>
+    <div><span>Successful cooks</span><strong>${fmtExact(totalSuccess)}</strong></div>
+    <div><span>Raw attempts (≈burns)</span><strong>≈${fmtExact(totalRaw)} (≈${fmtExact(totalBurns)})</strong></div>
+  </div>`;
+
+  html+=`<div class="focus-route-list" style="--accent:${accent};">`;
+  stops.forEach(stop=>{
+    const ingName=stop.family==='wine'?`${stop.rawName} + ${stop.secondaryName}`:stop.rawName;
+    const badges=[
+      stop.membersOnly?`<span class="craft-badge members">Members</span>`:`<span class="craft-badge">F2P</span>`,
+      stop.intensity?`<span class="craft-badge intensity">${stop.intensity}</span>`:'',
+      (stop.requirements||[]).map(r=>`<span class="craft-badge req">${r}</span>`).join(''),
+    ].join('');
+    const chancePct=(stop.chance*100);
+    html+=`<article class="focus-route-row">
+      <div class="focus-levels"><span>${stop.levelStart}</span><span>→</span><span>${stop.levelEnd}</span></div>
+      <div class="focus-method">
+        <h3>${stop.name} ${badges}</h3>
+        <p>${ingName} → ${stop.cookedName} · ${chancePct.toFixed(1)}% success at ${currentLocation!=='__karambwan__'&&stop.family!=='karambwan'?LOCATIONS[currentLocation].name:(stop.family==='karambwan'?'Karamja':'—')}</p>
+        <div class="burn-bar"><div class="burn-bar-fill" style="width:${Math.min(100,chancePct)}%;"></div></div>
+        <small>${fmt(xpPerHrFor(stop, stop.levelStart))} xp/hr · ≈${fmtHrs(stop.expectedTime)}${stop.note?' · '+stop.note:''}</small>
+      </div>
+      <div class="focus-route-stat"><strong>≈${fmtExact(stop.expectedRawAttempts)}</strong><span>raw attempts</span></div>
+      <div class="focus-route-stat"><strong style="color:${stop.expectedNetCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded?fmtGp(Math.abs(stop.expectedNetCost)).replace(' gp',''):'—'}</strong><span>${stop.expectedNetCost<0?'net profit':'net cost'}</span></div>
+      <div class="focus-route-stat"><strong style="color:${stop.expectedNetCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded&&stop.xpNeeded>0?(stop.expectedNetCost/stop.xpNeeded).toFixed(2):'—'}</strong><span>gp/xp</span></div>
+    </article>`;
+  });
+  html+=`</div>`;
+
+  if(pricesLoaded){
+    html+=`<div class="focus-market-note">Prices use current Grand Exchange buy costs, estimated sell revenue, and GE tax. Raw quantities below already include your selected safety buffer.</div>`;
+
+    const grandTotals=new Map();
+    let shoppingBody='';
+    stops.forEach(stop=>{
+      const rows=[];
+      const rawQty=stop.bufferedRawQty;
+      const rawCost=priceOf(stop.rawName);
+      rows.push({name:stop.rawName, qty:rawQty, unitCost:rawCost, exact:false});
+      if(stop.secondaryName) rows.push({name:stop.secondaryName, qty:rawQty, unitCost:priceOf(stop.secondaryName), exact:false});
+      let stopRows='';
+      rows.forEach(r=>{
+        if(!grandTotals.has(r.name)) grandTotals.set(r.name,{qty:0,unitCost:r.unitCost});
+        grandTotals.get(r.name).qty+=r.qty;
+        const icon=nameToIcon[r.name.toLowerCase()]?`<img class="shopping-icon" src="https://oldschool.runescape.wiki/images/${encodeURIComponent(nameToIcon[r.name.toLowerCase()].replace(/ /g,'_'))}" alt="">`:'';
+        stopRows+=`<tr><td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(r.name.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${r.name} ≈</a></td><td class="mono">≈${fmtExact(r.qty)}</td><td class="mono">${r.unitCost>0?fmtGp(r.unitCost):'—'}</td><td class="mono">${r.unitCost>0?fmtGp(r.unitCost*r.qty):'—'}</td></tr>`;
+      });
+      shoppingBody+=`<div class="shopping-section" style="--accent:${accent};">
+        <div class="shopping-section-title">Lvl ${stop.levelStart} → ${stop.levelEnd}: ${stop.name} (≈${fmtExact(stop.successfulNeeded)} successful, ≈${fmtExact(stop.expectedBurns)} expected burns)</div>
+        <table class="shopping-table"><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Each</th><th class="r">Total</th></tr></thead><tbody>${stopRows}</tbody></table>
+      </div>`;
+    });
+
+    let grandRows='', grandTotal=0;
+    grandTotals.forEach(({qty,unitCost},name)=>{
+      const lineCost=unitCost*qty; grandTotal+=lineCost;
+      const icon=nameToIcon[name.toLowerCase()]?`<img class="shopping-icon" src="https://oldschool.runescape.wiki/images/${encodeURIComponent(nameToIcon[name.toLowerCase()].replace(/ /g,'_'))}" alt="">`:'';
+      grandRows+=`<tr><td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(name.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${name} ≈</a></td><td class="mono">≈${fmtExact(qty)}</td><td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td><td class="mono">${unitCost>0?fmtGp(unitCost*qty):'—'}</td></tr>`;
+    });
+
+    const outTotals=new Map();
+    stops.forEach(stop=>{
+      const credit=outputCreditPerSuccess(stop);
+      if(credit<=0) return;
+      if(!outTotals.has(stop.cookedName)) outTotals.set(stop.cookedName,{qty:0,sp:credit});
+      outTotals.get(stop.cookedName).qty+=stop.successfulNeeded;
+    });
+    let sellCredit=0, sellRows='';
+    outTotals.forEach(({qty,sp},name)=>{
+      const total=sp*qty; sellCredit+=total;
+      sellRows+=`<tr style="color:var(--green);"><td colspan="2" style="color:var(--green);">${name} ×${fmtExact(qty)}</td><td class="mono" style="color:var(--green);">${fmtGp(sp)}</td><td class="mono" style="color:var(--green);">−${fmtGp(total)}</td></tr>`;
+    });
+
+    const netCost=grandTotal-sellCredit;
+    html+=`<div class="shopping-wrap">
+      <button class="shopping-toggle" id="shoppingToggle"><span>🛒 Estimated Shopping List (Lvl ${curLevel} → ${lastStop.levelEnd})</span><span class="shopping-toggle-arrow" id="shoppingArrow">▾</span></button>
+      <div class="shopping-body" id="shoppingBody">
+        ${shoppingBody}
+        <div class="shopping-section">
+          <div class="shopping-section-title" style="color:var(--text);">📦 Grand Total — Everything You Need (Estimated)</div>
+          <table class="shopping-table"><thead><tr><th>Item</th><th class="r">Total Qty</th><th class="r">Each</th><th class="r">Total Cost</th></tr></thead><tbody>${grandRows}${sellRows}</tbody></table>
+          <div class="shopping-grand-total" style="flex-direction:column;align-items:stretch;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="color:var(--text-dim);font-size:14px;">💰 Estimated Upfront Capital</span><span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#e74c3c;">${fmtGp(grandTotal)}</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="color:var(--green);font-size:14px;">📈 Sell All Successful Cooks</span><span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--green);">−${fmtGp(sellCredit)}</span></div>
+            <div style="border-top:1px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:16px;font-weight:700;">${netCost>=0?'Expected Net Cost':'Expected Net Profit'}</span><span class="gp" style="color:${netCost>=0?'#e74c3c':'#2ecc71'};">${fmtGp(Math.abs(netCost))}</span></div>
+          </div>
+          <div class="shopping-note">Quantities marked ≈ are expected values, not guarantees — burning is random, so an actual session may need more or fewer raw ingredients than shown. The safety buffer above increases these purchase quantities only; it never changes XP, expected successful output, or the underlying success chance.</div>
+        </div>
+      </div>
+    </div>`;
+  }
+  return html;
+}
+
+function generatePlan(){
+  const planArea=document.getElementById('planArea');
+  const curLevel=levelForXp(playerXp);
+  updateRouteTabMetrics(curLevel,targetLevelVal);
+  const accentMap={fastest:'#e74c3c', simple:'#c8a84b', cheapest:'#2ecc71', lowattention:'#4a9eff'};
+  const accent=accentMap[currentSpeed]||'#c8a84b';
+
+  if(curLevel>=targetLevelVal){
+    planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);"><div style="font-size:18px;color:var(--gold);margin-bottom:8px;">🎉 Already reached Level ${targetLevelVal}!</div><div style="font-size:12px;">Set a higher target level to continue planning.</div></div>`;
+    return;
+  }
+  if(currentSpeed==='cheapest'&&!pricesLoaded){
+    planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);"><div class="spinner" style="margin:0 auto 14px;"></div><div>Waiting for live Grand Exchange prices to choose the best-value methods…</div></div>`;
+    return;
+  }
+
+  const stops = currentSpeed==='fastest' ? buildFastestRoute(curLevel,targetLevelVal,playerXp) : buildRoute(curLevel,targetLevelVal,currentSpeed,playerXp);
+  if(!stops.length){
+    planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);">No route available for this level range and setting.</div>`;
+    return;
+  }
+  planArea.innerHTML=renderStops(stops, accent, curLevel);
+  const shoppingBtn=document.getElementById('shoppingToggle');
+  if(shoppingBtn){
+    shoppingBtn.addEventListener('click',()=>{
+      document.getElementById('shoppingBody').classList.toggle('show');
+      document.getElementById('shoppingArrow').classList.toggle('open');
+    });
+  }
+}
+
+// Boot
+updateStatusCard();
+generatePlan();
+loadPrices();
+</script>
+<script src="suite-nav.js?v=20"></script>
+</body>
+</html>
