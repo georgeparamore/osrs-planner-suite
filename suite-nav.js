@@ -7,7 +7,8 @@
     {name:'Herblore',group:'Training planner',description:'Routes and live costs',file:'osrs-herblore-planner.html',icon:'https://oldschool.runescape.wiki/images/Herblore_icon.png'},
     {name:'Prayer',group:'Training planner',description:'Methods and bone costs',file:'osrs-prayer-planner.html',icon:'https://oldschool.runescape.wiki/images/Prayer_icon.png'},
     {name:'Crafting',group:'Training planner',description:'Gems, dragonhide, and more',file:'osrs-crafting-planner.html',icon:'https://oldschool.runescape.wiki/images/Crafting_icon.png'},
-    {name:'Smithing',group:'Training planner',description:'Anvils, Blast Furnace, Foundry',file:'osrs-smithing-planner.html',icon:'https://oldschool.runescape.wiki/images/Smithing_icon.png'}
+    {name:'Smithing',group:'Training planner',description:'Anvils, Blast Furnace, Foundry',file:'osrs-smithing-planner.html',icon:'https://oldschool.runescape.wiki/images/Smithing_icon.png'},
+    {name:'Fletching',group:'Training planner',description:'Bows, darts, and Vale Totems',file:'osrs-fletching-planner.html',icon:'https://oldschool.runescape.wiki/images/Fletching_icon.png'}
   ];
   const currentFile=(location.pathname.split('/').pop()||'index.html').toLowerCase();
   const currentIndex=tools.findIndex(tool=>tool.file===currentFile);
@@ -31,7 +32,7 @@
   document.addEventListener('click',event=>{if(!host.contains(event.target))close()});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'){close();button.focus()}});
 
-  if(current.name==='Herblore'||current.name==='Crafting'||current.name==='Smithing'){
+  if(current.name==='Herblore'||current.name==='Crafting'||current.name==='Smithing'||current.name==='Fletching'){
     const content=document.querySelector('.content');
     const oldPanel=document.querySelector('.input-panel');
     const speedPanel=document.querySelector('.speed-panel');

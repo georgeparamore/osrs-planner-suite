@@ -23,7 +23,7 @@ Read `CLAUDE_COOKING_HANDOFF_2026-08-05.md` completely and implement it on a new
 
 ### Codex — Fletching planner
 
-Do not begin implementation until Claude’s Cooking PR is reviewed/merged and navigation conflicts are resolved. The research and implementation plan is `CODEX_FLETCHING_PLAN_2026-08-05.md`.
+Implementation is complete on `codex/fletching-planner` for review. It includes six routes, live prices, exact quantities, Wise Old Man lookup, owned-item controls, and both level and combined-reward planning for Vale Totems. The research and implementation plan is `CODEX_FLETCHING_PLAN_2026-08-05.md`. Reconcile the shared navigation with Claude’s Cooking PR before merging both branches.
 
 ## Current production state
 
