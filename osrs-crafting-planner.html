@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crafting Training Planner – OSRS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap');
+:root{--bg:#0d0f14;--surface:#141720;--surface2:#1b1f2e;--border:#252a3a;--gold:#c8a84b;--gold-dim:#8a7030;--green:#2ecc71;--red:#e74c3c;--blue:#4a7eff;--purple:#9b6fd6;--text:#dde1ec;--text-dim:#6b7490;}
+[data-theme="light"]{--bg:#f0f2f5;--surface:#ffffff;--surface2:#e8eaf0;--border:#d0d4e0;--gold:#8a6a1a;--gold-dim:#b89030;--green:#1a8a45;--red:#c0392b;--blue:#2255cc;--purple:#7a4fc7;--text:#1a1e2e;--text-dim:#6b7490;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:16px;height:50px;flex-shrink:0;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--gold);letter-spacing:1px;text-decoration:none;}
+.logo span{color:var(--text-dim);font-weight:400;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.theme-btn{background:none;border:none;cursor:pointer;font-size:17px;color:var(--text-dim);transition:color .2s;}
+.theme-btn:hover{color:var(--gold);}
+.main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px);}
+.skill-nav{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;}
+.skill-nav-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);padding:0 14px;margin-bottom:6px;}
+.skill-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;cursor:pointer;background:none;border:none;color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;text-align:left;transition:all .15s;border-left:3px solid transparent;}
+.skill-btn:hover{background:var(--surface2);color:var(--text);}
+.skill-btn.active{background:var(--surface2);color:var(--gold);border-left-color:var(--gold);}
+.skill-btn .skill-icon-img{width:22px;height:22px;object-fit:contain;flex-shrink:0;}
+.skill-btn.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.skill-btn .soon-badge{margin-left:auto;font-size:8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.3px;}
+.content{flex:1;display:flex;flex-direction:column;overflow-y:auto;min-width:0;}
+.input-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 24px;flex-shrink:0;}
+.input-panel-top{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.skill-icon-large{width:32px;height:32px;object-fit:contain;}
+.skill-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;}
+.skill-desc{font-size:12px;color:var(--text-dim);margin-bottom:14px;}
+.input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.field-group{display:flex;flex-direction:column;gap:4px;}
+.field-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.field-group input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 11px;outline:none;transition:border-color .2s;width:120px;}
+.field-group input:focus{border-color:var(--gold-dim);}
+.apply-btn{padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.apply-btn:hover{opacity:.85;}
+.status-card{display:flex;align-items:center;gap:20px;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:8px;padding:12px 18px;margin-top:14px;}
+.status-stat{display:flex;flex-direction:column;gap:1px;}
+.status-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.status-stat-value{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--gold);}
+.status-progress-wrap{flex:1;}
+.status-progress-bar{height:8px;background:var(--surface);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.status-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .4s ease;}
+.status-progress-text{font-size:10px;color:var(--text-dim);margin-top:4px;display:flex;justify-content:space-between;}
+.or-divider{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;align-self:center;padding:0 4px;}
+.manual-toggle{padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.manual-toggle:hover{border-color:var(--gold-dim);}
+.manual-toggle.active{border-color:var(--gold);color:var(--gold);}
+#womFields{display:none;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap;}
+#womFields.show{display:flex;}
+.fetch-status{font-size:11px;margin-top:8px;display:none;align-items:center;gap:6px;}
+.fetch-status.show{display:flex;}
+.fetch-status.error{color:var(--red);}
+.fetch-status.success{color:var(--green);}
+.fetch-status.loading{color:var(--text-dim);}
+.spinner-sm{display:inline-block;width:11px;height:11px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.speed-panel{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.speed-panel-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:10px;}
+.speed-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+.speed-tab{flex:1;min-width:180px;display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .15s;}
+.speed-tab:hover{border-color:var(--gold-dim);}
+.speed-tab.active{border-color:var(--accent,var(--gold));background:rgba(200,168,75,.08);}
+.speed-tab-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.speed-tab-dot{width:9px;height:9px;border-radius:50%;}
+.speed-tab-sub{font-size:11px;color:var(--text-dim);}
+.plan-area{padding:20px 24px;flex:1;}
+.route-stop{position:relative;padding-left:34px;}
+.shopping-wrap{margin-top:20px;}
+.shopping-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--gold-dim);border-radius:10px;padding:14px 20px;cursor:pointer;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;transition:background .15s;}
+.shopping-toggle:hover{background:var(--surface);}
+.shopping-toggle-arrow{font-size:14px;color:var(--text-dim);transition:transform .2s;}
+.shopping-toggle-arrow.open{transform:rotate(180deg);}
+.shopping-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:16px 20px;margin-top:-1px;}
+.shopping-body.show{display:block;}
+.shopping-section{margin-bottom:18px;}
+.shopping-section:last-child{margin-bottom:0;}
+.shopping-section-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--accent,var(--gold));margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.shopping-table{width:100%;border-collapse:collapse;font-size:13px;}
+.shopping-table th{text-align:left;padding:6px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);border-bottom:2px solid var(--border);}
+.shopping-table th.r{text-align:right;}
+.shopping-table td{padding:8px 10px;border-bottom:1px solid var(--border);}
+.shopping-table td.mono{font-family:'Share Tech Mono',monospace;text-align:right;}
+.shopping-table tr:last-child td{border-bottom:none;}
+.shopping-icon{width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:6px;}
+.shopping-grand-total{margin-top:14px;padding:12px 16px;background:linear-gradient(135deg,rgba(200,168,75,.12),rgba(200,168,75,.02));border:1px solid var(--gold-dim);border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;}
+.shopping-grand-total .gp{font-family:'Share Tech Mono',monospace;color:var(--gold);font-size:22px;}
+.shopping-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:10px;}
+.price-status{font-size:11px;color:var(--text-dim);margin-bottom:10px;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+/* CRAFTING-SPECIFIC CONTROLS */
+.craft-toggle-row{display:flex;gap:18px;flex-wrap:wrap;align-items:center;}
+.craft-toggle-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;flex-shrink:0;}
+.craft-toggle-group{display:flex;flex-direction:column;gap:5px;}
+.craft-toggle-group>span{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);}
+.craft-seg{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.craft-seg button{background:var(--surface2);border:0;border-right:1px solid var(--border);color:var(--text-dim);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 12px;cursor:pointer;}
+.craft-seg button:last-child{border-right:0;}
+.craft-seg button.active{background:var(--gold);color:#000;font-weight:700;}
+.craft-toggle-group select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;padding:7px 10px;}
+.craft-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(74,126,255,.13);color:var(--blue);white-space:nowrap;}
+.craft-badge.members{background:rgba(155,111,214,.15);color:var(--purple);}
+body[data-suite-page="crafting"] .craft-toggle-panel{max-width:1120px;width:calc(100% - 36px);margin:14px auto 0;border:1px solid var(--border);border-radius:8px;box-sizing:border-box;}
+</style>
+<link rel="stylesheet" href="suite-nav.css?v=18">
+</head>
+<body>
+<header>
+  <a class="logo" href="index.html" title="OSRS Tool Suite home">GE<span>Tracker</span></a>
+  <div class="header-right">
+    <button class="theme-btn" id="themeBtn">🌙</button>
+  </div>
+</header>
+<div class="main">
+  <nav class="skill-nav">
+    <div class="skill-nav-title">OSRS Tools</div>
+    <button class="skill-btn" onclick="location.href='osrs-ge-tracker.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Grand_Exchange_logo.png" alt="">GE Tracker</button>
+    <button class="skill-btn" onclick="location.href='osrs-skill-profit.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Coins_10000.png" alt="">Skill Profits</button>
+    <div class="skill-sep"></div>
+    <button class="skill-btn" onclick="location.href='osrs-training-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Construction_icon.png" alt="">Construction</button>
+    <button class="skill-btn" onclick="location.href='osrs-farming-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Farming_icon.png" alt="">Farming</button>
+    <button class="skill-btn" onclick="location.href='osrs-herblore-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Herblore_icon.png" alt="">Herblore</button>
+    <button class="skill-btn" onclick="location.href='osrs-prayer-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Prayer_icon.png" alt="">Prayer</button>
+    <button class="skill-btn active"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">Crafting</button>
+    <div class="skill-sep"></div>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">Fletching<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking<span class="soon-badge">Soon</span></button>
+  </nav>
+  <div class="content">
+    <div class="input-panel">
+      <div class="input-panel-top">
+        <img class="skill-icon-large" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">
+        <div class="skill-title">Crafting Training Planner</div>
+      </div>
+      <div class="skill-desc">Set your current level and target, pick a route, and get a verified step-by-step plan with live cost estimates from the Grand Exchange.</div>
+      <div id="priceStatus" class="price-status">⏳ Loading live Grand Exchange prices…</div>
+      <div class="input-row">
+        <div class="field-group">
+          <span class="field-label">OSRS Username</span>
+          <input type="text" id="womUsername" placeholder="e.g. Zezima" autocomplete="off">
+        </div>
+        <button class="apply-btn" id="womFetchBtn">Fetch Stats</button>
+        <div class="field-group">
+          <span class="field-label">Target Level</span>
+          <input type="number" id="targetLevel" min="4" max="99" value="99">
+        </div>
+        <div class="or-divider">or</div>
+        <button class="manual-toggle" id="womToggle">Enter Manually</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">Pulls your live Crafting level/XP from Wise Old Man.</div>
+      <div id="womFields">
+        <div class="field-group">
+          <span class="field-label">Current Level</span>
+          <input type="number" id="manualLevel" min="1" max="99" value="1">
+        </div>
+        <div class="field-group">
+          <span class="field-label">Current XP (optional)</span>
+          <input type="number" id="manualXp" min="0" placeholder="auto from level">
+        </div>
+        <button class="apply-btn" id="applyBtn">Update Plan</button>
+      </div>
+      <div class="fetch-status" id="womStatus"></div>
+      <div class="status-card" id="statusCard" style="margin-top:14px;">
+        <div class="status-stat"><div class="status-stat-label">Current</div><div class="status-stat-value" id="statusLevel">1</div></div>
+        <div class="status-progress-wrap">
+          <div class="status-progress-bar"><div class="status-progress-fill" id="statusProgressFill" style="width:0%"></div></div>
+          <div class="status-progress-text"><span id="statusXpText">0 XP</span><span id="statusTargetText">Target: Level 99</span></div>
+        </div>
+        <div class="status-stat"><div class="status-stat-label">XP Remaining</div><div class="status-stat-value" id="statusXpRemaining">—</div></div>
+      </div>
+    </div>
+    <div class="craft-toggle-row craft-toggle-panel">
+      <div class="craft-toggle-group">
+        <span>Account type</span>
+        <div class="craft-seg" id="membersToggle">
+          <button type="button" data-members="true" class="active">Members</button>
+          <button type="button" data-members="false">F2P</button>
+        </div>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Dragonhide needle</span>
+        <div class="craft-seg" id="needleToggle">
+          <button type="button" data-needle="true" class="active">Costume needle</button>
+          <button type="button" data-needle="false">Normal needle</button>
+        </div>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Output handling</span>
+        <select id="outputHandling">
+          <option value="ge">Sell on Grand Exchange</option>
+          <option value="alch">High Alchemy (dragonhide/battlestaves only)</option>
+        </select>
+      </div>
+      <div class="craft-toggle-group">
+        <span>Cheapest route</span>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" id="cheapestFloorToggle" checked style="accent-color:var(--gold);">
+          Skip methods slower than 15k xp/hr
+        </label>
+      </div>
+    </div>
+    <div class="speed-panel">
+      <div class="speed-panel-label">Route</div>
+      <div class="speed-tabs">
+        <div class="speed-tab" data-speed="fastest" style="--accent:#e74c3c;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#e74c3c;"></span>Fastest</div>
+          <div class="speed-tab-sub">Max XP/hr, money no object — gems through dragonstone, then red/black dragonhide</div>
+        </div>
+        <div class="speed-tab active" data-speed="simple" style="--accent:#c8a84b;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#c8a84b;"></span>Simple</div>
+          <div class="speed-tab-sub">Predictable bank-standing progression — gems, battlestaves, all four dragonhide tiers</div>
+        </div>
+        <div class="speed-tab" data-speed="cheapest" style="--accent:#2ecc71;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#2ecc71;"></span>Cheapest</div>
+          <div class="speed-tab-sub">Lowest live net GP/XP among unlocked methods, reevaluated at every level</div>
+        </div>
+        <div class="speed-tab" data-speed="lowattention" style="--accent:#4a9eff;">
+          <div class="speed-tab-name"><span class="speed-tab-dot" style="background:#4a9eff;"></span>Low Attention</div>
+          <div class="speed-tab-sub">Molten glass progression — fewer clicks, long bank-standing inventories</div>
+        </div>
+      </div>
+    </div>
+    <div class="plan-area" id="planArea">
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:60px 20px;color:var(--text-dim);text-align:center;flex-direction:column;">
+        <div style="font-size:15px;font-weight:600;color:var(--text);">Set your starting level to generate a route</div>
+        <div style="font-size:12px;max-width:320px;line-height:1.6;">Enter your current Crafting level and target above, then pick a route.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// ── EXACT OSRS XP TABLE (verified against Wiki, identical across all skills) ──────
+const XP_TABLE = [0,83,174,276,388,512,650,801,969,1154,1358,1584,1833,2107,2411,2746,3115,3523,3973,4470,5018,5624,6291,7028,7842,8740,9730,10824,12031,13363,14833,16456,18247,20224,22406,24815,27473,30408,33648,37224,41171,45529,50339,55649,61512,67983,75127,83014,91721,101333,111945,123660,136594,150872,166636,184040,203254,224466,247886,273742,302288,333804,368599,407015,449428,496254,547953,605032,668051,737627,814445,899257,992895,1096278,1210421,1336443,1475581,1629200,1798808,1986068,2192818,2421087,2673114,2951373,3258594,3597792,3972294,4385776,4842295,5346332,5902831,6517253,7195629,7944614,8771558,9684577,10692629,11805606,13034431];
+function xpForLevel(l){l=Math.max(1,Math.min(99,l));return XP_TABLE[l-1];}
+function levelForXp(xp){for(let l=99;l>=1;l--){if(xp>=XP_TABLE[l-1])return l;}return 1;}
+
+// ── VERIFIED CRAFTING METHODS DATABASE ────────────────────────────────────────────
+// XP values, level requirements, exact material quantities, and actions/hour figures
+// cross-checked against the OSRS Wiki (Crafting, Pay-to-play/Free-to-play Crafting
+// training, Leather, Dragonhide, Molten glass, and individual item pages) on 2026-08-05.
+// D'hide throughput: normal needle = 1,685 bodies/hr, costume needle = 1,705 bodies/hr,
+// uniform across all four tiers (wiki-confirmed XP/hr figures divide out exactly).
+const DHIDE_NORMAL_RATE = 1685, DHIDE_NEEDLE_RATE = 1705;
+
+const LEATHER = [
+  {family:'leather', name:'Leather gloves',  minLevel:1,  maxLevel:7,  xpPerAction:13.8, actionsPerHr:1750, outputName:'Leather gloves',  inputNames:['Leather',{name:'Thread',qty:0.2}], note:'1,750 items/hr is a bank-standing estimate — the wiki confirms a 3-tick (1.8s) crafting animation, the same class of speed as glassblowing, but actual rate depends on banking efficiency.'},
+  {family:'leather', name:'Leather boots',   minLevel:7,  maxLevel:9,  xpPerAction:16.2, actionsPerHr:1750, outputName:'Leather boots',   inputNames:['Leather',{name:'Thread',qty:0.2}]},
+  {family:'leather', name:'Leather cowl',    minLevel:9,  maxLevel:11, xpPerAction:18.5, actionsPerHr:1750, outputName:'Leather cowl',    inputNames:['Leather',{name:'Thread',qty:0.2}]},
+  {family:'leather', name:'Leather vambraces',minLevel:11,maxLevel:14, xpPerAction:22,   actionsPerHr:1750, outputName:'Leather vambraces',inputNames:['Leather',{name:'Thread',qty:0.2}]},
+  {family:'leather', name:'Leather body',    minLevel:14, maxLevel:18, xpPerAction:25,   actionsPerHr:1750, outputName:'Leather body',    inputNames:['Leather',{name:'Thread',qty:0.2}]},
+  {family:'leather', name:'Leather chaps',   minLevel:18, maxLevel:28, xpPerAction:27,   actionsPerHr:1750, outputName:'Leather chaps',   inputNames:['Leather',{name:'Thread',qty:0.2}]},
+  {family:'leather', name:'Hardleather body',minLevel:28, maxLevel:99, xpPerAction:35,   actionsPerHr:1750, outputName:'Hardleather body',inputNames:['Hard leather',{name:'Thread',qty:0.2}], note:'Bank-standing rate is an estimate — leather items are rarely trained this far since gem cutting overtakes them at level 20.'},
+];
+const GEMS = [
+  {family:'gem', name:'Cut sapphire',   minLevel:20, maxLevel:27, xpPerAction:50,    actionsPerHr:2780, outputName:'Sapphire',    inputNames:['Uncut sapphire']},
+  {family:'gem', name:'Cut emerald',    minLevel:27, maxLevel:34, xpPerAction:67.5,  actionsPerHr:2780, outputName:'Emerald',     inputNames:['Uncut emerald']},
+  {family:'gem', name:'Cut ruby',       minLevel:34, maxLevel:43, xpPerAction:85,    actionsPerHr:2780, outputName:'Ruby',        inputNames:['Uncut ruby']},
+  {family:'gem', name:'Cut diamond',    minLevel:43, maxLevel:55, xpPerAction:107.5, actionsPerHr:2780, outputName:'Diamond',     inputNames:['Uncut diamond']},
+  {family:'gem', name:'Cut dragonstone',minLevel:55, maxLevel:99, xpPerAction:137.5, actionsPerHr:2780, outputName:'Dragonstone', inputNames:['Uncut dragonstone'], membersOnly:true},
+];
+const JEWELLERY = [
+  {family:'jewellery', name:'Gold ring',        minLevel:5,  maxLevel:6,  xpPerAction:15,  actionsPerHr:1600, outputName:'Gold ring',        inputNames:['Gold bar']},
+  {family:'jewellery', name:'Gold necklace',     minLevel:6,  maxLevel:8,  xpPerAction:20,  actionsPerHr:1600, outputName:'Gold necklace',    inputNames:['Gold bar']},
+  {family:'jewellery', name:'Sapphire ring',     minLevel:20, maxLevel:22, xpPerAction:40,  actionsPerHr:1400, outputName:'Sapphire ring',    inputNames:['Gold bar','Sapphire']},
+  {family:'jewellery', name:'Silver tiara',      minLevel:23, maxLevel:43, xpPerAction:52.5,actionsPerHr:1400, outputName:'Tiara',            inputNames:['Silver bar']},
+  {family:'jewellery', name:'Diamond ring',      minLevel:43, maxLevel:56, xpPerAction:85,  actionsPerHr:1400, outputName:'Diamond ring',     inputNames:['Gold bar','Diamond']},
+  {family:'jewellery', name:'Diamond necklace',  minLevel:56, maxLevel:70, xpPerAction:90,  actionsPerHr:1400, outputName:'Diamond necklace', inputNames:['Gold bar','Diamond']},
+  {family:'jewellery', name:'Dragonstone amulet (u)', minLevel:80, maxLevel:99, xpPerAction:150, actionsPerHr:1400, outputName:'Dragonstone amulet (u)', inputNames:['Gold bar','Dragonstone'], membersOnly:true, note:'Low trade volume — verify the live price before buying gold bars and dragonstones in bulk.'},
+];
+const BATTLESTAVES = [
+  {family:'battlestaff', name:'Water battlestaff', minLevel:54, maxLevel:58, xpPerAction:100,   actionsPerHr:2450, outputName:'Water battlestaff', inputNames:['Water orb','Battlestaff'], membersOnly:true, highAlch:9300},
+  {family:'battlestaff', name:'Earth battlestaff', minLevel:58, maxLevel:62, xpPerAction:112.5, actionsPerHr:2450, outputName:'Earth battlestaff', inputNames:['Earth orb','Battlestaff'], membersOnly:true, highAlch:9300},
+  {family:'battlestaff', name:'Fire battlestaff',  minLevel:62, maxLevel:66, xpPerAction:125,   actionsPerHr:2450, outputName:'Fire battlestaff',  inputNames:['Fire orb','Battlestaff'],  membersOnly:true, highAlch:9300},
+  {family:'battlestaff', name:'Air battlestaff',   minLevel:66, maxLevel:99, xpPerAction:137.5, actionsPerHr:2450, outputName:'Air battlestaff',   inputNames:['Air orb','Battlestaff'],   membersOnly:true, highAlch:9300},
+];
+const DHIDE = [
+  {family:'dhide', name:'Green dragonhide body', minLevel:63, maxLevel:71, xpPerAction:186, actionsPerHr:DHIDE_NORMAL_RATE, needleActionsPerHr:DHIDE_NEEDLE_RATE, outputName:'Green dragonhide body', inputNames:[{name:'Green dragon leather',qty:3}], membersOnly:true, highAlch:4680},
+  {family:'dhide', name:'Blue dragonhide body',  minLevel:71, maxLevel:77, xpPerAction:210, actionsPerHr:DHIDE_NORMAL_RATE, needleActionsPerHr:DHIDE_NEEDLE_RATE, outputName:'Blue dragonhide body',  inputNames:[{name:'Blue dragon leather',qty:3}],  membersOnly:true, highAlch:5616},
+  {family:'dhide', name:'Red dragonhide body',   minLevel:77, maxLevel:84, xpPerAction:234, actionsPerHr:DHIDE_NORMAL_RATE, needleActionsPerHr:DHIDE_NEEDLE_RATE, outputName:'Red dragonhide body',   inputNames:[{name:'Red dragon leather',qty:3}],   membersOnly:true, highAlch:6738},
+  {family:'dhide', name:'Black dragonhide body', minLevel:84, maxLevel:99, xpPerAction:258, actionsPerHr:DHIDE_NORMAL_RATE, needleActionsPerHr:DHIDE_NEEDLE_RATE, outputName:'Black dragonhide body', inputNames:[{name:'Black dragon leather',qty:3}], membersOnly:true, highAlch:8088},
+];
+const GLASS = [
+  {family:'glass', name:'Beer glass',           minLevel:1,  maxLevel:4,  xpPerAction:17.5, actionsPerHr:1750, outputName:'Beer glass',           inputNames:['Molten glass'], membersOnly:true},
+  {family:'glass', name:'Empty candle lantern', minLevel:4,  maxLevel:12, xpPerAction:19,   actionsPerHr:1750, outputName:'Empty candle lantern', inputNames:['Molten glass'], membersOnly:true},
+  {family:'glass', name:'Empty oil lamp',       minLevel:12, maxLevel:33, xpPerAction:25,   actionsPerHr:1750, outputName:'Empty oil lamp',       inputNames:['Molten glass'], membersOnly:true},
+  {family:'glass', name:'Vial',                 minLevel:33, maxLevel:42, xpPerAction:35,   actionsPerHr:1750, outputName:'Vial',                 inputNames:['Molten glass'], membersOnly:true},
+  {family:'glass', name:'Empty fishbowl',       minLevel:42, maxLevel:46, xpPerAction:42.5, actionsPerHr:1750, outputName:'Empty fishbowl',       inputNames:['Molten glass'], membersOnly:true},
+  {family:'glass', name:'Unpowered orb',        minLevel:46, maxLevel:99, xpPerAction:52.5, actionsPerHr:1750, outputName:'Unpowered orb',        inputNames:['Molten glass'], membersOnly:true, note:'Lantern lens (level 49, 55 xp/action) is a slightly faster alternative but has thinner GE liquidity — not auto-selected.'},
+];
+const DRIFTNET = [
+  {family:'driftnet', name:'Drift net', minLevel:26, maxLevel:99, xpPerAction:60, actionsPerHr:1000, outputName:'Drift net', inputNames:[{name:'Jute fibre',qty:2}], membersOnly:true, note:'Requires access to Land’s End drift net fishing. Rate reflects roughly 1,000 nets/hour.'},
+];
+const AMETHYST = [
+  {family:'amethyst', name:'Amethyst bolt tips',  minLevel:83, maxLevel:85, xpPerAction:60, actionsPerHr:2750, outputName:'Amethyst bolt tips', outputQty:15, inputNames:['Amethyst'], membersOnly:true},
+  {family:'amethyst', name:'Amethyst arrowtips',  minLevel:85, maxLevel:87, xpPerAction:60, actionsPerHr:2750, outputName:'Amethyst arrowtips', outputQty:15, inputNames:['Amethyst'], membersOnly:true},
+  {family:'amethyst', name:'Amethyst javelin heads',minLevel:87, maxLevel:89, xpPerAction:60, actionsPerHr:2750, outputName:'Amethyst javelin heads', outputQty:5, inputNames:['Amethyst'], membersOnly:true},
+  {family:'amethyst', name:'Amethyst dart tips',  minLevel:89, maxLevel:99, xpPerAction:60, actionsPerHr:2750, outputName:'Amethyst dart tips', outputQty:8, inputNames:['Amethyst'], membersOnly:true},
+];
+
+// Fastest only compares the families that can plausibly lead on raw XP/hour: leather,
+// gems, battlestaves, and dragonhide (matches the handoff's Fastest spec). Cheapest
+// compares every candidate family, since low-volume/afk methods can still win on GP/XP.
+// Every candidate stays eligible through 99 and is reevaluated at each new unlock,
+// exactly like Herblore's live-value route.
+const FASTEST_POOL = [...LEATHER, ...GEMS, ...BATTLESTAVES, ...DHIDE]
+  .map(m => ({...m, maxLevel:99}));
+const CHEAPEST_POOL = [...LEATHER, ...GEMS, ...JEWELLERY, ...BATTLESTAVES, ...DHIDE, ...GLASS, ...DRIFTNET, ...AMETHYST]
+  .map(m => ({...m, maxLevel:99}));
+
+// Simple — hand-curated, fewer switches than Fastest. Uses all four dragonhide tiers
+// (skips Air battlestaff) instead of Fastest's battlestaff/dragonhide crossover optimization.
+const CRAFTING_SIMPLE = [
+  {family:'leather', name:'Leather gloves',    minLevel:1,  maxLevel:7,  xpPerAction:13.8, actionsPerHr:1750, outputName:'Leather gloves',    inputNames:['Leather',{name:'Thread',qty:0.2}]},
+  {family:'leather', name:'Leather boots',     minLevel:7,  maxLevel:11, xpPerAction:16.2, actionsPerHr:1750, outputName:'Leather boots',     inputNames:['Leather',{name:'Thread',qty:0.2}], note:'Kept two levels past its natural window to skip the short Leather cowl tier.'},
+  {family:'leather', name:'Leather vambraces', minLevel:11, maxLevel:20, xpPerAction:22,   actionsPerHr:1750, outputName:'Leather vambraces', inputNames:['Leather',{name:'Thread',qty:0.2}], note:'Kept until gem cutting unlocks at 20 to skip the Leather body/chaps tiers.'},
+  {family:'gem', name:'Cut sapphire',    minLevel:20, maxLevel:27, xpPerAction:50,    actionsPerHr:2780, outputName:'Sapphire',    inputNames:['Uncut sapphire']},
+  {family:'gem', name:'Cut emerald',     minLevel:27, maxLevel:34, xpPerAction:67.5,  actionsPerHr:2780, outputName:'Emerald',     inputNames:['Uncut emerald']},
+  {family:'gem', name:'Cut ruby',        minLevel:34, maxLevel:43, xpPerAction:85,    actionsPerHr:2780, outputName:'Ruby',        inputNames:['Uncut ruby']},
+  {family:'gem', name:'Cut diamond',     minLevel:43, maxLevel:54, xpPerAction:107.5, actionsPerHr:2780, outputName:'Diamond',     inputNames:['Uncut diamond']},
+  {family:'battlestaff', name:'Water battlestaff', minLevel:54, maxLevel:58, xpPerAction:100,   actionsPerHr:2450, outputName:'Water battlestaff', inputNames:['Water orb','Battlestaff'], membersOnly:true, highAlch:9300},
+  {family:'battlestaff', name:'Earth battlestaff', minLevel:58, maxLevel:62, xpPerAction:112.5, actionsPerHr:2450, outputName:'Earth battlestaff', inputNames:['Earth orb','Battlestaff'], membersOnly:true, highAlch:9300},
+  {family:'battlestaff', name:'Fire battlestaff',  minLevel:62, maxLevel:66, xpPerAction:125,   actionsPerHr:2450, outputName:'Fire battlestaff',  inputNames:['Fire orb','Battlestaff'],  membersOnly:true, highAlch:9300},
+  {family:'battlestaff', name:'Air battlestaff',   minLevel:66, maxLevel:99, xpPerAction:137.5, actionsPerHr:2450, outputName:'Air battlestaff',   inputNames:['Air orb','Battlestaff'],   membersOnly:true, highAlch:9300, note:'A consistent bank-standing finish that keeps the Simple route predictable through level 99.'},
+];
+
+// Low Attention — molten glass end to end, centered on unpowered orbs from 46 as requested.
+const CRAFTING_LOWATTENTION = GLASS;
+
+const CRAFTING_ROUTES = { fastest: FASTEST_POOL, cheapest: CHEAPEST_POOL, simple: CRAFTING_SIMPLE, lowattention: CRAFTING_LOWATTENTION };
+const CHEAPEST_XPHR_FLOOR = 15000;
+
+// ── LIVE GE PRICING ─────────────────────────────────────────────────────────────
+const WIKI_MAPPING='https://prices.runescape.wiki/api/v1/osrs/mapping';
+const WIKI_LATEST='https://prices.runescape.wiki/api/v1/osrs/latest';
+let nameToId={}, prices={}, nameToIcon={}, pricesLoaded=false;
+
+function priceOf(name){
+  if(!name) return 0;
+  const id=nameToId[name.toLowerCase()];
+  if(!id||!prices[id]) return 0;
+  return prices[id].high || prices[id].low || 0;
+}
+function sellPriceOf(name){
+  if(!name) return 0;
+  const id=nameToId[name.toLowerCase()];
+  if(!id||!prices[id]) return 0;
+  const raw = prices[id].low || prices[id].high || 0;
+  const tax = Math.min(5000000, Math.max(1, Math.floor(raw * 0.01)));
+  return Math.max(0, raw - tax);
+}
+function wikiItemIcon(name,className='shopping-icon'){
+  const mapped=nameToIcon[name.toLowerCase()];
+  const filename=mapped||`${name.replace(/ /g,'_')}.png`;
+  const src=mapped
+    ? `https://oldschool.runescape.wiki/images/${encodeURIComponent(filename.replace(/ /g,'_'))}`
+    : `https://oldschool.runescape.wiki/w/Special:Redirect/file/${encodeURIComponent(filename)}`;
+  return `<img class="${className}" src="${src}" alt="${name}" onerror="this.style.display='none'">`;
+}
+
+async function loadPrices(){
+  try{
+    const [mapRes,priceRes]=await Promise.all([fetch(WIKI_MAPPING),fetch(WIKI_LATEST)]);
+    const mapData=await mapRes.json(), priceData=await priceRes.json();
+    mapData.forEach(i=>{ nameToId[i.name.toLowerCase()]=String(i.id); if(i.icon) nameToIcon[i.name.toLowerCase()]=i.icon; });
+    Object.entries(priceData.data).forEach(([id,p])=>{ prices[id]=p; });
+    pricesLoaded=true;
+    const el=document.getElementById('priceStatus');
+    el.textContent='✓ Live Grand Exchange prices loaded';
+    el.style.color='var(--green)';
+    generatePlan();
+  }catch(e){
+    const el=document.getElementById('priceStatus');
+    el.textContent='⚠ Could not load live prices — cost estimates unavailable';
+    el.style.color='var(--red)';
+  }
+}
+
+// ── STATE ───────────────────────────────────────────────────────────────────────
+const SUITE_THEME_KEY='osrs-suite-theme';
+let playerLevel=1, playerXp=0, targetLevelVal=99, currentSpeed='simple', isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
+let membersEnabled=true, needleEnabled=true, outputHandling='ge', cheapestFloorEnabled=true;
+document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  localStorage.setItem(SUITE_THEME_KEY,isDark?'dark':'light');
+});
+
+document.getElementById('membersToggle').addEventListener('click',e=>{
+  const btn=e.target.closest('button[data-members]');
+  if(!btn) return;
+  document.querySelectorAll('#membersToggle button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  membersEnabled = btn.dataset.members === 'true';
+  generatePlan();
+});
+document.getElementById('needleToggle').addEventListener('click',e=>{
+  const btn=e.target.closest('button[data-needle]');
+  if(!btn) return;
+  document.querySelectorAll('#needleToggle button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  needleEnabled = btn.dataset.needle === 'true';
+  generatePlan();
+});
+document.getElementById('outputHandling').addEventListener('change',e=>{
+  outputHandling = e.target.value;
+  generatePlan();
+});
+document.getElementById('cheapestFloorToggle').addEventListener('change',e=>{
+  cheapestFloorEnabled = e.target.checked;
+  generatePlan();
+});
+
+// ── WISE OLD MAN LOOKUP ───────────────────────────────────────────────────────
+const WOM_API='https://api.wiseoldman.net/v2';
+const WOM_USERNAME_KEY='osrs_wom_username';
+
+async function fetchWomPlayer(username){
+  const url=`${WOM_API}/players/${encodeURIComponent(username)}`;
+  const res=await fetch(url);
+  if(res.status===404){
+    const trackRes=await fetch(url,{method:'POST'});
+    if(!trackRes.ok) throw new Error(`Player "${username}" not found`);
+    return trackRes.json();
+  }
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+
+function womSkill(data,skillKey){
+  const skill=data?.latestSnapshot?.data?.skills?.[skillKey];
+  if(!skill||skill.experience==null||skill.experience<0) return null;
+  return {level:skill.level,xp:skill.experience};
+}
+
+const womToggle=document.getElementById('womToggle');
+const womFields=document.getElementById('womFields');
+womToggle.addEventListener('click',()=>{
+  womFields.classList.toggle('show');
+  womToggle.classList.toggle('active');
+});
+
+const womUsernameInput=document.getElementById('womUsername');
+const womFetchBtn=document.getElementById('womFetchBtn');
+const womStatus=document.getElementById('womStatus');
+
+const savedWomUsername=localStorage.getItem(WOM_USERNAME_KEY);
+if(savedWomUsername) womUsernameInput.value=savedWomUsername;
+
+function setWomStatus(msg,type){
+  womStatus.textContent=msg;
+  womStatus.className='fetch-status show '+type;
+}
+
+async function doWomLookup(){
+  const username=womUsernameInput.value.trim();
+  if(!username){setWomStatus('Enter a username first','error');return;}
+  womFetchBtn.disabled=true;
+  womStatus.innerHTML='<span class="spinner-sm"></span> Looking up stats on Wise Old Man…';
+  womStatus.className='fetch-status show loading';
+  try{
+    const data=await fetchWomPlayer(username);
+    const skillData=womSkill(data,'crafting');
+    if(!skillData){
+      throw new Error('No Crafting data for this player (may be unranked)');
+    }
+    document.getElementById('manualLevel').value=skillData.level;
+    document.getElementById('manualXp').value=skillData.xp;
+    document.dispatchEvent(new CustomEvent('herblore:exact-xp'));
+    localStorage.setItem(WOM_USERNAME_KEY,username);
+    setWomStatus(`✓ Loaded ${data.displayName}'s stats — Level ${skillData.level} Crafting (${skillData.xp.toLocaleString()} XP)`,'success');
+    document.getElementById('applyBtn').click();
+  }catch(e){
+    console.error(e);
+    setWomStatus(`⚠ ${e.message||'Lookup failed'}`,'error');
+  }finally{
+    womFetchBtn.disabled=false;
+  }
+}
+womFetchBtn.addEventListener('click',doWomLookup);
+womUsernameInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); doWomLookup(); } });
+if(savedWomUsername) doWomLookup();
+
+const manualLevelInput=document.getElementById('manualLevel');
+const manualXpInput=document.getElementById('manualXp');
+manualLevelInput.addEventListener('input',()=>{
+  manualXpInput.value='';
+});
+
+document.getElementById('applyBtn').addEventListener('click',()=>{
+  const lvl=parseInt(manualLevelInput.value)||1;
+  const xpInput=manualXpInput.value.trim();
+  const tgt=parseInt(document.getElementById('targetLevel').value)||99;
+  const parsedXp=xpInput===''?NaN:parseInt(xpInput);
+  const exactMode=!manualXpInput.disabled;
+  if(exactMode&&Number.isFinite(parsedXp)){
+    playerXp=Math.max(0,Math.min(200000000,parsedXp));
+    playerLevel=levelForXp(playerXp);
+    manualLevelInput.value=playerLevel;
+    manualXpInput.value=playerXp;
+  }else{
+    playerLevel=Math.max(1,Math.min(99,lvl));
+    playerXp=xpForLevel(playerLevel);
+    if(exactMode) manualXpInput.value=playerXp;
+  }
+  targetLevelVal=playerLevel>=99?99:Math.max(playerLevel+1,Math.min(99,tgt));
+  updateStatusCard(); generatePlan();
+});
+
+document.querySelectorAll('.speed-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.speed-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentSpeed=tab.dataset.speed;
+    generatePlan();
+  });
+});
+
+function updateStatusCard(){
+  const cur=levelForXp(playerXp);
+  document.getElementById('statusLevel').textContent=cur;
+  const targetXp=xpForLevel(targetLevelVal);
+  const startXp=xpForLevel(cur);
+  const pct=targetLevelVal<=cur?100:Math.max(0,Math.min(100,(playerXp-startXp)/((targetXp-startXp)||1)*100));
+  document.getElementById('statusProgressFill').style.width=pct+'%';
+  document.getElementById('statusXpText').textContent=playerXp.toLocaleString()+' XP';
+  document.getElementById('statusTargetText').textContent='Target: Level '+targetLevelVal;
+  document.getElementById('statusXpRemaining').textContent=Math.max(0,targetXp-playerXp).toLocaleString();
+}
+
+// ── ROUTE GENERATION ────────────────────────────────────────────────────────────
+function actionsPerHrFor(method){
+  if(method.family==='dhide') return needleEnabled ? method.needleActionsPerHr : method.actionsPerHr;
+  return method.actionsPerHr;
+}
+function xpPerHrFor(method){ return method.xpPerAction * actionsPerHrFor(method); }
+function outputQtyFor(method){ return method.outputQty || 1; }
+function effectiveInputs(method){
+  const inputs=[...(method.inputNames||[])];
+  if(outputHandling==='alch' && method.highAlch) inputs.push('Nature rune');
+  return inputs;
+}
+
+function creditFor(method){
+  if(outputHandling==='alch' && method.highAlch){
+    return method.highAlch;
+  }
+  return sellPriceOf(method.outputName) * outputQtyFor(method);
+}
+function netCostPerAction(method){
+  const inputCost=effectiveInputs(method).reduce((sum,n)=>{
+    const itemName=typeof n==='string'?n:n.name;
+    const qty=typeof n==='object'&&n.qty?n.qty:1;
+    return sum+priceOf(itemName)*qty;
+  },0);
+  return inputCost-creditFor(method);
+}
+function netGpPerXp(method){
+  const hasOutput=creditFor(method)>0;
+  const hasAllInputs=effectiveInputs(method).every(n=>priceOf(typeof n==='string'?n:n.name)>0);
+  return hasOutput&&hasAllInputs?netCostPerAction(method)/method.xpPerAction:Infinity;
+}
+
+function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel)){
+  let methods = CRAFTING_ROUTES[speed] || [];
+  if(!membersEnabled){
+    methods = methods.filter(m=>!m.membersOnly).map(m=>speed==='simple'&&m.name==='Cut diamond'?{...m,maxLevel:99,note:'Reliable Free-to-play method through level 99.'}:m);
+  }
+  const isPool = speed==='fastest' || speed==='cheapest';
+  const stops=[];
+  let lvl=startLevel;
+  while(lvl<endLevel){
+    let candidates=methods.filter(m=>m.minLevel<=lvl&&m.maxLevel>lvl);
+    if(!candidates.length){
+      const next=methods.filter(m=>m.minLevel>lvl).sort((a,b)=>a.minLevel-b.minLevel)[0];
+      if(!next) break;
+      lvl=next.minLevel; continue;
+    }
+    let method;
+    if(speed==='fastest'){
+      method=candidates.slice().sort((a,b)=>xpPerHrFor(b)-xpPerHrFor(a))[0];
+    }else if(speed==='cheapest'){
+      const withFloor = cheapestFloorEnabled ? candidates.filter(m=>xpPerHrFor(m)>=CHEAPEST_XPHR_FLOOR) : candidates;
+      const pool = (withFloor.length ? withFloor : candidates).filter(m=>Number.isFinite(netGpPerXp(m)));
+      if(!pool.length) break;
+      method=pool.slice().sort((a,b)=>netGpPerXp(a)-netGpPerXp(b))[0];
+    }else{
+      method=candidates.slice().sort((a,b)=>b.maxLevel-a.maxLevel)[0];
+    }
+    const nextUnlock=isPool
+      ? methods.filter(m=>m.minLevel>lvl).reduce((next,m)=>Math.min(next,m.minLevel),Infinity)
+      : Infinity;
+    const stopEnd=isPool
+      ? Math.min(nextUnlock,endLevel)
+      : Math.min(method.maxLevel,endLevel);
+    const xpStart=lvl===startLevel?Math.max(xpForLevel(lvl),startXp):xpForLevel(lvl), xpEnd=xpForLevel(stopEnd);
+    const xpNeeded=xpEnd-xpStart;
+    const actionsNeeded=Math.ceil(xpNeeded/method.xpPerAction);
+    const hoursNeeded=actionsNeeded/actionsPerHrFor(method);
+    const totalCost=pricesLoaded?netCostPerAction(method)*actionsNeeded:0;
+    const previous=stops[stops.length-1];
+    if(isPool&&previous&&previous.name===method.name){
+      previous.levelEnd=stopEnd;
+      previous.xpNeeded+=xpNeeded;
+      previous.actionsNeeded=Math.ceil(previous.xpNeeded/method.xpPerAction);
+      previous.hoursNeeded=previous.actionsNeeded/actionsPerHrFor(method);
+      previous.totalCost=netCostPerAction(method)*previous.actionsNeeded;
+    }else{
+      const liveNote=speed==='cheapest'
+        ? `Cheapest eligible method at ${netGpPerXp(method).toFixed(2)} net GP/XP using the latest loaded GE prices. This choice can change as prices move.`
+        : (speed==='fastest' ? `Highest XP/hr eligible method (${Math.round(xpPerHrFor(method)).toLocaleString()} xp/hr) at this level.` : method.note);
+      stops.push({...method,note:liveNote,levelStart:lvl,levelEnd:stopEnd,xpNeeded,actionsNeeded,hoursNeeded,totalCost});
+    }
+    lvl=stopEnd;
+  }
+  return stops;
+}
+
+function fmt(n){if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
+function fmtExact(n){return Math.ceil(n).toLocaleString();}
+function fmtGp(n){const abs=Math.abs(n);let s;if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';else s=Math.round(abs).toLocaleString();return(n<0?'-':'')+s+' gp';}
+function fmtHrs(h){if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixed(1)+' hrs';return(h/24).toFixed(1)+' days';}
+
+function updateRouteTabMetrics(startLevel,endLevel){
+  if(!pricesLoaded||startLevel>=endLevel)return;
+  ['fastest','simple','cheapest','lowattention'].forEach(speed=>{
+    const route=buildRoute(startLevel,endLevel,speed,playerXp);
+    const cost=route.reduce((sum,stop)=>sum+stop.totalCost,0);
+    const hours=route.reduce((sum,stop)=>sum+stop.hoursNeeded,0);
+    const subtitle=document.querySelector(`.speed-tab[data-speed="${speed}"] .speed-tab-sub`);
+    if(subtitle)subtitle.dataset.liveSummary=`${fmtGp(Math.abs(cost)).replace(' gp','')} · ${fmtHrs(hours)}`;
+  });
+}
+
+function generatePlan(){
+  const planArea=document.getElementById('planArea');
+  const curLevel=levelForXp(playerXp);
+  updateRouteTabMetrics(curLevel,targetLevelVal);
+  const accentMap={fastest:'#e74c3c', simple:'#c8a84b', cheapest:'#2ecc71', lowattention:'#4a9eff'};
+  const accent=accentMap[currentSpeed]||'#c8a84b';
+
+  if(curLevel>=targetLevelVal){
+    planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);"><div style="font-size:18px;color:var(--gold);margin-bottom:8px;">🎉 Already reached Level ${targetLevelVal}!</div><div style="font-size:12px;">Set a higher target level to continue planning.</div></div>`;
+    return;
+  }
+  if(currentSpeed==='cheapest'&&!pricesLoaded){
+    planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);"><div class="spinner" style="margin:0 auto 14px;"></div><div>Waiting for live Grand Exchange prices to choose the best-value methods…</div></div>`;
+    return;
+  }
+
+  const stops=buildRoute(curLevel,targetLevelVal,currentSpeed,playerXp);
+  if(!stops.length){
+    const reason = (!membersEnabled && CRAFTING_ROUTES[currentSpeed].every(m=>m.membersOnly))
+      ? 'This route has no Free-to-play methods available. Switch to Members to see a plan.'
+      : 'No route available for this level range and setting.';
+    planArea.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text-dim);">${reason}</div>`;
+    return;
+  }
+
+  const lastStop=stops[stops.length-1];
+  const reachedTarget = lastStop.levelEnd >= targetLevelVal;
+
+  const totalXp=stops.reduce((s,x)=>s+x.xpNeeded,0);
+  const totalHrs=stops.reduce((s,x)=>s+x.hoursNeeded,0);
+  const totalCost=stops.reduce((s,x)=>s+x.totalCost,0);
+  const totalActions=stops.reduce((s,x)=>s+x.actionsNeeded,0);
+
+  let grossIngredientCost = 0;
+  let grossSellValue = 0;
+  if(pricesLoaded){
+    stops.forEach(stop=>{
+      const inCostPerAction=effectiveInputs(stop).reduce((s,n)=>{
+        const itemName=typeof n==='string'?n:n.name;
+        const qty=typeof n==='object'&&n.qty?n.qty:1;
+        return s+(priceOf(itemName)||0)*qty;
+      },0);
+      grossIngredientCost += inCostPerAction * stop.actionsNeeded;
+      grossSellValue += creditFor(stop) * stop.actionsNeeded;
+    });
+  }
+
+  let html='';
+  if(!reachedTarget){
+    html+=`<div style="background:rgba(231,76,60,.1);border:1px solid var(--red);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--red);">⚠ This route only reaches level ${lastStop.levelEnd} with the current Account type / route settings. ${!membersEnabled?'Switch to Members to continue past this point.':'No further eligible methods were found.'}</div>`;
+  }
+
+  html+=`<div class="focus-summary">
+    <div><span>${totalCost>=0?'Net cost':'Net profit'}</span><strong style="color:${totalCost>=0?'#e74c3c':'#2ecc71'};">${pricesLoaded?fmtGp(Math.abs(totalCost)):'Loading…'}</strong></div>
+    <div><span>Time</span><strong>${fmtHrs(totalHrs)}</strong></div>
+    <div><span>Actions</span><strong>${fmtExact(totalActions)}</strong></div>
+    <div><span>Upfront</span><strong>${pricesLoaded?fmtGp(grossIngredientCost):'Loading…'}</strong></div>
+  </div>`;
+
+  html+=`<div class="focus-route-list" style="--accent:${accent};">`;
+  stops.forEach(stop=>{
+    const ingList=(stop.inputNames||[]).map(n=>typeof n==='string'?n:`${n.name}${n.qty!==1?` ×${n.qty}`:''}`).join(' + ');
+    const badges = [stop.membersOnly?`<span class="craft-badge members">Members</span>`:`<span class="craft-badge">F2P</span>`].join('');
+    html+=`<article class="focus-route-row">
+      <div class="focus-levels"><span>${stop.levelStart}</span><span>→</span><span>${stop.levelEnd}</span></div>
+      <div class="focus-method">
+        <h3>${stop.name} ${badges}</h3>
+        <p>${ingList || '—'}</p>
+        <small>${fmt(xpPerHrFor(stop))} xp/hr · ${fmtHrs(stop.hoursNeeded)}${stop.note?' · '+stop.note:''}</small>
+      </div>
+      <div class="focus-route-stat"><strong>${stop.actionsNeeded.toLocaleString()}</strong><span>actions</span></div>
+      <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded?fmtGp(Math.abs(stop.totalCost)).replace(' gp',''):'—'}</strong><span>${stop.totalCost<0?'net profit':'net cost'}</span></div>
+      <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded&&stop.xpNeeded>0?(stop.totalCost/stop.xpNeeded).toFixed(2):'—'}</strong><span>gp/xp</span></div>
+    </article>`;
+  });
+  html+=`</div>`;
+
+  if(pricesLoaded){
+    html+=`<div class="focus-market-note">Prices use current Grand Exchange buy costs, estimated sell revenue (or High Alchemy value where selected), and GE tax.</div>`;
+
+    const grandTotals = new Map();
+    let shoppingBody = '';
+    stops.forEach(stop=>{
+      const stopInputs=effectiveInputs(stop);
+      if(!stopInputs.length) return;
+      let stopRows = '';
+      stopInputs.forEach(input=>{
+        const inputName = typeof input === 'string' ? input : input.name;
+        const ingQtyMult = typeof input === 'object' && input.qty ? input.qty : 1;
+        const qty = Math.ceil(stop.actionsNeeded * ingQtyMult);
+        const unitCost = priceOf(inputName);
+        const lineCost = unitCost * qty;
+        if(!grandTotals.has(inputName)) grandTotals.set(inputName,{qty:0,unitCost});
+        grandTotals.get(inputName).qty += qty;
+        const icon = nameToIcon[inputName.toLowerCase()]
+          ? `<img class="shopping-icon" src="https://oldschool.runescape.wiki/images/${encodeURIComponent(nameToIcon[inputName.toLowerCase()].replace(/ /g,'_'))}" alt="">`
+          : '';
+        stopRows += `<tr>
+          <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(inputName.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${inputName}${ingQtyMult!==1?` ×${ingQtyMult}`:''}</a></td>
+          <td class="mono">${fmtExact(qty)}</td>
+          <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
+          <td class="mono">${unitCost>0?fmtGp(lineCost):'—'}</td>
+        </tr>`;
+      });
+      shoppingBody += `<div class="shopping-section" style="--accent:${accent};">
+        <div class="shopping-section-title">Lvl ${stop.levelStart} → ${stop.levelEnd}: ${stop.name}</div>
+        <table class="shopping-table">
+          <thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Each</th><th class="r">Total</th></tr></thead>
+          <tbody>${stopRows}</tbody>
+        </table>
+      </div>`;
+    });
+
+    let grandRows = '';
+    let grandTotal = 0;
+    grandTotals.forEach(({qty,unitCost},name)=>{
+      const lineCost = unitCost * qty;
+      grandTotal += lineCost;
+      const icon = nameToIcon[name.toLowerCase()]
+        ? `<img class="shopping-icon" src="https://oldschool.runescape.wiki/images/${encodeURIComponent(nameToIcon[name.toLowerCase()].replace(/ /g,'_'))}" alt="">`
+        : '';
+      grandRows += `<tr>
+        <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(name.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${name}</a></td>
+        <td class="mono">${fmtExact(qty)}</td>
+        <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
+        <td class="mono">${unitCost>0?fmtGp(unitCost*qty):'—'}</td>
+      </tr>`;
+    });
+
+    const outTotals = new Map();
+    stops.forEach(stop=>{
+      if(!stop.outputName) return;
+      const sp = creditFor(stop) / outputQtyFor(stop);
+      if(!outTotals.has(stop.outputName)) outTotals.set(stop.outputName,{qty:0,sp});
+      outTotals.get(stop.outputName).qty += stop.actionsNeeded * outputQtyFor(stop);
+    });
+    let sellCredit = 0;
+    let sellRows = '';
+    outTotals.forEach(({qty,sp},name)=>{
+      const total = sp*qty;
+      sellCredit += total;
+      sellRows += `<tr style="color:var(--green);">
+        <td colspan="2" style="color:var(--green);">${name} ×${fmtExact(qty)}</td>
+        <td class="mono" style="color:var(--green);">${fmtGp(sp)}</td>
+        <td class="mono" style="color:var(--green);">−${fmtGp(total)}</td>
+      </tr>`;
+    });
+
+    const netCost = grandTotal - sellCredit;
+
+    html += `<div class="shopping-wrap">
+      <button class="shopping-toggle" id="shoppingToggle">
+        <span>🛒 Full Shopping List (Lvl ${curLevel} → ${lastStop.levelEnd})</span>
+        <span class="shopping-toggle-arrow" id="shoppingArrow">▾</span>
+      </button>
+      <div class="shopping-body" id="shoppingBody">
+        ${shoppingBody}
+        <div class="shopping-section">
+          <div class="shopping-section-title" style="color:var(--text);">📦 Grand Total — Everything You Need</div>
+          <table class="shopping-table">
+            <thead><tr><th>Item</th><th class="r">Total Qty</th><th class="r">Each</th><th class="r">Total Cost</th></tr></thead>
+            <tbody>${grandRows}${sellRows}</tbody>
+          </table>
+          <div class="shopping-grand-total" style="flex-direction:column;align-items:stretch;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="color:var(--text-dim);font-size:14px;">💰 Upfront Capital Needed</span>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#e74c3c;">${fmtGp(grandTotal)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="color:var(--green);font-size:14px;">📈 ${outputHandling==='alch'?'Alch/Sell All Finished Items':'Sell All Finished Items'}</span>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--green);">−${fmtGp(sellCredit)}</span>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:16px;font-weight:700;">${netCost>=0?'Net Cost':'Net Profit'}</span>
+              <span class="gp" style="color:${netCost>=0?'#e74c3c':'#2ecc71'};">${fmtGp(Math.abs(netCost))}</span>
+            </div>
+          </div>
+          <div class="shopping-note">Quantities are exact (rounded up to whole items). Prices update live from the Grand Exchange. Check prices again before bulk buying as margins shift daily.</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  planArea.innerHTML=html;
+  const shoppingBtn=document.getElementById('shoppingToggle');
+  if(shoppingBtn){
+    shoppingBtn.addEventListener('click',()=>{
+      document.getElementById('shoppingBody').classList.toggle('show');
+      document.getElementById('shoppingArrow').classList.toggle('open');
+    });
+  }
+}
+
+// Boot
+updateStatusCard();
+generatePlan();
+loadPrices();
+</script>
+<script src="suite-nav.js?v=18"></script>
+</body>
+</html>

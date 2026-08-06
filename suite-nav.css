@@ -23,131 +23,131 @@ header{height:58px!important;padding:0 18px!important;gap:14px!important;overflo
 .suite-menu-link small{color:var(--text-dim);font-size:10px;margin-top:2px}
 .content{width:100%}
 :is(body[data-suite-page="skill-profits"],body[data-suite-page="construction"],body[data-suite-page="farming"],body[data-suite-page="prayer"]) .content{flex:0 1 940px;width:calc(100% - 20px);max-width:940px;margin:0 auto}
-body[data-suite-page="herblore"] .content{background:var(--bg)}
-body[data-suite-page="herblore"] .input-panel{max-width:1120px;width:calc(100% - 36px);margin:18px auto 0;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-sizing:border-box}
-body[data-suite-page="herblore"] .speed-panel,body[data-suite-page="herblore"] .plan-area{max-width:1120px;width:calc(100% - 36px);margin-left:auto;margin-right:auto;box-sizing:border-box}
-body[data-suite-page="herblore"] .speed-panel{margin-top:14px;border:1px solid var(--border);border-radius:8px 8px 0 0;overflow:hidden}
-body[data-suite-page="herblore"] .plan-area{border:1px solid var(--border);border-top:0;border-radius:0 0 8px 8px;margin-bottom:24px}
-body[data-suite-page="herblore"] .input-panel-top{margin-bottom:6px}
-body[data-suite-page="herblore"] .skill-icon-large{width:28px;height:28px}
-body[data-suite-page="herblore"] .skill-title{font-size:22px}
-body[data-suite-page="herblore"] .speed-panel{padding:0}
-body[data-suite-page="herblore"] .speed-panel-label{display:none}
-body[data-suite-page="herblore"] .speed-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
-body[data-suite-page="herblore"] .speed-tab{min-width:0;border:0;border-right:1px solid var(--border);border-radius:0;background:var(--surface);padding:12px 13px}
-body[data-suite-page="herblore"] .speed-tab:last-child{border-right:0}
-body[data-suite-page="herblore"] .speed-tab:hover{background:var(--surface2)}
-body[data-suite-page="herblore"] .speed-tab.active{background:rgba(200,168,75,.07);box-shadow:inset 0 -2px var(--accent,var(--gold))}
-body[data-suite-page="herblore"] .speed-tab-name{font-size:15px}
-body[data-suite-page="herblore"] .speed-tab-sub{font-size:10px;line-height:1.35}
-body[data-suite-page="herblore"] .plan-area{padding:18px 24px}
-body[data-suite-page="herblore"] .plan-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:0;align-items:stretch;background:transparent;border-width:1px 0;border-radius:0;padding:12px 0;margin-bottom:14px}
-body[data-suite-page="herblore"] .plan-summary-stat{min-width:0;padding:3px 14px;border-right:1px solid var(--border)}
-body[data-suite-page="herblore"] .plan-summary-value{font-size:17px}
-body[data-suite-page="herblore"] .plan-summary-divider{display:none}
-body[data-suite-page="herblore"] .plan-summary-total{min-width:0;padding:3px 14px;border:0;border-radius:0;background:transparent}
-body[data-suite-page="herblore"] .plan-summary-total .plan-summary-value{font-size:18px}
-body[data-suite-page="herblore"] .route-line{padding-left:0}
-body[data-suite-page="herblore"] .route-line::before,body[data-suite-page="herblore"] .route-stop::before,body[data-suite-page="herblore"] .route-finish::before{display:none}
-body[data-suite-page="herblore"] .route-stop{margin-bottom:8px;background:var(--surface);border-radius:6px;padding:14px 16px}
-body[data-suite-page="herblore"] .route-stop-header{margin-bottom:5px}
-body[data-suite-page="herblore"] .route-stop-levels{font-size:17px;min-width:76px}
-body[data-suite-page="herblore"] .route-stop-name{font-size:14px}
-body[data-suite-page="herblore"] .route-badge.xp{display:none}
-body[data-suite-page="herblore"] .route-stop-detail{grid-template-columns:repeat(3,minmax(100px,1fr));gap:12px;margin-top:8px;padding-top:8px}
-body[data-suite-page="herblore"] .route-stop-detail .route-stat:nth-child(1),body[data-suite-page="herblore"] .route-stop-detail .route-stat:nth-child(3){display:none}
-body[data-suite-page="herblore"] .route-stop-ing{margin-top:6px}
-body[data-suite-page="herblore"] .route-finish{margin-left:0!important;border-radius:6px;padding:13px 16px}
-body[data-suite-page="herblore"] .target-estimate-card{display:none}
-body[data-suite-page="herblore"] .shopping-wrap{margin-top:10px}
-body[data-suite-page="herblore"] .shopping-toggle{border-color:var(--border);border-radius:6px;background:var(--surface);padding:12px 16px;font-size:15px}
-body[data-suite-page="herblore"] .content{max-width:940px;margin:0 auto;padding:30px 0 36px;background:transparent}
-body[data-suite-page="herblore"] .focused-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:20px}
-body[data-suite-page="herblore"] .focused-title>span{display:block;color:var(--gold);font-size:10px;text-transform:uppercase;letter-spacing:1.3px;margin-bottom:6px}
-body[data-suite-page="herblore"] .focused-title h1{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;margin:0;color:var(--text)}
-body[data-suite-page="herblore"] .focused-title h1 b{font-weight:400}
-body[data-suite-page="herblore"] .focused-account{display:flex;align-items:center;gap:8px}
-body[data-suite-page="herblore"] .focused-account input{width:132px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:0}
-body[data-suite-page="herblore"] .focused-account button{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:0}
-body[data-suite-page="herblore"] .focused-level-strip{display:flex;align-items:flex-end;gap:12px;background:var(--surface);border:1px solid var(--border);padding:14px;margin:0}
-body[data-suite-page="herblore"] .focused-level-strip label{display:grid;gap:6px}
-body[data-suite-page="herblore"] .focused-level-strip label>span{color:var(--text-dim);font-size:9px;text-transform:uppercase;letter-spacing:1px}
-body[data-suite-page="herblore"] .focused-level-strip label input{width:76px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px;border-radius:0}
-body[data-suite-page="herblore"] .focused-level-strip>i{align-self:center;color:var(--text-dim);font-style:normal;margin-top:16px}
-body[data-suite-page="herblore"] .focused-level-strip .apply-btn{height:36px;border-radius:0;padding:0 15px}
-body[data-suite-page="herblore"] .focused-xp-controls{margin-left:auto;display:flex;align-items:center;gap:10px}
-body[data-suite-page="herblore"] .focused-xp-controls>span{color:var(--text-dim);font-size:9px;text-transform:uppercase;letter-spacing:1px}
-body[data-suite-page="herblore"] .focused-mode-toggle{display:flex;border:1px solid var(--border)}
-body[data-suite-page="herblore"] .focused-mode-toggle button{height:34px;padding:0 12px;border:0;border-right:1px solid var(--border);background:var(--bg);color:var(--text-dim);font:inherit;font-size:11px;cursor:pointer}
-body[data-suite-page="herblore"] .focused-mode-toggle button:last-child{border-right:0}
-body[data-suite-page="herblore"] .focused-mode-toggle button.active{background:var(--gold-soft);color:var(--gold);box-shadow:inset 0 -2px var(--gold)}
-body[data-suite-page="herblore"] .focused-xp-start{display:none!important}
-body[data-suite-page="herblore"] .focused-exact-xp{width:140px!important;height:36px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:0}
-body[data-suite-page="herblore"] .focused-level-strip.show-exact .focused-level-start{display:none}
-body[data-suite-page="herblore"] .focused-level-strip.show-exact .focused-xp-start{display:grid!important}
-body[data-suite-page="herblore"] .focused-meta{min-height:24px;padding:6px 2px;display:flex;align-items:center;gap:12px}
-body[data-suite-page="herblore"] .focused-meta .price-status,body[data-suite-page="herblore"] .focused-meta .fetch-status{margin:0;font-size:10px}
-body[data-suite-page="herblore"] .focused-status-engine{display:none!important}
-body[data-suite-page="herblore"] .speed-panel{border:1px solid var(--border);border-top:0;background:var(--surface);padding:0}
-body[data-suite-page="herblore"] .speed-panel-label{display:none}
-body[data-suite-page="herblore"] .speed-tabs{gap:0}
-body[data-suite-page="herblore"] .speed-tab{border:0;border-right:1px solid var(--border);border-radius:0;background:var(--surface);padding:13px 10px;text-align:center;min-height:62px}
-body[data-suite-page="herblore"] .speed-tab:last-child{border-right:0}
-body[data-suite-page="herblore"] .speed-tab.active{background:color-mix(in srgb,var(--gold) 18%,var(--surface));box-shadow:inset 0 -2px var(--gold)}
-body[data-suite-page="herblore"] .speed-tab-name{justify-content:center;font-size:14px}
-body[data-suite-page="herblore"] .speed-tab-dot{display:none}
-body[data-suite-page="herblore"] .speed-tab-sub{font-size:0;line-height:1;margin-top:5px}
-body[data-suite-page="herblore"] .speed-tab-sub:after{font-size:10px;color:var(--text-dim)}
-body[data-suite-page="herblore"] .speed-tab[data-speed="nuclear"] .speed-tab-sub:after{content:attr(data-live-summary)}
-body[data-suite-page="herblore"] .speed-tab[data-speed="standard"] .speed-tab-sub:after{content:attr(data-live-summary)}
-body[data-suite-page="herblore"] .speed-tab[data-speed="budget"] .speed-tab-sub:after{content:attr(data-live-summary)}
-body[data-suite-page="herblore"] .speed-tab[data-speed="mixology"] .speed-tab-sub:after{content:'Minigame'}
-body[data-suite-page="herblore"] .plan-area{border:1px solid var(--border);border-top:0;border-radius:0;background:transparent;padding:16px 24px 28px;min-height:0}
-body[data-suite-page="herblore"] .focus-summary{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:16px}
-body[data-suite-page="herblore"] .focus-summary>div{padding:14px 16px;border-right:1px solid var(--border)}
-body[data-suite-page="herblore"] .focus-summary>div:last-child{border-right:0}
-body[data-suite-page="herblore"] .focus-summary span,body[data-suite-page="herblore"] .focus-route-stat span{display:block;color:var(--text-dim);font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-body[data-suite-page="herblore"] .focus-summary strong{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:400}
-body[data-suite-page="herblore"] .focus-route-list{display:grid;gap:8px}
-body[data-suite-page="herblore"] .focus-route-row{display:grid;grid-template-columns:110px minmax(220px,1fr) 90px 100px 75px;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:15px 16px}
-body[data-suite-page="herblore"] .focus-route-row:hover{border-color:var(--gold-dim)}
-body[data-suite-page="herblore"] .focus-levels{display:flex;align-items:center;gap:8px;color:var(--accent,var(--gold));font-family:'Share Tech Mono',monospace;font-size:15px}
-body[data-suite-page="herblore"] .focus-method h3{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;margin:0}
-body[data-suite-page="herblore"] .focus-method p{color:var(--text-dim);font-size:11px;margin:3px 0 0}
-body[data-suite-page="herblore"] .focus-method small{display:block;color:var(--text-dim);font-size:10px;margin-top:5px}
-body[data-suite-page="herblore"] .focus-route-stat{text-align:right}
-body[data-suite-page="herblore"] .focus-route-stat strong{font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:400}
-body[data-suite-page="herblore"] .focus-market-note{color:var(--text-dim);font-size:10px;margin:10px 2px 0}
-body[data-suite-page="herblore"] .mixology-mode-bar{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);margin-bottom:16px}
-body[data-suite-page="herblore"] .mixology-mode-btn{border:0;border-right:1px solid var(--border);background:var(--surface);color:var(--text);padding:12px;cursor:pointer}
-body[data-suite-page="herblore"] .mixology-mode-btn:last-child{border-right:0}
-body[data-suite-page="herblore"] .mixology-mode-btn.active{background:color-mix(in srgb,#4a9eff 16%,var(--surface));box-shadow:inset 0 -2px #4a9eff;color:#4a9eff}
-body[data-suite-page="herblore"] .mixology-reward-panel{padding:4px 0}
-body[data-suite-page="herblore"] .mixology-reward-picker{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;background:var(--surface);border:1px solid var(--border);padding:14px;margin-bottom:16px}
-body[data-suite-page="herblore"] .mixology-reward-icon{width:40px;height:40px;object-fit:contain;align-self:center}
-body[data-suite-page="herblore"] .mixology-reward-picker label{display:grid;gap:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase;letter-spacing:.6px}
-body[data-suite-page="herblore"] .mixology-reward-picker select{min-width:230px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px}
-body[data-suite-page="herblore"] .mixology-reward-picker p{margin:0;color:var(--text-dim);font-size:11px;text-align:right}
-body[data-suite-page="herblore"] .mixology-reward-picker>div{display:grid;gap:4px}
-body[data-suite-page="herblore"] .mixology-picker-label{color:var(--text-dim);font-size:9px;text-transform:uppercase;letter-spacing:.7px}
-body[data-suite-page="herblore"] .mixology-reward-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
-body[data-suite-page="herblore"] .mixology-reward-option{display:grid;grid-template-columns:auto 40px 1fr;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);padding:10px 12px;cursor:pointer}
-body[data-suite-page="herblore"] .mixology-reward-option.selected{border-color:#4a9eff;background:color-mix(in srgb,#4a9eff 10%,var(--surface));box-shadow:inset 3px 0 #4a9eff}
-body[data-suite-page="herblore"] .mixology-reward-option input{accent-color:#4a9eff}
-body[data-suite-page="herblore"] .mixology-reward-option>span{display:grid;gap:3px}
-body[data-suite-page="herblore"] .mixology-reward-option strong{font-size:12px}
-body[data-suite-page="herblore"] .mixology-reward-option small{color:var(--text-dim);font-size:9px}
-body[data-suite-page="herblore"] .mixology-reward-empty{border:1px dashed var(--border);color:var(--text-dim);padding:24px;text-align:center;font-size:12px}
-body[data-suite-page="herblore"] .mixology-reward-supplies{display:grid;gap:8px}
-body[data-suite-page="herblore"] .mixology-reward-supplies article{display:grid;grid-template-columns:70px 1fr 1fr 110px;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);padding:13px 15px;font-size:12px}
-body[data-suite-page="herblore"] .mixology-reward-supplies article span:last-child{text-align:right;font-family:'Share Tech Mono',monospace}
-body[data-suite-page="herblore"] .mixology-reward-total{display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:14px;padding:14px 2px 0}
-body[data-suite-page="herblore"] .mixology-reward-total strong{font-family:'Share Tech Mono',monospace;color:#e74c3c}
-body[data-suite-page="herblore"] .mixology-reward-note{color:var(--text-dim);font-size:10px;margin:10px 2px 0}
-body[data-suite-page="herblore"] .mixology-potion-name{display:flex;align-items:center;gap:9px}
-body[data-suite-page="herblore"] .mixology-item-icon{width:24px;height:24px;object-fit:contain;flex:0 0 auto}
-body[data-suite-page="herblore"] .mixology-potion-cell .mixology-item-icon{display:inline-block;vertical-align:middle;margin-right:9px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .content{background:var(--bg)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .input-panel{max-width:1120px;width:calc(100% - 36px);margin:18px auto 0;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-sizing:border-box}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-panel,:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .plan-area{max-width:1120px;width:calc(100% - 36px);margin-left:auto;margin-right:auto;box-sizing:border-box}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-panel{margin-top:14px;border:1px solid var(--border);border-radius:8px 8px 0 0;overflow:hidden}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .plan-area{border:1px solid var(--border);border-top:0;border-radius:0 0 8px 8px;margin-bottom:24px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .input-panel-top{margin-bottom:6px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .skill-icon-large{width:28px;height:28px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .skill-title{font-size:22px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-panel{padding:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-panel-label{display:none}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab{min-width:0;border:0;border-right:1px solid var(--border);border-radius:0;background:var(--surface);padding:12px 13px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab:last-child{border-right:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab:hover{background:var(--surface2)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab.active{background:rgba(200,168,75,.07);box-shadow:inset 0 -2px var(--accent,var(--gold))}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab-name{font-size:15px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab-sub{font-size:10px;line-height:1.35}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .plan-area{padding:18px 24px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .plan-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:0;align-items:stretch;background:transparent;border-width:1px 0;border-radius:0;padding:12px 0;margin-bottom:14px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .plan-summary-stat{min-width:0;padding:3px 14px;border-right:1px solid var(--border)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .plan-summary-value{font-size:17px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .plan-summary-divider{display:none}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .plan-summary-total{min-width:0;padding:3px 14px;border:0;border-radius:0;background:transparent}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .plan-summary-total .plan-summary-value{font-size:18px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-line{padding-left:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-line::before,:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-stop::before,:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-finish::before{display:none}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-stop{margin-bottom:8px;background:var(--surface);border-radius:6px;padding:14px 16px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-stop-header{margin-bottom:5px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-stop-levels{font-size:17px;min-width:76px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-stop-name{font-size:14px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-badge.xp{display:none}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-stop-detail{grid-template-columns:repeat(3,minmax(100px,1fr));gap:12px;margin-top:8px;padding-top:8px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-stop-detail .route-stat:nth-child(1),:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-stop-detail .route-stat:nth-child(3){display:none}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-stop-ing{margin-top:6px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-finish{margin-left:0!important;border-radius:6px;padding:13px 16px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .target-estimate-card{display:none}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .shopping-wrap{margin-top:10px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .shopping-toggle{border-color:var(--border);border-radius:6px;background:var(--surface);padding:12px 16px;font-size:15px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .content{max-width:940px;margin:0 auto;padding:30px 0 36px;background:transparent}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:20px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-title>span{display:block;color:var(--gold);font-size:10px;text-transform:uppercase;letter-spacing:1.3px;margin-bottom:6px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-title h1{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;margin:0;color:var(--text)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-title h1 b{font-weight:400}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-account{display:flex;align-items:center;gap:8px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-account input{width:132px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-account button{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-level-strip{display:flex;align-items:flex-end;gap:12px;background:var(--surface);border:1px solid var(--border);padding:14px;margin:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-level-strip label{display:grid;gap:6px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-level-strip label>span{color:var(--text-dim);font-size:9px;text-transform:uppercase;letter-spacing:1px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-level-strip label input{width:76px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px;border-radius:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-level-strip>i{align-self:center;color:var(--text-dim);font-style:normal;margin-top:16px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-level-strip .apply-btn{height:36px;border-radius:0;padding:0 15px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-xp-controls{margin-left:auto;display:flex;align-items:center;gap:10px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-xp-controls>span{color:var(--text-dim);font-size:9px;text-transform:uppercase;letter-spacing:1px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-mode-toggle{display:flex;border:1px solid var(--border)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-mode-toggle button{height:34px;padding:0 12px;border:0;border-right:1px solid var(--border);background:var(--bg);color:var(--text-dim);font:inherit;font-size:11px;cursor:pointer}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-mode-toggle button:last-child{border-right:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-mode-toggle button.active{background:var(--gold-soft);color:var(--gold);box-shadow:inset 0 -2px var(--gold)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-xp-start{display:none!important}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-exact-xp{width:140px!important;height:36px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-level-strip.show-exact .focused-level-start{display:none}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-level-strip.show-exact .focused-xp-start{display:grid!important}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-meta{min-height:24px;padding:6px 2px;display:flex;align-items:center;gap:12px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-meta .price-status,:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-meta .fetch-status{margin:0;font-size:10px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-status-engine{display:none!important}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-panel{border:1px solid var(--border);border-top:0;background:var(--surface);padding:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-panel-label{display:none}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tabs{gap:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab{border:0;border-right:1px solid var(--border);border-radius:0;background:var(--surface);padding:13px 10px;text-align:center;min-height:62px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab:last-child{border-right:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab.active{background:color-mix(in srgb,var(--gold) 18%,var(--surface));box-shadow:inset 0 -2px var(--gold)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab-name{justify-content:center;font-size:14px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab-dot{display:none}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab-sub{font-size:0;line-height:1;margin-top:5px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab-sub:after{font-size:10px;color:var(--text-dim)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab[data-speed="nuclear"] .speed-tab-sub:after{content:attr(data-live-summary)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab[data-speed="standard"] .speed-tab-sub:after{content:attr(data-live-summary)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab[data-speed="budget"] .speed-tab-sub:after{content:attr(data-live-summary)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab[data-speed="mixology"] .speed-tab-sub:after{content:'Minigame'}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .plan-area{border:1px solid var(--border);border-top:0;border-radius:0;background:transparent;padding:16px 24px 28px;min-height:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-summary{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:16px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-summary>div{padding:14px 16px;border-right:1px solid var(--border)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-summary>div:last-child{border-right:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-summary span,:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-route-stat span{display:block;color:var(--text-dim);font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-summary strong{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:400}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-route-list{display:grid;gap:8px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-route-row{display:grid;grid-template-columns:110px minmax(220px,1fr) 90px 100px 75px;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:15px 16px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-route-row:hover{border-color:var(--gold-dim)}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-levels{display:flex;align-items:center;gap:8px;color:var(--accent,var(--gold));font-family:'Share Tech Mono',monospace;font-size:15px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-method h3{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;margin:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-method p{color:var(--text-dim);font-size:11px;margin:3px 0 0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-method small{display:block;color:var(--text-dim);font-size:10px;margin-top:5px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-route-stat{text-align:right}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-route-stat strong{font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:400}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-market-note{color:var(--text-dim);font-size:10px;margin:10px 2px 0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-mode-bar{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);margin-bottom:16px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-mode-btn{border:0;border-right:1px solid var(--border);background:var(--surface);color:var(--text);padding:12px;cursor:pointer}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-mode-btn:last-child{border-right:0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-mode-btn.active{background:color-mix(in srgb,#4a9eff 16%,var(--surface));box-shadow:inset 0 -2px #4a9eff;color:#4a9eff}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-panel{padding:4px 0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-picker{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;background:var(--surface);border:1px solid var(--border);padding:14px;margin-bottom:16px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-icon{width:40px;height:40px;object-fit:contain;align-self:center}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-picker label{display:grid;gap:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase;letter-spacing:.6px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-picker select{min-width:230px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-picker p{margin:0;color:var(--text-dim);font-size:11px;text-align:right}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-picker>div{display:grid;gap:4px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-picker-label{color:var(--text-dim);font-size:9px;text-transform:uppercase;letter-spacing:.7px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-option{display:grid;grid-template-columns:auto 40px 1fr;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);padding:10px 12px;cursor:pointer}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-option.selected{border-color:#4a9eff;background:color-mix(in srgb,#4a9eff 10%,var(--surface));box-shadow:inset 3px 0 #4a9eff}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-option input{accent-color:#4a9eff}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-option>span{display:grid;gap:3px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-option strong{font-size:12px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-option small{color:var(--text-dim);font-size:9px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-empty{border:1px dashed var(--border);color:var(--text-dim);padding:24px;text-align:center;font-size:12px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-supplies{display:grid;gap:8px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-supplies article{display:grid;grid-template-columns:70px 1fr 1fr 110px;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);padding:13px 15px;font-size:12px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-supplies article span:last-child{text-align:right;font-family:'Share Tech Mono',monospace}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-total{display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:14px;padding:14px 2px 0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-total strong{font-family:'Share Tech Mono',monospace;color:#e74c3c}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-note{color:var(--text-dim);font-size:10px;margin:10px 2px 0}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-potion-name{display:flex;align-items:center;gap:9px}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-item-icon{width:24px;height:24px;object-fit:contain;flex:0 0 auto}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-potion-cell .mixology-item-icon{display:inline-block;vertical-align:middle;margin-right:9px}
 @media(max-width:900px){.suite-cycle{display:none}.suite-tool-menu{left:0}.suite-tool-button{min-width:165px}.hide-sm{display:none!important}}
-@media(max-width:680px){header{padding:0 10px!important;gap:8px!important}.logo{font-size:15px!important}.suite-tool-button{min-width:0;width:150px}.suite-tool-menu{position:fixed;top:58px;left:8px;right:8px;width:auto;grid-template-columns:1fr;max-height:calc(100vh - 70px);overflow-y:auto}.suite-menu-link{padding:8px}.suite-tool-group{display:none}.header-right{margin-left:auto!important}.update-badge,.search-wrap{display:none!important}body[data-suite-page="herblore"] .content{width:calc(100% - 20px);padding:22px 0}body[data-suite-page="herblore"] .focused-page-head{align-items:flex-start;flex-direction:column}body[data-suite-page="herblore"] .focused-account{width:100%}body[data-suite-page="herblore"] .focused-account input{flex:1}body[data-suite-page="herblore"] .focused-level-strip{flex-wrap:wrap}body[data-suite-page="herblore"] .focused-xp-controls{width:100%;margin-left:0;justify-content:space-between}body[data-suite-page="herblore"] .speed-panel,body[data-suite-page="herblore"] .plan-area{width:100%}body[data-suite-page="herblore"] .speed-tabs{grid-template-columns:1fr 1fr}body[data-suite-page="herblore"] .speed-tab{border-right:1px solid var(--border);border-bottom:1px solid var(--border)}body[data-suite-page="herblore"] .plan-summary{grid-template-columns:1fr 1fr}body[data-suite-page="herblore"] .route-stop-detail{grid-template-columns:1fr 1fr}body[data-suite-page="herblore"] .focus-summary{grid-template-columns:1fr 1fr}body[data-suite-page="herblore"] .focus-summary>div:nth-child(2){border-right:0}body[data-suite-page="herblore"] .focus-route-row{grid-template-columns:90px 1fr;gap:10px}body[data-suite-page="herblore"] .focus-route-stat{text-align:left}body[data-suite-page="herblore"] .focus-method{grid-column:2}body[data-suite-page="herblore"] .focus-route-stat:nth-child(3){grid-column:1}body[data-suite-page="herblore"] .focus-route-stat:nth-child(4){grid-column:2}body[data-suite-page="herblore"] .focus-route-stat:nth-child(5){grid-column:1}}
+@media(max-width:680px){header{padding:0 10px!important;gap:8px!important}.logo{font-size:15px!important}.suite-tool-button{min-width:0;width:150px}.suite-tool-menu{position:fixed;top:58px;left:8px;right:8px;width:auto;grid-template-columns:1fr;max-height:calc(100vh - 70px);overflow-y:auto}.suite-menu-link{padding:8px}.suite-tool-group{display:none}.header-right{margin-left:auto!important}.update-badge,.search-wrap{display:none!important}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .content{width:calc(100% - 20px);padding:22px 0}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-page-head{align-items:flex-start;flex-direction:column}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-account{width:100%}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-account input{flex:1}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-level-strip{flex-wrap:wrap}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-xp-controls{width:100%;margin-left:0;justify-content:space-between}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-panel,:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .plan-area{width:100%}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tabs{grid-template-columns:1fr 1fr}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tab{border-right:1px solid var(--border);border-bottom:1px solid var(--border)}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .plan-summary{grid-template-columns:1fr 1fr}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .route-stop-detail{grid-template-columns:1fr 1fr}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-summary{grid-template-columns:1fr 1fr}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-summary>div:nth-child(2){border-right:0}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-route-row{grid-template-columns:90px 1fr;gap:10px}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-route-stat{text-align:left}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-method{grid-column:2}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-route-stat:nth-child(3){grid-column:1}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-route-stat:nth-child(4){grid-column:2}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focus-route-stat:nth-child(5){grid-column:1}}
 @media(max-width:430px){.suite-tool-button{width:126px}.suite-tool-name{font-size:12px}.suite-tool-icon{width:18px;height:18px}.suite-tool-button{grid-template-columns:20px 1fr 10px}}
-@media(max-width:680px){body[data-suite-page="herblore"] .mixology-reward-picker{align-items:stretch;flex-direction:column}body[data-suite-page="herblore"] .mixology-reward-picker select{width:100%;min-width:0}body[data-suite-page="herblore"] .mixology-reward-picker p{text-align:left}body[data-suite-page="herblore"] .mixology-reward-grid{grid-template-columns:1fr}body[data-suite-page="herblore"] .mixology-reward-supplies article{grid-template-columns:58px 1fr;gap:7px}body[data-suite-page="herblore"] .mixology-reward-supplies article span:last-child{text-align:left}}
+@media(max-width:680px){:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-picker{align-items:stretch;flex-direction:column}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-picker select{width:100%;min-width:0}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-picker p{text-align:left}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-grid{grid-template-columns:1fr}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-supplies article{grid-template-columns:58px 1fr;gap:7px}:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .mixology-reward-supplies article span:last-child{text-align:left}}
