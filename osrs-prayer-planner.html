@@ -168,7 +168,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
     <div class="skill-sep"></div>
     <button class="skill-btn" onclick="location.href='osrs-smithing-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing</button>
     <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">Fletching<span class="soon-badge">Soon</span></button>
-    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn" onclick="location.href='osrs-cooking-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking</button>
     <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">Crafting<span class="soon-badge">Soon</span></button>
   </nav>
   <div class="content">
@@ -478,6 +478,7 @@ function updateStatusCard(){
 // ── HELPERS ─────────────────────────────────────────────────────────────────────
 function fmt(n){if(!n&&n!==0)return'—';if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
 function fmtGp(n){const abs=Math.abs(n);let s;if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';else s=Math.round(abs).toLocaleString();return(n<0?'-':'')+s+' gp';}
+function fmtGpExact(n){return`${Math.round(n).toLocaleString()} gp`;}
 function fmtHrs(h){if(!isFinite(h)||h<=0)return'—';if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixed(1)+' hrs';return(h/24).toFixed(1)+' days';}
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -887,11 +888,11 @@ function renderBonesMode(){
     <div class="route-stop-detail">
       <div class="route-stat"><div class="route-stat-label">XP Remaining</div><div class="route-stat-value">${xpRemaining.toLocaleString()}</div></div>
       <div class="route-stat"><div class="route-stat-label">${itemLabel}s Needed${method.consumeChance<1?' (expected)':''}</div><div class="route-stat-value">${itemsNeeded.toLocaleString()}</div></div>
-      <div class="route-stat"><div class="route-stat-label">${itemLabel} Price</div><div class="route-stat-value">${pricesLoaded?fmtGp(econ.bonePrice):'—'}</div></div>
-      ${method.needsSlime?`<div class="route-stat"><div class="route-stat-label">Bucket of Slime</div><div class="route-stat-value">${pricesLoaded?fmtGp(econ.slimePrice):'—'}</div></div>`:''}
+      <div class="route-stat"><div class="route-stat-label">${itemLabel} Price</div><div class="route-stat-value">${pricesLoaded?fmtGpExact(econ.bonePrice):'—'}</div></div>
+      ${method.needsSlime?`<div class="route-stat"><div class="route-stat-label">Bucket of Slime</div><div class="route-stat-value">${pricesLoaded?fmtGpExact(econ.slimePrice):'—'}</div></div>`:''}
       ${usesOfferingSpell?`<div class="route-stat"><div class="route-stat-label">Casts Needed</div><div class="route-stat-value">${castsNeeded.toLocaleString()}</div></div>
       ${method.runeNames.map(rn=>`<div class="route-stat"><div class="route-stat-label">${rn}s Needed</div><div class="route-stat-value">${castsNeeded.toLocaleString()}</div></div>`).join('')}
-      <div class="route-stat"><div class="route-stat-label">Rune Cost / Cast</div><div class="route-stat-value">${pricesLoaded?fmtGp(econ.runeCostPerCast):'—'}</div></div>
+      <div class="route-stat"><div class="route-stat-label">Rune Cost / Cast</div><div class="route-stat-value">${pricesLoaded?fmtGpExact(econ.runeCostPerCast):'—'}</div></div>
       <div class="route-stat"><div class="route-stat-label">Prayer Pts Restored</div><div class="route-stat-value">${prayerPointsRestored.toLocaleString()}</div></div>`:''}
       <div class="route-stat"><div class="route-stat-label">Finish By</div><div class="route-stat-value">${finishStr}</div></div>
     </div>
@@ -912,7 +913,7 @@ function renderBonesMode(){
     <td class="mono">${r.xp}</td>
     <td class="mono">${fmt(r.perOffering)}</td>
     <td class="mono">${fmt(r.xpPerHr)}</td>
-    <td class="mono">${pricesLoaded?fmtGp(r.bonePrice):'—'}</td>
+    <td class="mono">${pricesLoaded?fmtGpExact(r.bonePrice):'—'}</td>
     <td class="mono" style="color:${r.gpPerXp<=0?'var(--green)':'var(--red)'};">${pricesLoaded?r.gpPerXp.toFixed(2)+' gp':'—'}</td>
   </tr>`).join('');
 
@@ -1103,8 +1104,8 @@ function renderLibationMode(){
       <div class="route-stat"><div class="route-stat-label">Bones Needed</div><div class="route-stat-value">${bonesNeeded.toLocaleString()}</div></div>
       <div class="route-stat"><div class="route-stat-label">Shards Needed</div><div class="route-stat-value">${shardsNeeded.toLocaleString()}</div></div>
       <div class="route-stat"><div class="route-stat-label">Jugs Needed</div><div class="route-stat-value">${jugsNeeded.toLocaleString()}</div></div>
-      <div class="route-stat"><div class="route-stat-label">Bone Price</div><div class="route-stat-value">${pricesLoaded?fmtGp(econ.boneCost):'—'}</div></div>
-      <div class="route-stat"><div class="route-stat-label">${wineLabel} Cost</div><div class="route-stat-value">${pricesLoaded?fmtGp(econ.jugCost):'—'}</div></div>
+      <div class="route-stat"><div class="route-stat-label">Bone Price</div><div class="route-stat-value">${pricesLoaded?fmtGpExact(econ.boneCost):'—'}</div></div>
+      <div class="route-stat"><div class="route-stat-label">${wineLabel} Cost</div><div class="route-stat-value">${pricesLoaded?fmtGpExact(econ.jugCost):'—'}</div></div>
       <div class="route-stat"><div class="route-stat-label">Sacrifice Actions</div><div class="route-stat-value">${actionsNeeded.toLocaleString()}</div></div>
       <div class="route-stat"><div class="route-stat-label">Prayer Pts Drained</div><div class="route-stat-value">${prayerPointsDrained.toLocaleString()}</div></div>
       <div class="route-stat"><div class="route-stat-label">Finish By</div><div class="route-stat-value">${finishStr}</div></div>
@@ -1126,7 +1127,7 @@ function renderLibationMode(){
     <td>${r.name}${r.locked?' 🔒':''}</td>
     <td class="mono">${r.shards}</td>
     <td class="mono">${r.xpPerBone}</td>
-    <td class="mono">${pricesLoaded?fmtGp(r.boneCost):'—'}</td>
+    <td class="mono">${pricesLoaded?fmtGpExact(r.boneCost):'—'}</td>
     <td class="mono" style="color:${r.gpPerXp<=0?'var(--green)':'var(--red)'};">${pricesLoaded?r.gpPerXp.toFixed(2)+' gp':'—'}</td>
   </tr>`).join('');
 

@@ -285,7 +285,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
     <div class="skill-sep"></div>
     <button class="skill-btn" onclick="location.href='osrs-smithing-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Smithing_icon.png" alt="">Smithing</button>
     <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Fletching_icon.png" alt="">Fletching<span class="soon-badge">Soon</span></button>
-    <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking<span class="soon-badge">Soon</span></button>
+    <button class="skill-btn" onclick="location.href='osrs-cooking-planner.html'"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Cooking_icon.png" alt="">Cooking</button>
     <button class="skill-btn disabled"><img class="skill-icon-img" src="https://oldschool.runescape.wiki/images/Crafting_icon.png" alt="">Crafting<span class="soon-badge">Soon</span></button>
   </nav>
 
@@ -1011,6 +1011,7 @@ function fmtGp(n){
   else s=Math.round(abs).toLocaleString();
   return (n<0?'-':'')+s+' gp';
 }
+function fmtGpExact(n){return`${Math.round(n).toLocaleString()} gp`;}
 function fmtTime(min){
   if(min<60) return Math.round(min)+'m';
   const hrs=min/60;
@@ -1563,7 +1564,7 @@ function generateCustomPlan(){
         <div class="track-stat"><div class="track-stat-label">Daily XP</div><div class="track-stat-value" style="color:var(--gold);">${fmt(runDailyXp)}</div></div>
         <div class="track-stat"><div class="track-stat-label">Daily cost</div><div class="track-stat-value" style="color:var(--red);">${fmtGp(runDailyCost)}</div></div>
       </div>
-      <div class="track-card-note">Seed ${fmtGp(seedCost)} + ${protectionLabel(regularTier)} (${fmtGp(payCost)})</div>
+      <div class="track-card-note">Seed ${fmtGpExact(seedCost)} + ${protectionLabel(regularTier)} (${fmtGpExact(payCost)})</div>
     </div>`;
   }
 
@@ -1590,7 +1591,7 @@ function generateCustomPlan(){
         <div class="track-stat"><div class="track-stat-label">Daily XP</div><div class="track-stat-value" style="color:var(--gold);">${fmt(runDailyXp)}</div></div>
         <div class="track-stat"><div class="track-stat-label">Daily cost</div><div class="track-stat-value" style="color:var(--red);">${fmtGp(runDailyCost)}</div></div>
       </div>
-      <div class="track-card-note">Seed ${fmtGp(seedCost)} + ${protectionLabel(fruitTier)} (${fmtGp(payCost)})</div>
+      <div class="track-card-note">Seed ${fmtGpExact(seedCost)} + ${protectionLabel(fruitTier)} (${fmtGpExact(payCost)})</div>
     </div>`;
   }
 
@@ -1652,7 +1653,7 @@ function generateCustomPlan(){
         <div class="track-stat"><div class="track-stat-label">Daily XP</div><div class="track-stat-value" style="color:var(--gold);">${fmt(dailyHerbXp)}</div></div>
         <div class="track-stat"><div class="track-stat-label">Daily profit</div><div class="track-stat-value" style="color:${profitCls};">${fmtGp(dailyProfit)}</div></div>
       </div>
-      <div class="track-card-note">~${HERB_YIELD_PER_PATCH} herbs/patch at ${fmtGp(herbSellPrice)} each (grimy, instant-sell estimate) — assumes ultracompost + magic secateurs.</div>
+      <div class="track-card-note">~${HERB_YIELD_PER_PATCH} herbs/patch at ${fmtGpExact(herbSellPrice)} each (grimy, instant-sell estimate) — assumes ultracompost + magic secateurs.</div>
     </div>`;
   } else if(customState.herbsEnabled===false){
     html += `<div class="track-card" style="--accent:${accent};"><div class="track-card-empty">Herb runs disabled — toggle them on above to include in your plan.</div></div>`;
