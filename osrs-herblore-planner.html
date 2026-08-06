@@ -637,6 +637,7 @@ function netGpPerXp(method){
 function fmt(n){if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
 function fmtExact(n){return Math.ceil(n).toLocaleString();}
 function fmtGp(n){return(n<0?'-':'')+Math.round(Math.abs(n)).toLocaleString()+' gp';}
+function fmtGpTotal(n){const abs=Math.abs(n);let value;if(abs>=1e9)value=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)value=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)value=(abs/1e3).toFixed(1)+'K';else value=Math.round(abs).toLocaleString();return(n<0?'-':'')+value+' gp';}
 function fmtHrs(h){if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixed(1)+' hrs';return(h/24).toFixed(1)+' days';}
 
 function updateRouteTabMetrics(startLevel,endLevel){
@@ -646,7 +647,7 @@ function updateRouteTabMetrics(startLevel,endLevel){
     const cost=route.reduce((sum,stop)=>sum+stop.totalCost,0);
     const hours=route.reduce((sum,stop)=>sum+stop.hoursNeeded,0);
     const subtitle=document.querySelector(`.speed-tab[data-speed="${speed}"] .speed-tab-sub`);
-    if(subtitle)subtitle.dataset.liveSummary=`${fmtGp(Math.abs(cost)).replace(' gp','')} · ${fmtHrs(hours)}`;
+    if(subtitle)subtitle.dataset.liveSummary=`${fmtGpTotal(Math.abs(cost)).replace(' gp','')} · ${fmtHrs(hours)}`;
   });
 }
 
@@ -753,7 +754,7 @@ function renderMixologyRewardPlan(curLevel){
       <div><span>Lye resin</span><strong>${fmt(resin.lye)}</strong></div>
     </div>
     <div class="mixology-reward-supplies">${supplies.map(item=>`<article><strong>${item.type.toUpperCase()}</strong><span>${fmt(item.paste)} paste</span><span>${fmt(item.herbs)} ${item.herb}</span><span>${fmtGp(item.cost)}</span></article>`).join('')}</div>
-    <div class="mixology-reward-total"><span>Estimated herb cost</span><strong>${fmtGp(totalCost)}</strong></div>
+    <div class="mixology-reward-total"><span>Estimated herb cost</span><strong>${fmtGpTotal(totalCost)}</strong></div>
     <p class="mixology-reward-note">Estimate assumes attentive level 81+ play at roughly 3,000 of each resin per hour and about 1.5 resin per paste. Actual results vary with orders and digweed.</p>`:`<div class="mixology-reward-empty">Select at least one reward to calculate the combined requirements.</div>`}
   </div>`;
 }
@@ -842,7 +843,7 @@ function renderMixologyPlan(curLevel, targetLevel){
       <div class="plan-summary-divider"></div>
       <div class="plan-summary-total">
         <div class="plan-summary-label">Est. Total Cost</div>
-        <div class="plan-summary-value" style="color:#e74c3c;">${fmtGp(totalCost)}</div>
+        <div class="plan-summary-value" style="color:#e74c3c;">${fmtGpTotal(totalCost)}</div>
       </div>
     </div>
 
@@ -885,10 +886,10 @@ function renderMixologyPlan(curLevel, targetLevel){
               </div>
             </div>
             <div style="font-size:11px;border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:4px;">
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-dim);">Mox (${bestMox.name}) needed:</span><span style="font-family:'Share Tech Mono',monospace;">${fmt(moxHerbsNeeded)} herbs — ${fmtGp(moxTotalCost)}</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-dim);">Aga (${bestAga.name}) needed:</span><span style="font-family:'Share Tech Mono',monospace;">${fmt(agaHerbsNeeded)} herbs — ${fmtGp(agaTotalCost)}</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-dim);">Lye (${bestLye.name}) needed:</span><span style="font-family:'Share Tech Mono',monospace;">${fmt(lyeHerbsNeeded)} herbs — ${fmtGp(lyeTotalCost)}</span></div>
-              <div style="display:flex;justify-content:space-between;padding-top:4px;border-top:1px solid var(--border);"><strong>Total herb cost:</strong><span style="font-family:'Share Tech Mono',monospace;color:#e74c3c;">${fmtGp(totalCost)}</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-dim);">Mox (${bestMox.name}) needed:</span><span style="font-family:'Share Tech Mono',monospace;">${fmt(moxHerbsNeeded)} herbs — ${fmtGpTotal(moxTotalCost)}</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-dim);">Aga (${bestAga.name}) needed:</span><span style="font-family:'Share Tech Mono',monospace;">${fmt(agaHerbsNeeded)} herbs — ${fmtGpTotal(agaTotalCost)}</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-dim);">Lye (${bestLye.name}) needed:</span><span style="font-family:'Share Tech Mono',monospace;">${fmt(lyeHerbsNeeded)} herbs — ${fmtGpTotal(lyeTotalCost)}</span></div>
+              <div style="display:flex;justify-content:space-between;padding-top:4px;border-top:1px solid var(--border);"><strong>Total herb cost:</strong><span style="font-family:'Share Tech Mono',monospace;color:#e74c3c;">${fmtGpTotal(totalCost)}</span></div>
               <div style="color:var(--text-dim);margin-top:4px;font-style:italic;">Paste can't be traded — check live prices before buying herbs. Grimy herbs are ~5-15% cheaper but need cleaning first.</div>
             </div>
           </div>
@@ -904,7 +905,7 @@ function renderMixologyPlan(curLevel, targetLevel){
         <div class="target-estimate-stat"><div class="target-estimate-label">Est. Time (active)</div><div class="target-estimate-value">${fmtHrs(hoursNeeded)}</div></div>
         <div class="target-estimate-stat"><div class="target-estimate-label">Est. Time (passive)</div><div class="target-estimate-value">${fmtHrs(xpRemaining/MIXOLOGY_XP_PER_HR_PASSIVE)}</div></div>
         <div class="target-estimate-stat"><div class="target-estimate-label">Finish By</div><div class="target-estimate-value" style="font-size:14px;">${finishStr}</div></div>
-        <div class="target-estimate-stat target-estimate-cost"><div class="target-estimate-label">Total Herb Cost</div><div class="target-estimate-value" style="color:#e74c3c;">${fmtGp(totalCost)}</div></div>
+        <div class="target-estimate-stat target-estimate-cost"><div class="target-estimate-label">Total Herb Cost</div><div class="target-estimate-value" style="color:#e74c3c;">${fmtGpTotal(totalCost)}</div></div>
         <div class="target-estimate-stat"><div class="target-estimate-label">GP / XP</div><div class="target-estimate-value" style="color:${accent};">${gpPerXp} gp</div></div>
       </div>
       <div class="target-estimate-note">XP rates from OSRS Wiki (confirmed): ~70k xp/hr active clicking at level 81+, ~45k xp/hr passive. Rates are lower below level 81 since Mixalot (the highest-XP potion) isn't available. Herb costs calculated from the cheapest herb per paste type — Marrentill for Mox, Lantadyme for Aga, Avantoe for Lye. Always compare grimy vs clean prices on the GE first as grimy herbs are often significantly cheaper. Paste yields are exact values from the OSRS Wiki. Does not include sell-back value since paste is non-tradeable.</div>
@@ -1063,18 +1064,18 @@ function generatePlan(){
   }
 
   let html=`<div class="focus-summary">
-    <div><span>${totalCost>=0?'Net cost':'Net profit'}</span><strong style="color:${totalCost>=0?'#e74c3c':'#2ecc71'};">${pricesLoaded?fmtGp(Math.abs(totalCost)):'Loading…'}</strong></div>
+    <div><span>${totalCost>=0?'Net cost':'Net profit'}</span><strong style="color:${totalCost>=0?'#e74c3c':'#2ecc71'};">${pricesLoaded?fmtGpTotal(Math.abs(totalCost)):'Loading…'}</strong></div>
     <div><span>Time</span><strong>${fmtHrs(totalHrs)}</strong></div>
     <div><span>Potions</span><strong>${fmtExact(totalPotions)}</strong></div>
-    <div><span>Upfront</span><strong>${pricesLoaded?fmtGp(grossIngredientCost):'Loading…'}</strong></div>
+    <div><span>Upfront</span><strong>${pricesLoaded?fmtGpTotal(grossIngredientCost):'Loading…'}</strong></div>
   </div>`;
 
   if(gogglesEnabled||amuletEnabled||pouchEnabled){
     const savedGp=baselineCost-totalCost, savedHours=baselineHrs-totalHrs;
     html+=`<div class="upgrade-comparison">
-      <div><span>Without upgrades</span><strong>${pricesLoaded?fmtGp(Math.abs(baselineCost)):'Loading…'} · ${fmtHrs(baselineHrs)}</strong></div>
-      <div><span>With selected upgrades</span><strong>${pricesLoaded?fmtGp(Math.abs(totalCost)):'Loading…'} · ${fmtHrs(totalHrs)}</strong></div>
-      <div><span>Estimated savings</span><strong>${pricesLoaded?fmtGp(savedGp):'Loading…'} · ${savedHours>0?fmtHrs(savedHours):'No time change'}</strong></div>
+      <div><span>Without upgrades</span><strong>${pricesLoaded?fmtGpTotal(Math.abs(baselineCost)):'Loading…'} · ${fmtHrs(baselineHrs)}</strong></div>
+      <div><span>With selected upgrades</span><strong>${pricesLoaded?fmtGpTotal(Math.abs(totalCost)):'Loading…'} · ${fmtHrs(totalHrs)}</strong></div>
+      <div><span>Estimated savings</span><strong>${pricesLoaded?fmtGpTotal(savedGp):'Loading…'} · ${savedHours>0?fmtHrs(savedHours):'No time change'}</strong></div>
     </div>`;
   }
 
@@ -1090,7 +1091,7 @@ function generatePlan(){
         <div class="upgrade-badges">${gogglesEnabled&&gogglesEligible(stop)?'<span class="upgrade-badge">Goggles: ≈10% secondary saved</span>':''}${amuletEnabled&&amuletEligible(stop)?'<span class="upgrade-badge">Amulet: ≈15% bonus-dose chance</span>':''}${pouchEnabled&&pouchEligible(stop)?'<span class="upgrade-badge">Pouch: ≈2,700/hr</span>':''}</div>
       </div>
       <div class="focus-route-stat"><strong>${stop.actionsNeeded.toLocaleString()}</strong><span>potions</span></div>
-      <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded?fmtGp(Math.abs(stop.totalCost)).replace(' gp',''):'—'}</strong><span>${stop.totalCost<0?'net profit':'net cost'}</span></div>
+      <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded?fmtGpTotal(Math.abs(stop.totalCost)).replace(' gp',''):'—'}</strong><span>${stop.totalCost<0?'net profit':'net cost'}</span></div>
       <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded&&stop.xpNeeded>0?(stop.totalCost/stop.xpNeeded).toFixed(2):'—'}</strong><span>gp/xp</span></div>
     </article>`;
   });
@@ -1209,15 +1210,15 @@ function generatePlan(){
           <div class="shopping-grand-total" style="flex-direction:column;align-items:stretch;gap:8px;">
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <span style="color:var(--text-dim);font-size:14px;">💰 Upfront Capital Needed</span>
-              <span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#e74c3c;">${fmtGp(grandTotal)}</span>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#e74c3c;">${fmtGpTotal(grandTotal)}</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <span style="color:var(--green);font-size:14px;">📈 Sell All Finished Potions</span>
-              <span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--green);">−${fmtGp(sellCredit)}</span>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--green);">−${fmtGpTotal(sellCredit)}</span>
             </div>
             <div style="border-top:1px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;align-items:center;">
               <span style="font-size:16px;font-weight:700;">${netCost>=0?'Net Cost':'Net Profit'}</span>
-              <span class="gp" style="color:${netCost>=0?'#e74c3c':'#2ecc71'};">${fmtGp(Math.abs(netCost))}</span>
+              <span class="gp" style="color:${netCost>=0?'#e74c3c':'#2ecc71'};">${fmtGpTotal(Math.abs(netCost))}</span>
             </div>
           </div>
           <div class="shopping-note">Quantities are exact — buy this many and you'll have just enough with no leftover. Prices update live from the Grand Exchange. Check prices again before bulk buying as margins shift daily.</div>
