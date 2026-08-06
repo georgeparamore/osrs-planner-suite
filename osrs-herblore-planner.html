@@ -134,12 +134,30 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .target-estimate-cost .target-estimate-value{font-size:22px;}
 .target-estimate-note{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
 .price-status{font-size:11px;color:var(--text-dim);margin-bottom:10px;}
+.upgrade-panel{margin-top:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;}
+.upgrade-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:8px;}
+.upgrade-controls{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;}
+.upgrade-toggle{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--border);border-radius:7px;background:var(--surface);cursor:pointer;font-size:12px;color:var(--text-dim);transition:.15s;}
+.upgrade-toggle:has(input:checked){border-color:var(--gold);color:var(--text);background:rgba(200,168,75,.08);}
+.upgrade-toggle input{accent-color:var(--gold);}
+.upgrade-toggle img{width:20px;height:20px;object-fit:contain;image-rendering:auto;}
+.upgrade-charges{display:none;align-items:center;gap:7px;padding:6px 9px;border-left:1px solid var(--border);margin-left:2px;}
+.upgrade-charges.show{display:flex;}
+.upgrade-charges input{width:76px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:5px 7px;font-family:'Share Tech Mono',monospace;}
+.upgrade-note{font-size:10px;color:var(--text-dim);margin-top:7px;line-height:1.4;}
+.upgrade-comparison{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:12px 0;}
+.upgrade-comparison>div{background:var(--surface2);padding:10px 12px;display:flex;flex-direction:column;gap:3px;}
+.upgrade-comparison span{font-size:9px;text-transform:uppercase;color:var(--text-dim);letter-spacing:.4px;}
+.upgrade-comparison strong{font-family:'Share Tech Mono',monospace;font-size:14px;}
+.upgrade-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;}
+.upgrade-badge{font-size:9px;padding:2px 6px;border-radius:9px;background:rgba(74,126,255,.12);color:var(--blue);}
+@media(max-width:600px){.upgrade-comparison{grid-template-columns:1fr}.upgrade-controls{flex-direction:column}.upgrade-toggle{width:100%}}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
-<link rel="stylesheet" href="suite-nav.css?v=17">
+<link rel="stylesheet" href="suite-nav.css?v=19">
 </head>
 <body>
 <header>
@@ -205,6 +223,16 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
           <div class="status-progress-text"><span id="statusXpText">0 XP</span><span id="statusTargetText">Target: Level 99</span></div>
         </div>
         <div class="status-stat"><div class="status-stat-label">XP Remaining</div><div class="status-stat-value" id="statusXpRemaining">—</div></div>
+      </div>
+      <div class="upgrade-panel" id="upgradePanel">
+        <div class="upgrade-title">Owned Mixology upgrades</div>
+        <div class="upgrade-controls">
+          <label class="upgrade-toggle"><input type="checkbox" id="gogglesToggle"><img src="https://oldschool.runescape.wiki/images/Prescription_goggles.png" alt="">Prescription goggles</label>
+          <label class="upgrade-toggle"><input type="checkbox" id="amuletToggle"><img src="https://oldschool.runescape.wiki/images/Alchemist%27s_amulet_(charged).png" alt="">Alchemist’s amulet</label>
+          <div class="upgrade-charges" id="amuletChargesWrap"><label for="amuletCharges" class="field-label">Current charges</label><input type="number" id="amuletCharges" min="0" max="5000" value="50"></div>
+          <label class="upgrade-toggle"><input type="checkbox" id="pouchToggle"><img src="https://oldschool.runescape.wiki/images/Reagent_pouch.png" alt="">Reagent pouch</label>
+        </div>
+        <div class="upgrade-note">Standard potion routes only. Estimates: goggles save eligible secondaries randomly; the amulet adds doses without XP; the pouch improves eligible 14+14 banking from 2,500 to about 2,700 potions/hr after level 81.</div>
       </div>
     </div>
     <div class="speed-panel">
@@ -367,6 +395,7 @@ async function loadPrices(){
 // ── STATE ───────────────────────────────────────────────────────────────────────
 const SUITE_THEME_KEY='osrs-suite-theme';
 let playerLevel=3, playerXp=0, targetLevelVal=99, currentSpeed='standard', isDark=localStorage.getItem(SUITE_THEME_KEY)!=='light';
+let gogglesEnabled=false, amuletEnabled=false, pouchEnabled=false, amuletCurrentCharges=50;
 document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
 document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
 
@@ -460,6 +489,23 @@ manualLevelInput.addEventListener('input',()=>{
   manualXpInput.value='';
 });
 
+const gogglesToggle=document.getElementById('gogglesToggle');
+const amuletToggle=document.getElementById('amuletToggle');
+const pouchToggle=document.getElementById('pouchToggle');
+const amuletChargesInput=document.getElementById('amuletCharges');
+const amuletChargesWrap=document.getElementById('amuletChargesWrap');
+[gogglesToggle,amuletToggle,pouchToggle].forEach(toggle=>toggle.addEventListener('change',()=>{
+  gogglesEnabled=gogglesToggle.checked;
+  amuletEnabled=amuletToggle.checked;
+  pouchEnabled=pouchToggle.checked;
+  amuletChargesWrap.classList.toggle('show',amuletEnabled);
+  generatePlan();
+}));
+amuletChargesInput.addEventListener('input',()=>{
+  amuletCurrentCharges=Math.max(0,Math.min(5000,parseInt(amuletChargesInput.value)||0));
+  generatePlan();
+});
+
 document.getElementById('applyBtn').addEventListener('click',()=>{
   const lvl=parseInt(manualLevelInput.value)||3;
   const xpInput=manualXpInput.value.trim();
@@ -502,6 +548,26 @@ function updateStatusCard(){
 }
 
 // ── ROUTE GENERATION ────────────────────────────────────────────────────────────
+function isCleaningMethod(method){return method.name.startsWith('Clean ');}
+function gogglesEligible(method){return !isCleaningMethod(method)&&method.name!=='Menaphite remedy'&&(method.inputNames||[]).length>=2;}
+function amuletEligible(method){return !isCleaningMethod(method)&&/\(3\)$/.test(method.outputName||'');}
+function pouchEligible(method){return !isCleaningMethod(method)&&method.name!=='Menaphite remedy'&&(method.levelStart??method.minLevel)>=81&&method.actionsPerHr===2500&&(method.inputNames||[]).length===2;}
+function actionsPerHrFor(method){return pouchEnabled&&pouchEligible(method)?2700:method.actionsPerHr;}
+function inputQtyFor(method,input,index){
+  const qty=typeof input==='object'&&input.qty?input.qty:1;
+  const isSecondary=index===(method.inputNames||[]).length-1;
+  return gogglesEnabled&&gogglesEligible(method)&&isSecondary?qty*0.9:qty;
+}
+function outputCreditFor(method){
+  const base=sellPriceOf(method.outputName);
+  if(!amuletEnabled||!amuletEligible(method))return base;
+  const fourDoseName=method.outputName.replace(/\(3\)$/,'(4)');
+  const fourDoseCredit=sellPriceOf(fourDoseName);
+  const doseValue=fourDoseCredit?fourDoseCredit/4:base/3;
+  return base+(0.15*doseValue);
+}
+function marginalAmuletCost(method){return amuletEnabled&&amuletEligible(method)?priceOf('Amulet of chemistry')*0.015:0;}
+
 function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel)){
   const methods=speed==='budget'
     ? [...HERBLORE_METHODS.value,...HERBLORE_METHODS.budget]
@@ -516,33 +582,37 @@ function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel))
       if(!next) break;
       lvl=next.minLevel; continue;
     }
+    const pricedCandidates=isLiveValue?candidates.filter(m=>Number.isFinite(netGpPerXp(m))):candidates;
+    if(!pricedCandidates.length)break;
     const method=isLiveValue
-      ? candidates.sort((a,b)=>netGpPerXp(a)-netGpPerXp(b))[0]
+      ? pricedCandidates.sort((a,b)=>netGpPerXp(a)-netGpPerXp(b))[0]
       : candidates.sort((a,b)=>b.maxLevel-a.maxLevel)[0];
     const nextUnlock=isLiveValue
       ? methods.filter(m=>m.minLevel>lvl).reduce((next,m)=>Math.min(next,m.minLevel),Infinity)
       : Infinity;
-    const stopEnd=isLiveValue
+    let stopEnd=isLiveValue
       ? Math.min(nextUnlock,endLevel)
       : Math.min(method.maxLevel,endLevel);
+    if(pouchEnabled&&lvl<81&&stopEnd>81)stopEnd=81;
     const xpStart=lvl===startLevel?Math.max(xpForLevel(lvl),startXp):xpForLevel(lvl), xpEnd=xpForLevel(stopEnd);
     const xpNeeded=xpEnd-xpStart;
     const actionsNeeded=Math.ceil(xpNeeded/method.xpPerAction);
-    const hoursNeeded=actionsNeeded/method.actionsPerHr;
+    const activeMethod={...method,levelStart:lvl};
+    const hoursNeeded=actionsNeeded/actionsPerHrFor(activeMethod);
 
     const totalCost=pricesLoaded?netCostPerAction(method)*actionsNeeded:0;
     const previous=stops[stops.length-1];
-    if(isLiveValue&&previous&&previous.name===method.name){
+    if(isLiveValue&&previous&&previous.name===method.name&&pouchEligible(previous)===pouchEligible(activeMethod)){
       previous.levelEnd=stopEnd;
       previous.xpNeeded+=xpNeeded;
       previous.actionsNeeded=Math.ceil(previous.xpNeeded/method.xpPerAction);
-      previous.hoursNeeded=previous.actionsNeeded/method.actionsPerHr;
+      previous.hoursNeeded=previous.actionsNeeded/actionsPerHrFor(previous);
       previous.totalCost=netCostPerAction(method)*previous.actionsNeeded;
     }else{
       const liveValueNote=isLiveValue
         ? `Cheapest eligible method at ${netGpPerXp(method).toFixed(2)} net GP/XP using the latest loaded GE prices. This choice can change as prices move.`
         : method.note;
-      stops.push({...method,note:liveValueNote,levelStart:lvl,levelEnd:stopEnd,xpNeeded,actionsNeeded,hoursNeeded,totalCost});
+      stops.push({...activeMethod,note:liveValueNote,levelEnd:stopEnd,xpNeeded,actionsNeeded,hoursNeeded,totalCost});
     }
     lvl=stopEnd;
   }
@@ -550,22 +620,24 @@ function buildRoute(startLevel, endLevel, speed, startXp=xpForLevel(startLevel))
 }
 
 function netCostPerAction(method){
-  const inputCost=(method.inputNames||[]).reduce((sum,n)=>{
+  const inputCost=(method.inputNames||[]).reduce((sum,n,index)=>{
     const itemName=typeof n==='string'?n:n.name;
-    const qty=typeof n==='object'&&n.qty?n.qty:1;
+    const qty=inputQtyFor(method,n,index);
     return sum+priceOf(itemName)*qty;
   },0);
-  return inputCost-sellPriceOf(method.outputName);
+  return inputCost+marginalAmuletCost(method)-outputCreditFor(method);
 }
 
 function netGpPerXp(method){
-  const hasOutput=sellPriceOf(method.outputName)>0;
-  const hasAllInputs=(method.inputNames||[]).every(n=>priceOf(typeof n==='string'?n:n.name)>0);
+  const hasOutput=outputCreditFor(method)>0;
+  const hasAllInputs=(method.inputNames||[]).every(n=>priceOf(typeof n==='string'?n:n.name)>0)&&(!amuletEnabled||!amuletEligible(method)||priceOf('Amulet of chemistry')>0);
   return hasOutput&&hasAllInputs?netCostPerAction(method)/method.xpPerAction:Infinity;
 }
 
 function fmt(n){if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toLocaleString();}
-function fmtGp(n){const abs=Math.abs(n);let s;if(abs>=1e9)s=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)s=(abs/1e3).toFixed(1)+'K';else s=Math.round(abs).toLocaleString();return(n<0?'-':'')+s+' gp';}
+function fmtExact(n){return Math.ceil(n).toLocaleString();}
+function fmtGp(n){return(n<0?'-':'')+Math.round(Math.abs(n)).toLocaleString()+' gp';}
+function fmtGpTotal(n){const abs=Math.abs(n);let value;if(abs>=1e9)value=(abs/1e9).toFixed(2)+'B';else if(abs>=1e6)value=(abs/1e6).toFixed(2)+'M';else if(abs>=1e3)value=(abs/1e3).toFixed(1)+'K';else value=Math.round(abs).toLocaleString();return(n<0?'-':'')+value+' gp';}
 function fmtHrs(h){if(h<1)return Math.round(h*60)+' min';if(h<48)return h.toFixed(1)+' hrs';return(h/24).toFixed(1)+' days';}
 
 function updateRouteTabMetrics(startLevel,endLevel){
@@ -575,7 +647,7 @@ function updateRouteTabMetrics(startLevel,endLevel){
     const cost=route.reduce((sum,stop)=>sum+stop.totalCost,0);
     const hours=route.reduce((sum,stop)=>sum+stop.hoursNeeded,0);
     const subtitle=document.querySelector(`.speed-tab[data-speed="${speed}"] .speed-tab-sub`);
-    if(subtitle)subtitle.dataset.liveSummary=`${fmtGp(Math.abs(cost)).replace(' gp','')} · ${fmtHrs(hours)}`;
+    if(subtitle)subtitle.dataset.liveSummary=`${fmtGpTotal(Math.abs(cost)).replace(' gp','')} · ${fmtHrs(hours)}`;
   });
 }
 
@@ -682,7 +754,7 @@ function renderMixologyRewardPlan(curLevel){
       <div><span>Lye resin</span><strong>${fmt(resin.lye)}</strong></div>
     </div>
     <div class="mixology-reward-supplies">${supplies.map(item=>`<article><strong>${item.type.toUpperCase()}</strong><span>${fmt(item.paste)} paste</span><span>${fmt(item.herbs)} ${item.herb}</span><span>${fmtGp(item.cost)}</span></article>`).join('')}</div>
-    <div class="mixology-reward-total"><span>Estimated herb cost</span><strong>${fmtGp(totalCost)}</strong></div>
+    <div class="mixology-reward-total"><span>Estimated herb cost</span><strong>${fmtGpTotal(totalCost)}</strong></div>
     <p class="mixology-reward-note">Estimate assumes attentive level 81+ play at roughly 3,000 of each resin per hour and about 1.5 resin per paste. Actual results vary with orders and digweed.</p>`:`<div class="mixology-reward-empty">Select at least one reward to calculate the combined requirements.</div>`}
   </div>`;
 }
@@ -771,7 +843,7 @@ function renderMixologyPlan(curLevel, targetLevel){
       <div class="plan-summary-divider"></div>
       <div class="plan-summary-total">
         <div class="plan-summary-label">Est. Total Cost</div>
-        <div class="plan-summary-value" style="color:#e74c3c;">${fmtGp(totalCost)}</div>
+        <div class="plan-summary-value" style="color:#e74c3c;">${fmtGpTotal(totalCost)}</div>
       </div>
     </div>
 
@@ -814,10 +886,10 @@ function renderMixologyPlan(curLevel, targetLevel){
               </div>
             </div>
             <div style="font-size:11px;border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:4px;">
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-dim);">Mox (${bestMox.name}) needed:</span><span style="font-family:'Share Tech Mono',monospace;">${fmt(moxHerbsNeeded)} herbs — ${fmtGp(moxTotalCost)}</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-dim);">Aga (${bestAga.name}) needed:</span><span style="font-family:'Share Tech Mono',monospace;">${fmt(agaHerbsNeeded)} herbs — ${fmtGp(agaTotalCost)}</span></div>
-              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-dim);">Lye (${bestLye.name}) needed:</span><span style="font-family:'Share Tech Mono',monospace;">${fmt(lyeHerbsNeeded)} herbs — ${fmtGp(lyeTotalCost)}</span></div>
-              <div style="display:flex;justify-content:space-between;padding-top:4px;border-top:1px solid var(--border);"><strong>Total herb cost:</strong><span style="font-family:'Share Tech Mono',monospace;color:#e74c3c;">${fmtGp(totalCost)}</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-dim);">Mox (${bestMox.name}) needed:</span><span style="font-family:'Share Tech Mono',monospace;">${fmt(moxHerbsNeeded)} herbs — ${fmtGpTotal(moxTotalCost)}</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-dim);">Aga (${bestAga.name}) needed:</span><span style="font-family:'Share Tech Mono',monospace;">${fmt(agaHerbsNeeded)} herbs — ${fmtGpTotal(agaTotalCost)}</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-dim);">Lye (${bestLye.name}) needed:</span><span style="font-family:'Share Tech Mono',monospace;">${fmt(lyeHerbsNeeded)} herbs — ${fmtGpTotal(lyeTotalCost)}</span></div>
+              <div style="display:flex;justify-content:space-between;padding-top:4px;border-top:1px solid var(--border);"><strong>Total herb cost:</strong><span style="font-family:'Share Tech Mono',monospace;color:#e74c3c;">${fmtGpTotal(totalCost)}</span></div>
               <div style="color:var(--text-dim);margin-top:4px;font-style:italic;">Paste can't be traded — check live prices before buying herbs. Grimy herbs are ~5-15% cheaper but need cleaning first.</div>
             </div>
           </div>
@@ -833,7 +905,7 @@ function renderMixologyPlan(curLevel, targetLevel){
         <div class="target-estimate-stat"><div class="target-estimate-label">Est. Time (active)</div><div class="target-estimate-value">${fmtHrs(hoursNeeded)}</div></div>
         <div class="target-estimate-stat"><div class="target-estimate-label">Est. Time (passive)</div><div class="target-estimate-value">${fmtHrs(xpRemaining/MIXOLOGY_XP_PER_HR_PASSIVE)}</div></div>
         <div class="target-estimate-stat"><div class="target-estimate-label">Finish By</div><div class="target-estimate-value" style="font-size:14px;">${finishStr}</div></div>
-        <div class="target-estimate-stat target-estimate-cost"><div class="target-estimate-label">Total Herb Cost</div><div class="target-estimate-value" style="color:#e74c3c;">${fmtGp(totalCost)}</div></div>
+        <div class="target-estimate-stat target-estimate-cost"><div class="target-estimate-label">Total Herb Cost</div><div class="target-estimate-value" style="color:#e74c3c;">${fmtGpTotal(totalCost)}</div></div>
         <div class="target-estimate-stat"><div class="target-estimate-label">GP / XP</div><div class="target-estimate-value" style="color:${accent};">${gpPerXp} gp</div></div>
       </div>
       <div class="target-estimate-note">XP rates from OSRS Wiki (confirmed): ~70k xp/hr active clicking at level 81+, ~45k xp/hr passive. Rates are lower below level 81 since Mixalot (the highest-XP potion) isn't available. Herb costs calculated from the cheapest herb per paste type — Marrentill for Mox, Lantadyme for Aga, Avantoe for Lye. Always compare grimy vs clean prices on the GE first as grimy herbs are often significantly cheaper. Paste yields are exact values from the OSRS Wiki. Does not include sell-back value since paste is non-tradeable.</div>
@@ -959,30 +1031,53 @@ function generatePlan(){
 
   const totalXp=stops.reduce((s,x)=>s+x.xpNeeded,0);
   const totalHrs=stops.reduce((s,x)=>s+x.hoursNeeded,0);
-  const totalCost=stops.reduce((s,x)=>s+x.totalCost,0); // net cost = ingredients - sell value
+  const expectedAmuletProcs=amuletEnabled?stops.filter(amuletEligible).reduce((s,x)=>s+x.actionsNeeded*0.15,0):0;
+  const amuletsNeeded=amuletEnabled?Math.ceil(Math.max(0,expectedAmuletProcs-amuletCurrentCharges)/10):0;
+  const marginalAmuletTotal=stops.reduce((s,x)=>s+marginalAmuletCost(x)*x.actionsNeeded,0);
+  const amuletAdjustment=amuletsNeeded*priceOf('Amulet of chemistry')-marginalAmuletTotal;
+  if(amuletEnabled){
+    const lastEligible=[...stops].reverse().find(amuletEligible);
+    if(lastEligible)lastEligible.totalCost+=amuletAdjustment;
+  }
+  let totalCost=stops.reduce((s,x)=>s+x.totalCost,0);
   const totalPotions=stops.reduce((s,x)=>s+x.actionsNeeded,0);
+  const baselineHrs=stops.reduce((s,x)=>s+x.actionsNeeded/x.actionsPerHr,0);
+  const baselineCost=pricesLoaded?stops.reduce((sum,stop)=>{
+    const inputs=(stop.inputNames||[]).reduce((s,n)=>s+priceOf(typeof n==='string'?n:n.name)*(typeof n==='object'&&n.qty?n.qty:1),0);
+    return sum+(inputs-sellPriceOf(stop.outputName))*stop.actionsNeeded;
+  },0):0;
 
   // Also compute gross upfront capital separately — players need this much cash in hand before selling
   let grossIngredientCost = 0;
   let grossSellValue = 0;
   if(pricesLoaded){
     stops.forEach(stop=>{
-      const inCostPerPotion=(stop.inputNames||[]).reduce((s,n)=>{
+      const inCostPerPotion=(stop.inputNames||[]).reduce((s,n,index)=>{
         const itemName=typeof n==='string'?n:n.name;
-        const qty=typeof n==='object'&&n.qty?n.qty:1;
+        const qty=inputQtyFor(stop,n,index);
         return s+(priceOf(itemName)||0)*qty;
       },0);
       grossIngredientCost += inCostPerPotion * stop.actionsNeeded;
-      grossSellValue += (sellPriceOf(stop.outputName)||0) * stop.actionsNeeded;
+      grossSellValue += outputCreditFor(stop) * stop.actionsNeeded;
     });
+    grossIngredientCost += amuletsNeeded*priceOf('Amulet of chemistry');
   }
 
   let html=`<div class="focus-summary">
-    <div><span>${totalCost>=0?'Net cost':'Net profit'}</span><strong style="color:${totalCost>=0?'#e74c3c':'#2ecc71'};">${pricesLoaded?fmtGp(Math.abs(totalCost)):'Loading…'}</strong></div>
+    <div><span>${totalCost>=0?'Net cost':'Net profit'}</span><strong style="color:${totalCost>=0?'#e74c3c':'#2ecc71'};">${pricesLoaded?fmtGpTotal(Math.abs(totalCost)):'Loading…'}</strong></div>
     <div><span>Time</span><strong>${fmtHrs(totalHrs)}</strong></div>
-    <div><span>Potions</span><strong>${fmt(totalPotions)}</strong></div>
-    <div><span>Upfront</span><strong>${pricesLoaded?fmtGp(grossIngredientCost):'Loading…'}</strong></div>
+    <div><span>Potions</span><strong>${fmtExact(totalPotions)}</strong></div>
+    <div><span>Upfront</span><strong>${pricesLoaded?fmtGpTotal(grossIngredientCost):'Loading…'}</strong></div>
   </div>`;
+
+  if(gogglesEnabled||amuletEnabled||pouchEnabled){
+    const savedGp=baselineCost-totalCost, savedHours=baselineHrs-totalHrs;
+    html+=`<div class="upgrade-comparison">
+      <div><span>Without upgrades</span><strong>${pricesLoaded?fmtGpTotal(Math.abs(baselineCost)):'Loading…'} · ${fmtHrs(baselineHrs)}</strong></div>
+      <div><span>With selected upgrades</span><strong>${pricesLoaded?fmtGpTotal(Math.abs(totalCost)):'Loading…'} · ${fmtHrs(totalHrs)}</strong></div>
+      <div><span>Estimated savings</span><strong>${pricesLoaded?fmtGpTotal(savedGp):'Loading…'} · ${savedHours>0?fmtHrs(savedHours):'No time change'}</strong></div>
+    </div>`;
+  }
 
   html+=`<div class="focus-route-list" style="--accent:${accent};">`;
   stops.forEach(stop=>{
@@ -992,10 +1087,11 @@ function generatePlan(){
       <div class="focus-method">
         <h3>${stop.name}</h3>
         <p>${ingList || '—'}</p>
-        <small>${fmt(stop.xpPerAction*stop.actionsPerHr)} xp/hr · ${fmtHrs(stop.hoursNeeded)}</small>
+        <small>${fmt(stop.xpPerAction*actionsPerHrFor(stop))} xp/hr · ${fmtHrs(stop.hoursNeeded)}</small>
+        <div class="upgrade-badges">${gogglesEnabled&&gogglesEligible(stop)?'<span class="upgrade-badge">Goggles: ≈10% secondary saved</span>':''}${amuletEnabled&&amuletEligible(stop)?'<span class="upgrade-badge">Amulet: ≈15% bonus-dose chance</span>':''}${pouchEnabled&&pouchEligible(stop)?'<span class="upgrade-badge">Pouch: ≈2,700/hr</span>':''}</div>
       </div>
       <div class="focus-route-stat"><strong>${stop.actionsNeeded.toLocaleString()}</strong><span>potions</span></div>
-      <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded?fmtGp(Math.abs(stop.totalCost)).replace(' gp',''):'—'}</strong><span>${stop.totalCost<0?'net profit':'net cost'}</span></div>
+      <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded?fmtGpTotal(Math.abs(stop.totalCost)).replace(' gp',''):'—'}</strong><span>${stop.totalCost<0?'net profit':'net cost'}</span></div>
       <div class="focus-route-stat"><strong style="color:${stop.totalCost<=0?'#2ecc71':'var(--text)'};">${pricesLoaded&&stop.xpNeeded>0?(stop.totalCost/stop.xpNeeded).toFixed(2):'—'}</strong><span>gp/xp</span></div>
     </article>`;
   });
@@ -1014,10 +1110,12 @@ function generatePlan(){
       if(!stop.inputNames||!stop.inputNames.length) return;
       let stopRows = '';
       let stopTotal = 0;
-      stop.inputNames.forEach(input=>{
+      stop.inputNames.forEach((input,index)=>{
         const inputName = typeof input === 'string' ? input : input.name;
         const ingQtyMult = typeof input === 'object' && input.qty ? input.qty : 1;
-        const qty = stop.actionsNeeded * ingQtyMult;
+        const adjustedQtyMult=inputQtyFor(stop,input,index);
+        const qty = Math.ceil(stop.actionsNeeded * adjustedQtyMult);
+        const expectedSaved=Math.max(0,Math.ceil(stop.actionsNeeded*ingQtyMult)-qty);
         const unitCost = priceOf(inputName);
         const lineCost = unitCost * qty;
         stopTotal += lineCost;
@@ -1028,8 +1126,8 @@ function generatePlan(){
           ? `<img class="shopping-icon" src="https://oldschool.runescape.wiki/images/${encodeURIComponent(nameToIcon[inputName.toLowerCase()].replace(/ /g,'_'))}" alt="">`
           : '';
         stopRows += `<tr>
-          <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(inputName.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${inputName}${ingQtyMult>1?` ×${ingQtyMult}`:''}</a></td>
-          <td class="mono">${fmt(qty)}</td>
+          <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(inputName.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${inputName}${ingQtyMult>1?` ×${ingQtyMult}`:''}</a>${expectedSaved?`<small style="display:block;color:var(--green);">≈${expectedSaved.toLocaleString()} saved</small>`:''}</td>
+          <td class="mono">${fmtExact(qty)}</td>
           <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
           <td class="mono">${unitCost>0?fmtGp(lineCost):'—'}</td>
         </tr>`;
@@ -1043,6 +1141,12 @@ function generatePlan(){
       </div>`;
     });
 
+    if(amuletsNeeded>0){
+      const unitCost=priceOf('Amulet of chemistry');
+      grandTotals.set('Amulet of chemistry',{qty:amuletsNeeded,unitCost});
+      shoppingBody+=`<div class="shopping-section" style="--accent:${accent};"><div class="shopping-section-title">Alchemist’s amulet recharges</div><div style="font-size:12px;color:var(--text-dim);">≈${Math.ceil(expectedAmuletProcs).toLocaleString()} charges expected; ${amuletCurrentCharges.toLocaleString()} current charges; buy ${amuletsNeeded.toLocaleString()} Amulets of chemistry (10 charges each).</div></div>`;
+    }
+
     // Grand total aggregation across all stops
     let grandRows = '';
     let grandTotal = 0;
@@ -1054,7 +1158,7 @@ function generatePlan(){
         : '';
       grandRows += `<tr>
         <td>${icon}<a href="https://oldschool.runescape.wiki/w/${encodeURIComponent(name.replace(/ /g,'_'))}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">${name}</a></td>
-        <td class="mono">${fmt(qty)}</td>
+        <td class="mono">${fmtExact(qty)}</td>
         <td class="mono">${unitCost>0?fmtGp(unitCost):'—'}</td>
         <td class="mono">${unitCost>0?fmtGp(unitCost*qty):'—'}</td>
       </tr>`;
@@ -1067,6 +1171,14 @@ function generatePlan(){
       const sp = sellPriceOf(stop.outputName);
       if(!outTotals.has(stop.outputName)) outTotals.set(stop.outputName,{qty:0,sp});
       outTotals.get(stop.outputName).qty += stop.actionsNeeded;
+      if(amuletEnabled&&amuletEligible(stop)){
+        const fourDoseName=stop.outputName.replace(/\(3\)$/,'(4)');
+        const fourDoseCredit=sellPriceOf(fourDoseName);
+        const dosePrice=fourDoseCredit?fourDoseCredit/4:sp/3;
+        const bonusName=`${stop.name} bonus doses (estimated)`;
+        if(!outTotals.has(bonusName))outTotals.set(bonusName,{qty:0,sp:dosePrice});
+        outTotals.get(bonusName).qty+=stop.actionsNeeded*0.15;
+      }
     });
     let sellCredit = 0;
     let sellRows = '';
@@ -1074,7 +1186,7 @@ function generatePlan(){
       const total = sp*qty;
       sellCredit += total;
       sellRows += `<tr style="color:var(--green);">
-        <td colspan="2" style="color:var(--green);">${name} ×${fmt(qty)}</td>
+        <td colspan="2" style="color:var(--green);">${name} ×${fmtExact(qty)}</td>
         <td class="mono" style="color:var(--green);">${fmtGp(sp)}</td>
         <td class="mono" style="color:var(--green);">−${fmtGp(total)}</td>
       </tr>`;
@@ -1098,15 +1210,15 @@ function generatePlan(){
           <div class="shopping-grand-total" style="flex-direction:column;align-items:stretch;gap:8px;">
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <span style="color:var(--text-dim);font-size:14px;">💰 Upfront Capital Needed</span>
-              <span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#e74c3c;">${fmtGp(grandTotal)}</span>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#e74c3c;">${fmtGpTotal(grandTotal)}</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <span style="color:var(--green);font-size:14px;">📈 Sell All Finished Potions</span>
-              <span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--green);">−${fmtGp(sellCredit)}</span>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--green);">−${fmtGpTotal(sellCredit)}</span>
             </div>
             <div style="border-top:1px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;align-items:center;">
               <span style="font-size:16px;font-weight:700;">${netCost>=0?'Net Cost':'Net Profit'}</span>
-              <span class="gp" style="color:${netCost>=0?'#e74c3c':'#2ecc71'};">${fmtGp(Math.abs(netCost))}</span>
+              <span class="gp" style="color:${netCost>=0?'#e74c3c':'#2ecc71'};">${fmtGpTotal(Math.abs(netCost))}</span>
             </div>
           </div>
           <div class="shopping-note">Quantities are exact — buy this many and you'll have just enough with no leftover. Prices update live from the Grand Exchange. Check prices again before bulk buying as margins shift daily.</div>
@@ -1146,6 +1258,6 @@ updateStatusCard();
 generatePlan();
 loadPrices();
 </script>
-<script src="suite-nav.js?v=17"></script>
+<script src="suite-nav.js?v=19"></script>
 </body>
 </html>

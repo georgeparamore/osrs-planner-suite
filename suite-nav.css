@@ -88,6 +88,7 @@ header{height:58px!important;padding:0 18px!important;gap:14px!important;overflo
 :is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-meta{min-height:24px;padding:6px 2px;display:flex;align-items:center;gap:12px}
 :is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-meta .price-status,:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-meta .fetch-status{margin:0;font-size:10px}
 :is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-status-engine{display:none!important}
+:is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .focused-upgrade-panel{margin:6px 0 14px}
 :is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-panel{border:1px solid var(--border);border-top:0;background:var(--surface);padding:0}
 :is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-panel-label{display:none}
 :is(body[data-suite-page="herblore"],body[data-suite-page="crafting"]) .speed-tabs{gap:0}
