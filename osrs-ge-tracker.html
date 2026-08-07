@@ -584,6 +584,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
         <button class="tf-btn" data-tf="3month">3M</button>
         <button class="tf-btn" data-tf="6month">6M</button>
         <button class="tf-btn" data-tf="1year">1Y</button>
+        <button class="tf-btn" id="backfillBtn" style="display:none" title="Bulk-fetch older real 5-minute data (one-time, roughly a minute or two) instead of waiting for it to accumulate from use">⏳ Load 7 more days</button>
         <div class="custom-range-wrap" id="customRangeWrap">
           <button class="tf-btn" id="customRangeBtn">Custom ▾</button>
           <div class="custom-range-menu" id="customRangeMenu">
@@ -1423,6 +1424,7 @@ async function loadItem(id){
   updateItemStar();
   document.querySelectorAll('.item-row').forEach(r=>r.classList.toggle('active',+r.dataset.id===id));
   drawings=[];drawingInProgress=null;selectedDrawingIdx=-1;dragHandle=null;undoStack=[];redoStack=[];updateUndoButtons();
+  updateBackfillBtnVisibility();
   await loadChart(id,currentTf);
   if(currentPTab==='watchlist')loadMarginHistory(id);
   if(currentPTab==='recent')renderAnnPanel();
@@ -1648,6 +1650,7 @@ document.getElementById('applyRangeBtn').addEventListener('click', async ()=>{
   customRangeBtn.classList.add('active');
   currentTf = 'custom';
   customDateRange = { from: new Date(from).getTime()/1000, to: new Date(to).getTime()/1000 + 86399 };
+  updateBackfillBtnVisibility();
   await loadChart(currentItem.id, 'custom');
 });
 const overlayBtn=document.getElementById('overlayBtn');
@@ -1714,8 +1717,68 @@ document.querySelectorAll('.tf-btn[data-tf]').forEach(btn=>btn.addEventListener(
   btn.classList.add('active');
   customRangeBtn.classList.remove('active');
   currentTf=btn.dataset.tf;
+  updateBackfillBtnVisibility();
   if(currentItem)await loadChart(currentItem.id,currentTf);
 }));
+
+// ── BULK 5-MINUTE HISTORY BACKFILL ──────────────────────────
+// The organic accumulating cache (mergeIntoHistCache) only grows as fast as this tracker
+// actually gets used. But the Wiki API's separate per-snapshot `/5m?timestamp=X` endpoint (as
+// opposed to the bulk `/timeseries` endpoint, which is hard-capped to its rolling ~1.7-2 day
+// window) accepts ANY 5-minute-aligned historical timestamp and returns real data going back
+// years — confirmed by directly querying it. The catch: it's one HTTP request per 5-minute
+// candle, so building real depth this way means many requests. Batching them with limited
+// concurrency (~10 in flight) makes a one-time, ~1-2 minute backfill of a week's worth of real
+// 5-minute candles practical, instead of making the user wait days for the organic cache to
+// reach the same depth.
+const BACKFILL_DAYS=7,BACKFILL_CONCURRENCY=10;
+function updateBackfillBtnVisibility(){
+  const btn=document.getElementById('backfillBtn');
+  if(!btn)return;
+  btn.style.display=(currentItem&&(currentTf==='5m'||currentTf==='10m'||currentTf==='15m'))?'':'none';
+}
+async function backfill5mHistory(itemId){
+  const btn=document.getElementById('backfillBtn');
+  if(btn)btn.disabled=true;
+  try{
+    let cached=[];
+    try{cached=JSON.parse(localStorage.getItem(histKey(itemId)))||[];}catch(e){cached=[];}
+    const earliestMs=cached.length?cached[0].t:(candles.length?candles[0].t:Date.now());
+    const earliestSec=Math.floor(earliestMs/1000),alignedEarliest=earliestSec-(earliestSec%300);
+    const targetFrom=alignedEarliest-BACKFILL_DAYS*86400;
+    const timestamps=[];
+    for(let t=alignedEarliest-300;t>=targetFrom;t-=300)timestamps.push(t);
+    if(!timestamps.length){showToast('Nothing further back to load');return;}
+    const total=timestamps.length;
+    let done=0,idx=0;const collected=[];
+    showToast(`⏳ Loading ${BACKFILL_DAYS}d of real 5-minute history…`,`0 / ${total} intervals`);
+    async function worker(){
+      while(idx<timestamps.length){
+        const ts=timestamps[idx++];
+        try{
+          const res=await fetch(`https://prices.runescape.wiki/api/v1/osrs/5m?timestamp=${ts}`,{headers:H});
+          const json=await res.json();
+          const entry=json.data&&json.data[itemId];
+          if(entry)collected.push({timestamp:ts,avgHighPrice:entry.avgHighPrice,avgLowPrice:entry.avgLowPrice,highPriceVolume:entry.highPriceVolume,lowPriceVolume:entry.lowPriceVolume});
+        }catch(e){/* one failed interval shouldn't abort the whole backfill */}
+        done++;
+        if(done%25===0||done===total)showToast(`⏳ Loading real 5-minute history…`,`${done} / ${total} intervals`);
+      }
+    }
+    await Promise.all(Array.from({length:BACKFILL_CONCURRENCY},worker));
+    const parsed=parseSeries(collected);
+    if(parsed.length){
+      mergeIntoHistCache(itemId,parsed);
+      showToast(`✓ Added ${parsed.length} real 5-minute candles`,'Reloading chart…');
+      if(currentItem&&currentItem.id===itemId&&(currentTf==='5m'||currentTf==='10m'||currentTf==='15m'))await loadChart(itemId,currentTf);
+    }else{
+      showToast('No historical data found for that range');
+    }
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+document.getElementById('backfillBtn').addEventListener('click',()=>{if(currentItem)backfill5mHistory(currentItem.id);});
 // ── CHART DATA ───────────────────────────────────────────
 function merge5m(raw,n){const out=[];for(let i=0;i+n<=raw.length;i+=n){const s=raw.slice(i,i+n);out.push({t:s[0].t,o:s[0].o,c:s[s.length-1].c,h:Math.max(...s.map(x=>x.h)),l:Math.min(...s.map(x=>x.l)),vol:s.reduce((a,x)=>a+x.vol,0)});}return out;}
 
@@ -1726,7 +1789,7 @@ function merge5m(raw,n){const out=[];for(let i=0;i+n<=raw.length;i+=n){const s=r
 // localStorage cache (deduped/sorted by timestamp), so the longer someone keeps using the
 // tracker on a given item, the deeper its real 5-minute history grows over time. This can't
 // recover data from before caching started — it only accumulates going forward.
-const HIST_MAX_DAYS=45,HIST_MAX_ITEMS=12;
+const HIST_MAX_DAYS=60,HIST_MAX_ITEMS=12;
 function histKey(itemId){return `ge5mHist_${itemId}`;}
 function loadHistIndex(){try{return JSON.parse(localStorage.getItem('ge5mHistIndex'))||{};}catch(e){return{};}}
 function saveHistIndex(idx){try{localStorage.setItem('ge5mHistIndex',JSON.stringify(idx));}catch(e){/* best-effort cache, ok to drop */}}
@@ -1990,31 +2053,20 @@ function drawChart(ctx,canvas,data){
 }
 
 // ── RENDER DRAWING ────────────────────────────────────────
-// Extends (x1,y1)→(x2,y2) forward past p2 until it exits the plot area, clipped at whichever
-// bound — right edge, top, or bottom — it reaches first. Blindly following the exact drawn
-// slope all the way to the right edge (the first version of this) turned even a slightly
-// tilted arrow into an absurd vertical swing once projected that far; clipping at the pane's
-// bounds is what real charting tools do, and it's what keeps a near-flat arrow reading as a
-// clean ray while a steeper one just exits top/bottom instead of distorting.
-function computeRayTip(x1,y1,x2,y2,rayBounds){
-  if(!rayBounds)return{x:x2,y:y2};
-  const{edgeX,topY,bottomY}=rayBounds,dx=x2-x1,dy=y2-y1;
-  if(dx<=0)return{x:x2,y:y2}; // only extend shapes that point toward more recent candles
-  let t=(edgeX-x1)/dx;
-  if(dy>0)t=Math.min(t,(bottomY-y1)/dy);
-  else if(dy<0)t=Math.min(t,(topY-y1)/dy);
-  t=Math.max(t,1);
-  return{x:x1+dx*t,y:y1+dy*t};
-}
-// `rayBounds` ({edgeX,topY,bottomY}, all in pixels) is the plot area arrows/rects project out
-// to — an open-ended ray/zone like TradingView's, rather than stopping dead at the p2 point —
-// while p1/p2 themselves stay put as the actual draggable control points.
+// `rayBounds` ({edgeX,topY,bottomY}, all in pixels) is the plot area rects extend their right
+// edge out to — an open-ended zone like TradingView's Supply/Demand boxes, rather than stopping
+// dead at the p2 point — while p1/p2 themselves stay put as the actual draggable control points.
+// Arrows do NOT auto-extend: they stop exactly where you release, and how far they reach is
+// entirely up to how far you drag the tip.
 function renderDrawing(ctx,d,toY,toX,zoomStart,n,selected,rayBounds){
   const li1=d.p1.idx-zoomStart,li2=d.p2.idx-zoomStart;
   const x1=toX(li1),y1=toY(d.p1.price),x2=toX(li2),y2=toY(d.p2.price),col=d.color||'#c8a84b';
   ctx.save();
   if(d.type==='arrow'){
-    const tip=computeRayTip(x1,y1,x2,y2,rayBounds),tipX=tip.x,tipY=tip.y;
+    // Arrows stop exactly where you release — no forced extension. Length is entirely up to
+    // you: drag the tip as far as you want (right up to the edge if that's the look you're
+    // after), same as any other draggable point. Rects still auto-extend as open-ended zones.
+    const tipX=x2,tipY=y2;
     ctx.strokeStyle=selected?'#fff':col;ctx.lineWidth=selected?2.5:2;ctx.setLineDash([]);
     ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(tipX,tipY);ctx.stroke();
     const angle=Math.atan2(tipY-y1,tipX-x1),hs=12;
@@ -2064,11 +2116,8 @@ function hitTestDrawing(d,mx,my,toY,toX,zoomStart,rayBounds){
   const x1=toX(li1),y1=toY(d.p1.price),x2=toX(li2),y2=toY(d.p2.price);
   if(d.type==='arrow'){
     if(Math.hypot(mx-x1,my-y1)<H_R+3)return'p1';if(Math.hypot(mx-x2,my-y2)<H_R+3)return'p2';
-    // Hit-test against the full rendered (and now boundary-clipped) ray, not just the p1-p2
-    // segment, so clicking anywhere along the visible projected line still selects/drags it.
-    const tip=computeRayTip(x1,y1,x2,y2,rayBounds),tipX=tip.x,tipY=tip.y;
-    const len=Math.hypot(tipX-x1,tipY-y1)||1,t=Math.max(0,Math.min(1,((mx-x1)*(tipX-x1)+(my-y1)*(tipY-y1))/(len*len)));
-    if(Math.hypot(mx-(x1+t*(tipX-x1)),my-(y1+t*(tipY-y1)))<8)return'body';
+    const len=Math.hypot(x2-x1,y2-y1)||1,t=Math.max(0,Math.min(1,((mx-x1)*(x2-x1)+(my-y1)*(y2-y1))/(len*len)));
+    if(Math.hypot(mx-(x1+t*(x2-x1)),my-(y1+t*(y2-y1)))<8)return'body';
   }else if(d.type==='rect'){
     const handles=rectHandles(x1,y1,x2,y2);for(const[name,{x,y}]of Object.entries(handles))if(Math.hypot(mx-x,my-y)<H_R+4)return name;
     const lx=Math.min(x1,x2),rx=rayBounds?Math.max(rayBounds.edgeX,x1,x2):Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2);if(mx>=lx&&mx<=rx&&my>=ty&&my<=by)return'body';
@@ -2254,8 +2303,11 @@ function attachMouseHandlers(canvas,data){
     // crosshair + tooltip
     const cc=chartCoords(mx,my);chH.style.display='none';chV.style.display='none';
     if(!cc){tooltip.style.display='none';return;}
-    chV.style.display='block';chV.style.left=(14+PL+(cc.li+.5)*space)+'px';
-    chH.style.display='block';chH.style.top=(8+my)+'px';
+    // Position relative to the canvas's own offset within .chart-wrap (its offsetParent), not a
+    // hardcoded guess — a stale magic-number offset here is exactly what let the crosshair drift
+    // out of alignment with the candles/cursor as the surrounding layout changed over time.
+    chV.style.display='block';chV.style.left=(canvas.offsetLeft+PL+(cc.li+.5)*space)+'px';
+    chH.style.display='block';chH.style.top=(canvas.offsetTop+my)+'px';
     const c=data[cc.globalIdx];if(!c)return;
     const ds=new Date(c.t).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
     const maPeriod=Math.max(2,parseInt(document.getElementById('maPeriod').value)||20);
