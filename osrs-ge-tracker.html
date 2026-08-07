@@ -1733,16 +1733,30 @@ function nearestIdxByTs(arr,ts){
 // captured on that point, so a shape drawn at (say) 3am on the 1H chart lands on the same
 // real-world 3am candle after switching to 5M — instead of reinterpreting its old numeric
 // index against a completely different, differently-sized array.
+// Returns true if any point's real timestamp fell entirely outside what this timeframe's API
+// call actually returned (e.g. a drawing from 5 days ago surviving onto 5M, whose native feed
+// only ever covers ~1.7-2 days) — those get clamped to the nearest edge candle rather than
+// their true position, since the data to place them correctly was never fetched.
 function remapDrawingsToCandles(newCandles){
-  if(!newCandles.length)return;
-  const remapPoint=p=>{if(!p||p.t==null)return;const idx=nearestIdxByTs(newCandles,p.t);if(idx!=null)p.idx=idx;};
+  if(!newCandles.length)return false;
+  const minT=newCandles[0].t,maxT=newCandles[newCandles.length-1].t;
+  let outOfRange=false;
+  const remapPoint=p=>{
+    if(!p||p.t==null)return;
+    if(p.t<minT||p.t>maxT)outOfRange=true;
+    const idx=nearestIdxByTs(newCandles,p.t);if(idx!=null)p.idx=idx;
+  };
   const remapPosition=d=>{
     remapPoint(d.entry);
-    if(d.entry&&d.entry.rightT!=null){const ri=nearestIdxByTs(newCandles,d.entry.rightT);if(ri!=null)d.entry.rightIdx=ri;}
+    if(d.entry&&d.entry.rightT!=null){
+      if(d.entry.rightT<minT||d.entry.rightT>maxT)outOfRange=true;
+      const ri=nearestIdxByTs(newCandles,d.entry.rightT);if(ri!=null)d.entry.rightIdx=ri;
+    }
   };
   drawings.forEach(d=>d.type==='position'?remapPosition(d):(remapPoint(d.p1),remapPoint(d.p2)));
   if(drawingInProgress)drawingInProgress.type==='position'?remapPosition(drawingInProgress):(remapPoint(drawingInProgress.p1),remapPoint(drawingInProgress.p2));
-  if(currentItem)getAnns(currentItem.id).forEach(a=>{if(a.t!=null){const idx=nearestIdxByTs(newCandles,a.t);if(idx!=null)a.candleIdx=idx;}});
+  if(currentItem)getAnns(currentItem.id).forEach(a=>{if(a.t!=null){if(a.t<minT||a.t>maxT)outOfRange=true;const idx=nearestIdxByTs(newCandles,a.t);if(idx!=null)a.candleIdx=idx;}});
+  return outOfRange;
 }
 
 function parseSeries(series){
@@ -1805,7 +1819,8 @@ async function loadChart(id,tf){
     const prevCenterT=hadPrevView?oldCandles[Math.min(oldCandles.length-1,Math.floor((zoomStart+zoomEnd)/2))]?.t:null;
     const prevSpanMs=hadPrevView?(oldCandles[Math.min(oldCandles.length-1,zoomEnd-1)]?.t-oldCandles[zoomStart]?.t):null;
     candles=merge>1?merge5m(raw,merge):raw;
-    remapDrawingsToCandles(candles);
+    const drawingsOutOfRange=remapDrawingsToCandles(candles);
+    if(drawingsOutOfRange)showToast('⚠ Some drawings are older than this timeframe\'s history',`${tf.toUpperCase()} only covers a limited lookback — switch to 1H or higher to see them`);
     currentViewSpan=viewSpan;
     if(hadPrevView&&prevCenterT!=null&&candles.length){
       const stepMs=candles.length>1?(candles[1].t-candles[0].t):null;
@@ -1920,7 +1935,12 @@ function drawChart(ctx,canvas,data){
   });
   if(drawingInProgress){
     if(drawingInProgress.type==='position')renderPosition(ctx,drawingInProgress,toY,toX,zoomStart,false);
-    else renderDrawing(ctx,drawingInProgress,toY,toX,zoomStart,n,false,PL+cW);
+    // Don't ray-extend the live preview: while you're still mid-drag, p1/p2 are only a few
+    // pixels apart, so their slope is mostly mouse noise — projecting that out to the edge
+    // makes the preview whip around wildly before you've actually finished placing it. Show
+    // the plain segment while dragging; the finished shape (in `drawings`, mouseup below)
+    // gets the full ray treatment once its direction is actually settled.
+    else renderDrawing(ctx,drawingInProgress,toY,toX,zoomStart,n,false,null);
   }
 
   attachMouseHandlers(canvas,data);
