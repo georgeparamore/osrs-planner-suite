@@ -1912,7 +1912,7 @@ function drawChart(ctx,canvas,data){
   const toP=y=>lo+(1-(y-PT)/cH)*(hi-lo);
   const toX=i=>PL+(i+.5)*space;
   const toIdx=x=>Math.min(Math.floor((x-PL)/space),n-1);
-  _chartGeom={PL,PR,PT,PB,cW,cH,volH,marginH,W,H,lo,hi,n,space,zoomStart,toY,toP,toX,toIdx,view,edgeX:PL+cW};
+  _chartGeom={PL,PR,PT,PB,cW,cH,volH,marginH,W,H,lo,hi,n,space,zoomStart,toY,toP,toX,toIdx,view,edgeX:PL+cW,topY:PT,bottomY:PT+cH};
 
   // grid
   ctx.strokeStyle=isDark?'#1e2336':'#e0e4f0';ctx.lineWidth=1;
@@ -1971,9 +1971,10 @@ function drawChart(ctx,canvas,data){
   }
 
   // drawings
+  const rayBounds={edgeX:PL+cW,topY:PT,bottomY:PT+cH};
   drawings.forEach((d,i)=>{
     if(d.type==='position')renderPosition(ctx,d,toY,toX,zoomStart,i===selectedDrawingIdx);
-    else renderDrawing(ctx,d,toY,toX,zoomStart,n,i===selectedDrawingIdx,PL+cW);
+    else renderDrawing(ctx,d,toY,toX,zoomStart,n,i===selectedDrawingIdx,rayBounds);
   });
   if(drawingInProgress){
     if(drawingInProgress.type==='position')renderPosition(ctx,drawingInProgress,toY,toX,zoomStart,false);
@@ -1989,19 +1990,31 @@ function drawChart(ctx,canvas,data){
 }
 
 // ── RENDER DRAWING ────────────────────────────────────────
-// `edgeX` is the chart's right plot-area edge in pixels. Arrows and rects both project out to
-// it — an open-ended ray/zone like TradingView's, rather than stopping dead at the p2 point —
+// Extends (x1,y1)→(x2,y2) forward past p2 until it exits the plot area, clipped at whichever
+// bound — right edge, top, or bottom — it reaches first. Blindly following the exact drawn
+// slope all the way to the right edge (the first version of this) turned even a slightly
+// tilted arrow into an absurd vertical swing once projected that far; clipping at the pane's
+// bounds is what real charting tools do, and it's what keeps a near-flat arrow reading as a
+// clean ray while a steeper one just exits top/bottom instead of distorting.
+function computeRayTip(x1,y1,x2,y2,rayBounds){
+  if(!rayBounds)return{x:x2,y:y2};
+  const{edgeX,topY,bottomY}=rayBounds,dx=x2-x1,dy=y2-y1;
+  if(dx<=0)return{x:x2,y:y2}; // only extend shapes that point toward more recent candles
+  let t=(edgeX-x1)/dx;
+  if(dy>0)t=Math.min(t,(bottomY-y1)/dy);
+  else if(dy<0)t=Math.min(t,(topY-y1)/dy);
+  t=Math.max(t,1);
+  return{x:x1+dx*t,y:y1+dy*t};
+}
+// `rayBounds` ({edgeX,topY,bottomY}, all in pixels) is the plot area arrows/rects project out
+// to — an open-ended ray/zone like TradingView's, rather than stopping dead at the p2 point —
 // while p1/p2 themselves stay put as the actual draggable control points.
-function renderDrawing(ctx,d,toY,toX,zoomStart,n,selected,edgeX){
+function renderDrawing(ctx,d,toY,toX,zoomStart,n,selected,rayBounds){
   const li1=d.p1.idx-zoomStart,li2=d.p2.idx-zoomStart;
   const x1=toX(li1),y1=toY(d.p1.price),x2=toX(li2),y2=toY(d.p2.price),col=d.color||'#c8a84b';
   ctx.save();
   if(d.type==='arrow'){
-    let tipX=x2,tipY=y2;
-    if(edgeX!=null&&x2!==x1){
-      const slope=(y2-y1)/(x2-x1);
-      tipX=Math.max(x2,edgeX);tipY=y1+slope*(tipX-x1);
-    }
+    const tip=computeRayTip(x1,y1,x2,y2,rayBounds),tipX=tip.x,tipY=tip.y;
     ctx.strokeStyle=selected?'#fff':col;ctx.lineWidth=selected?2.5:2;ctx.setLineDash([]);
     ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(tipX,tipY);ctx.stroke();
     const angle=Math.atan2(tipY-y1,tipX-x1),hs=12;
@@ -2010,7 +2023,7 @@ function renderDrawing(ctx,d,toY,toX,zoomStart,n,selected,edgeX){
     if(Math.abs(y2-y1)<1.5){ctx.font='10px Share Tech Mono';ctx.fillStyle=col;ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(fmt(Math.round(d.p1.price)),tipX+6,tipY-2);}
     if(selected)[[x1,y1],[x2,y2]].forEach(([hx,hy])=>{ctx.beginPath();ctx.arc(hx,hy,H_R,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();});
   }else if(d.type==='rect'){
-    const lx=Math.min(x1,x2),rx2=edgeX!=null?Math.max(edgeX,x1,x2):Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2);
+    const lx=Math.min(x1,x2),rx2=rayBounds?Math.max(rayBounds.edgeX,x1,x2):Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2);
     ctx.fillStyle=selected?'rgba(200,168,75,0.18)':'rgba(200,168,75,0.09)';ctx.fillRect(lx,ty,rx2-lx,by-ty);
     ctx.strokeStyle=selected?'#fff':col;ctx.lineWidth=selected?2:1.5;ctx.setLineDash(selected?[]:[5,3]);ctx.strokeRect(lx,ty,rx2-lx,by-ty);ctx.setLineDash([]);
     if(selected){const handles=rectHandles(x1,y1,x2,y2);Object.values(handles).forEach(({x,y})=>{ctx.beginPath();ctx.arc(x,y,H_R,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();});}
@@ -2046,20 +2059,19 @@ function renderPosition(ctx,d,toY,toX,zoomStart,selected){
 }
 
 // ── HIT TESTING ───────────────────────────────────────────
-function hitTestDrawing(d,mx,my,toY,toX,zoomStart,edgeX){
+function hitTestDrawing(d,mx,my,toY,toX,zoomStart,rayBounds){
   const li1=d.p1.idx-zoomStart,li2=d.p2.idx-zoomStart;
   const x1=toX(li1),y1=toY(d.p1.price),x2=toX(li2),y2=toY(d.p2.price);
   if(d.type==='arrow'){
     if(Math.hypot(mx-x1,my-y1)<H_R+3)return'p1';if(Math.hypot(mx-x2,my-y2)<H_R+3)return'p2';
-    // Hit-test against the full rendered ray (p1 → edge), not just the p1-p2 segment, so
-    // clicking anywhere along the visible projected line still selects/drags the arrow.
-    let tipX=x2,tipY=y2;
-    if(edgeX!=null&&x2!==x1){const slope=(y2-y1)/(x2-x1);tipX=Math.max(x2,edgeX);tipY=y1+slope*(tipX-x1);}
+    // Hit-test against the full rendered (and now boundary-clipped) ray, not just the p1-p2
+    // segment, so clicking anywhere along the visible projected line still selects/drags it.
+    const tip=computeRayTip(x1,y1,x2,y2,rayBounds),tipX=tip.x,tipY=tip.y;
     const len=Math.hypot(tipX-x1,tipY-y1)||1,t=Math.max(0,Math.min(1,((mx-x1)*(tipX-x1)+(my-y1)*(tipY-y1))/(len*len)));
     if(Math.hypot(mx-(x1+t*(tipX-x1)),my-(y1+t*(tipY-y1)))<8)return'body';
   }else if(d.type==='rect'){
     const handles=rectHandles(x1,y1,x2,y2);for(const[name,{x,y}]of Object.entries(handles))if(Math.hypot(mx-x,my-y)<H_R+4)return name;
-    const lx=Math.min(x1,x2),rx=edgeX!=null?Math.max(edgeX,x1,x2):Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2);if(mx>=lx&&mx<=rx&&my>=ty&&my<=by)return'body';
+    const lx=Math.min(x1,x2),rx=rayBounds?Math.max(rayBounds.edgeX,x1,x2):Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2);if(mx>=lx&&mx<=rx&&my>=ty&&my<=by)return'body';
   }
   return null;
 }
@@ -2119,7 +2131,7 @@ function attachMouseHandlers(canvas,data){
     e.preventDefault();if(!_chartGeom)return;
     const{mx,my}=pxToChart(e),{toY,toX,zoomStart}=_chartGeom;
     for(let i=drawings.length-1;i>=0;i--){
-      const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,zoomStart):hitTestDrawing(d,mx,my,toY,toX,zoomStart,edgeX);
+      const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,zoomStart):hitTestDrawing(d,mx,my,toY,toX,zoomStart,rayBounds);
       if(hit){selectedDrawingIdx=i;redrawFull();showCtxMenu(e.clientX,e.clientY,i);return;}
     }
   };
@@ -2130,7 +2142,8 @@ function attachMouseHandlers(canvas,data){
     hideCtxMenu();
     const{mx,my}=pxToChart(e);
     if(!_chartGeom)return;
-    const{toY,toX,zoomStart,edgeX}=_chartGeom;
+    const{toY,toX,zoomStart,edgeX,topY,bottomY}=_chartGeom;
+    const rayBounds={edgeX,topY,bottomY};
     const cc=chartCoords(mx,my);
 
     // annotation tool
@@ -2146,7 +2159,7 @@ function attachMouseHandlers(canvas,data){
 
     // hit test existing drawings first (any tool)
     for(let i=drawings.length-1;i>=0;i--){
-      const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,zoomStart):hitTestDrawing(d,mx,my,toY,toX,zoomStart,edgeX);
+      const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,zoomStart):hitTestDrawing(d,mx,my,toY,toX,zoomStart,rayBounds);
       if(hit){
         selectedDrawingIdx=i;dragHandle=hit;dragStartMx=mx;dragStartMy=my;
         dragStartP1=d.type==='position'?{...d.entry,sl:{...d.sl},rightIdx:d.entry.rightIdx}:{...d.p1};
@@ -2184,7 +2197,8 @@ function attachMouseHandlers(canvas,data){
     // "Assignment to constant variable" on every drag and silently abort — panning the chart
     // to reveal earlier history has never actually worked. Every other read in this handler
     // below intentionally keeps using this snapshot value (geometry as of the last render).
-    const{toY,toX,toP,toIdx,zoomStart:geomZoomStart,PL,space,edgeX}=_chartGeom;
+    const{toY,toX,toP,toIdx,zoomStart:geomZoomStart,PL,space,edgeX,topY,bottomY}=_chartGeom;
+    const rayBounds={edgeX,topY,bottomY};
 
     if(_isPanning){
       const dx=mx-_panStartX,deltaIdx=Math.round(-dx/space),span=_panStartZoom.e-_panStartZoom.s;
@@ -2234,7 +2248,7 @@ function attachMouseHandlers(canvas,data){
 
     // hover cursors
     let hovering=false;
-    for(let i=drawings.length-1;i>=0;i--){const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,geomZoomStart):hitTestDrawing(d,mx,my,toY,toX,geomZoomStart,edgeX);if(hit){canvas.style.cursor=HANDLE_CURSORS[hit]||'move';hovering=true;break;}}
+    for(let i=drawings.length-1;i>=0;i--){const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,geomZoomStart):hitTestDrawing(d,mx,my,toY,toX,geomZoomStart,rayBounds);if(hit){canvas.style.cursor=HANDLE_CURSORS[hit]||'move';hovering=true;break;}}
     if(!hovering)canvas.style.cursor='crosshair';
 
     // crosshair + tooltip
