@@ -1719,6 +1719,42 @@ document.querySelectorAll('.tf-btn[data-tf]').forEach(btn=>btn.addEventListener(
 // ── CHART DATA ───────────────────────────────────────────
 function merge5m(raw,n){const out=[];for(let i=0;i+n<=raw.length;i+=n){const s=raw.slice(i,i+n);out.push({t:s[0].t,o:s[0].o,c:s[s.length-1].c,h:Math.max(...s.map(x=>x.h)),l:Math.min(...s.map(x=>x.l)),vol:s.reduce((a,x)=>a+x.vol,0)});}return out;}
 
+// ── ACCUMULATING 5-MINUTE HISTORY CACHE ─────────────────────
+// The Wiki API's `timestep=5m` call always returns only its most-recent ~1.7-2 day window —
+// there's no request parameter that pages further back, it's a hard server-side limit. What we
+// CAN do is remember what's already been fetched: every 5m call gets merged into a per-item
+// localStorage cache (deduped/sorted by timestamp), so the longer someone keeps using the
+// tracker on a given item, the deeper its real 5-minute history grows over time. This can't
+// recover data from before caching started — it only accumulates going forward.
+const HIST_MAX_DAYS=45,HIST_MAX_ITEMS=12;
+function histKey(itemId){return `ge5mHist_${itemId}`;}
+function loadHistIndex(){try{return JSON.parse(localStorage.getItem('ge5mHistIndex'))||{};}catch(e){return{};}}
+function saveHistIndex(idx){try{localStorage.setItem('ge5mHistIndex',JSON.stringify(idx));}catch(e){/* best-effort cache, ok to drop */}}
+function evictStaleHistCaches(justUsedItemId){
+  const idx=loadHistIndex();
+  idx[justUsedItemId]=Date.now();
+  const ids=Object.keys(idx);
+  if(ids.length>HIST_MAX_ITEMS){
+    ids.sort((a,b)=>idx[a]-idx[b]).slice(0,ids.length-HIST_MAX_ITEMS).forEach(id=>{
+      try{localStorage.removeItem(histKey(id));}catch(e){}
+      delete idx[id];
+    });
+  }
+  saveHistIndex(idx);
+}
+function mergeIntoHistCache(itemId,freshRaw){
+  let cached=[];
+  try{cached=JSON.parse(localStorage.getItem(histKey(itemId)))||[];}catch(e){cached=[];}
+  const byT=new Map();
+  cached.forEach(c=>byT.set(c.t,c));
+  freshRaw.forEach(c=>byT.set(c.t,c));
+  const cutoff=Date.now()-HIST_MAX_DAYS*86400000;
+  const merged=[...byT.values()].filter(c=>c.t>=cutoff).sort((a,b)=>a.t-b.t);
+  try{localStorage.setItem(histKey(itemId),JSON.stringify(merged));evictStaleHistCaches(itemId);}
+  catch(e){/* localStorage full — caching is a nice-to-have, safe to skip this round */}
+  return merged;
+}
+
 // Binary search `arr` (candles, ascending by .t) for the index whose timestamp is closest to `ts`.
 function nearestIdxByTs(arr,ts){
   if(!arr.length||ts==null)return null;
@@ -1807,10 +1843,16 @@ async function loadChart(id,tf){
     else{step='24h';merge=1;viewSpan=90;}
     const url=`https://prices.runescape.wiki/api/v1/osrs/timeseries?timestep=${step}&id=${id}`;
     const res=await fetch(url,{headers:H});const data=await res.json();
-    let filtered=data.data||[];
-    if(customFrom!=null) filtered=filtered.filter(d=>d.timestamp>=customFrom);
-    if(customTo!=null) filtered=filtered.filter(d=>d.timestamp<=customTo);
-    const raw=parseSeries(filtered);
+    const rawAll=parseSeries(data.data||[]);
+    // The 5m endpoint's ~1.7-2 day window is a hard server-side cap with no pagination — but
+    // every fetch we've ever made for this item is worth remembering. Merge this fetch into the
+    // item's accumulating local cache so 5M/10M/15M history actually grows the more this tracker
+    // gets used, instead of always being clipped to just "whatever the API felt like returning
+    // just now". 1H/6H/24H already get weeks-to-a-year of history natively, so they don't need it.
+    const raw0=step==='5m'?mergeIntoHistCache(id,rawAll):rawAll;
+    let raw=raw0;
+    if(customFrom!=null) raw=raw.filter(d=>d.t>=customFrom*1000);
+    if(customTo!=null) raw=raw.filter(d=>d.t<=customTo*1000);
     // Snapshot the outgoing candles + visible window *before* replacing `candles` so drawings
     // (stored with an absolute timestamp on every point) and the viewport itself can be carried
     // over to the new resolution by time, the way TradingView keeps you looking at the same
