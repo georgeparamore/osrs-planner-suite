@@ -2053,31 +2053,20 @@ function drawChart(ctx,canvas,data){
 }
 
 // ── RENDER DRAWING ────────────────────────────────────────
-// Extends (x1,y1)→(x2,y2) forward past p2 until it exits the plot area, clipped at whichever
-// bound — right edge, top, or bottom — it reaches first. Blindly following the exact drawn
-// slope all the way to the right edge (the first version of this) turned even a slightly
-// tilted arrow into an absurd vertical swing once projected that far; clipping at the pane's
-// bounds is what real charting tools do, and it's what keeps a near-flat arrow reading as a
-// clean ray while a steeper one just exits top/bottom instead of distorting.
-function computeRayTip(x1,y1,x2,y2,rayBounds){
-  if(!rayBounds)return{x:x2,y:y2};
-  const{edgeX,topY,bottomY}=rayBounds,dx=x2-x1,dy=y2-y1;
-  if(dx<=0)return{x:x2,y:y2}; // only extend shapes that point toward more recent candles
-  let t=(edgeX-x1)/dx;
-  if(dy>0)t=Math.min(t,(bottomY-y1)/dy);
-  else if(dy<0)t=Math.min(t,(topY-y1)/dy);
-  t=Math.max(t,1);
-  return{x:x1+dx*t,y:y1+dy*t};
-}
-// `rayBounds` ({edgeX,topY,bottomY}, all in pixels) is the plot area arrows/rects project out
-// to — an open-ended ray/zone like TradingView's, rather than stopping dead at the p2 point —
-// while p1/p2 themselves stay put as the actual draggable control points.
+// `rayBounds` ({edgeX,topY,bottomY}, all in pixels) is the plot area rects extend their right
+// edge out to — an open-ended zone like TradingView's Supply/Demand boxes, rather than stopping
+// dead at the p2 point — while p1/p2 themselves stay put as the actual draggable control points.
+// Arrows do NOT auto-extend: they stop exactly where you release, and how far they reach is
+// entirely up to how far you drag the tip.
 function renderDrawing(ctx,d,toY,toX,zoomStart,n,selected,rayBounds){
   const li1=d.p1.idx-zoomStart,li2=d.p2.idx-zoomStart;
   const x1=toX(li1),y1=toY(d.p1.price),x2=toX(li2),y2=toY(d.p2.price),col=d.color||'#c8a84b';
   ctx.save();
   if(d.type==='arrow'){
-    const tip=computeRayTip(x1,y1,x2,y2,rayBounds),tipX=tip.x,tipY=tip.y;
+    // Arrows stop exactly where you release — no forced extension. Length is entirely up to
+    // you: drag the tip as far as you want (right up to the edge if that's the look you're
+    // after), same as any other draggable point. Rects still auto-extend as open-ended zones.
+    const tipX=x2,tipY=y2;
     ctx.strokeStyle=selected?'#fff':col;ctx.lineWidth=selected?2.5:2;ctx.setLineDash([]);
     ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(tipX,tipY);ctx.stroke();
     const angle=Math.atan2(tipY-y1,tipX-x1),hs=12;
@@ -2127,11 +2116,8 @@ function hitTestDrawing(d,mx,my,toY,toX,zoomStart,rayBounds){
   const x1=toX(li1),y1=toY(d.p1.price),x2=toX(li2),y2=toY(d.p2.price);
   if(d.type==='arrow'){
     if(Math.hypot(mx-x1,my-y1)<H_R+3)return'p1';if(Math.hypot(mx-x2,my-y2)<H_R+3)return'p2';
-    // Hit-test against the full rendered (and now boundary-clipped) ray, not just the p1-p2
-    // segment, so clicking anywhere along the visible projected line still selects/drags it.
-    const tip=computeRayTip(x1,y1,x2,y2,rayBounds),tipX=tip.x,tipY=tip.y;
-    const len=Math.hypot(tipX-x1,tipY-y1)||1,t=Math.max(0,Math.min(1,((mx-x1)*(tipX-x1)+(my-y1)*(tipY-y1))/(len*len)));
-    if(Math.hypot(mx-(x1+t*(tipX-x1)),my-(y1+t*(tipY-y1)))<8)return'body';
+    const len=Math.hypot(x2-x1,y2-y1)||1,t=Math.max(0,Math.min(1,((mx-x1)*(x2-x1)+(my-y1)*(y2-y1))/(len*len)));
+    if(Math.hypot(mx-(x1+t*(x2-x1)),my-(y1+t*(y2-y1)))<8)return'body';
   }else if(d.type==='rect'){
     const handles=rectHandles(x1,y1,x2,y2);for(const[name,{x,y}]of Object.entries(handles))if(Math.hypot(mx-x,my-y)<H_R+4)return name;
     const lx=Math.min(x1,x2),rx=rayBounds?Math.max(rayBounds.edgeX,x1,x2):Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2);if(mx>=lx&&mx<=rx&&my>=ty&&my<=by)return'body';
