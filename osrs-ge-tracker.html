@@ -1604,7 +1604,17 @@ document.getElementById('toolAnnotate').addEventListener('click',()=>setTool('an
 document.getElementById('clearDrawings').addEventListener('click',()=>{if(drawings.length){pushUndo();drawings=[];drawingInProgress=null;selectedDrawingIdx=-1;redraw();}});
 
 let horizArrowEnabled=false,lockRatioEnabled=false;
-document.getElementById('toggleHorizArrow').addEventListener('click',()=>{horizArrowEnabled=!horizArrowEnabled;document.getElementById('toggleHorizArrow').classList.toggle('on',horizArrowEnabled);showToast(horizArrowEnabled?'⟷ Horiz lock ON':'Horiz lock OFF');});
+document.getElementById('toggleHorizArrow').addEventListener('click',()=>{
+  horizArrowEnabled=!horizArrowEnabled;
+  document.getElementById('toggleHorizArrow').classList.toggle('on',horizArrowEnabled);
+  showToast(horizArrowEnabled?'⟷ Horiz lock ON':'Horiz lock OFF');
+  // Leveling on toggle (not just while dragging) means an arrow drawn off-level snaps flat
+  // the instant you turn the lock on, matching how a "make horizontal" action should feel.
+  if(horizArrowEnabled&&selectedDrawingIdx>=0){
+    const d=drawings[selectedDrawingIdx];
+    if(d&&d.type==='arrow'){pushUndo();const avg=(d.p1.price+d.p2.price)/2;d.p1={...d.p1,price:avg};d.p2={...d.p2,price:avg};redraw();}
+  }
+});
 document.getElementById('toggleLockRatio').addEventListener('click',()=>{lockRatioEnabled=!lockRatioEnabled;document.getElementById('toggleLockRatio').classList.toggle('on',lockRatioEnabled);showToast(lockRatioEnabled?'⛶ Aspect lock ON':'Aspect lock OFF');});
 
 // ── CUSTOM DATE RANGE ────────────────────────────────────
@@ -1695,7 +1705,7 @@ const ctxMenu=document.getElementById('drawCtxMenu');let ctxTargetIdx=-1;
 function showCtxMenu(x,y,idx){ctxTargetIdx=idx;ctxMenu.style.left=x+'px';ctxMenu.style.top=y+'px';ctxMenu.classList.add('show');}
 function hideCtxMenu(){ctxMenu.classList.remove('show');ctxTargetIdx=-1;}
 document.getElementById('ctxDelete').addEventListener('click',()=>{if(ctxTargetIdx<0){hideCtxMenu();return;}pushUndo();drawings.splice(ctxTargetIdx,1);if(selectedDrawingIdx===ctxTargetIdx)selectedDrawingIdx=-1;else if(selectedDrawingIdx>ctxTargetIdx)selectedDrawingIdx--;hideCtxMenu();redraw();});
-document.getElementById('ctxDuplicate').addEventListener('click',()=>{if(ctxTargetIdx<0){hideCtxMenu();return;}pushUndo();const o=drawings[ctxTargetIdx];drawings.push({...o,p1:{...o.p1,idx:o.p1.idx+2},p2:{...o.p2,idx:o.p2.idx+2}});selectedDrawingIdx=drawings.length-1;hideCtxMenu();redraw();});
+document.getElementById('ctxDuplicate').addEventListener('click',()=>{if(ctxTargetIdx<0){hideCtxMenu();return;}pushUndo();const o=drawings[ctxTargetIdx];const i1=o.p1.idx+2,i2=o.p2.idx+2;drawings.push({...o,p1:{...o.p1,idx:i1,t:candles[i1]?candles[i1].t:o.p1.t},p2:{...o.p2,idx:i2,t:candles[i2]?candles[i2].t:o.p2.t}});selectedDrawingIdx=drawings.length-1;hideCtxMenu();redraw();});
 document.addEventListener('click',e=>{if(!e.target.closest('#drawCtxMenu'))hideCtxMenu();});
 
 // timeframes
@@ -1708,6 +1718,32 @@ document.querySelectorAll('.tf-btn[data-tf]').forEach(btn=>btn.addEventListener(
 }));
 // ── CHART DATA ───────────────────────────────────────────
 function merge5m(raw,n){const out=[];for(let i=0;i+n<=raw.length;i+=n){const s=raw.slice(i,i+n);out.push({t:s[0].t,o:s[0].o,c:s[s.length-1].c,h:Math.max(...s.map(x=>x.h)),l:Math.min(...s.map(x=>x.l)),vol:s.reduce((a,x)=>a+x.vol,0)});}return out;}
+
+// Binary search `arr` (candles, ascending by .t) for the index whose timestamp is closest to `ts`.
+function nearestIdxByTs(arr,ts){
+  if(!arr.length||ts==null)return null;
+  let lo=0,hi=arr.length-1;
+  if(ts<=arr[0].t)return 0;
+  if(ts>=arr[hi].t)return hi;
+  while(lo<hi){const mid=(lo+hi)>>1;if(arr[mid].t<ts)lo=mid+1;else hi=mid;}
+  if(lo>0&&Math.abs(arr[lo-1].t-ts)<=Math.abs(arr[lo].t-ts))return lo-1;
+  return lo;
+}
+// Re-bases every drawing/annotation point onto `newCandles` using the absolute timestamp
+// captured on that point, so a shape drawn at (say) 3am on the 1H chart lands on the same
+// real-world 3am candle after switching to 5M — instead of reinterpreting its old numeric
+// index against a completely different, differently-sized array.
+function remapDrawingsToCandles(newCandles){
+  if(!newCandles.length)return;
+  const remapPoint=p=>{if(!p||p.t==null)return;const idx=nearestIdxByTs(newCandles,p.t);if(idx!=null)p.idx=idx;};
+  const remapPosition=d=>{
+    remapPoint(d.entry);
+    if(d.entry&&d.entry.rightT!=null){const ri=nearestIdxByTs(newCandles,d.entry.rightT);if(ri!=null)d.entry.rightIdx=ri;}
+  };
+  drawings.forEach(d=>d.type==='position'?remapPosition(d):(remapPoint(d.p1),remapPoint(d.p2)));
+  if(drawingInProgress)drawingInProgress.type==='position'?remapPosition(drawingInProgress):(remapPoint(drawingInProgress.p1),remapPoint(drawingInProgress.p2));
+  if(currentItem)getAnns(currentItem.id).forEach(a=>{if(a.t!=null){const idx=nearestIdxByTs(newCandles,a.t);if(idx!=null)a.candleIdx=idx;}});
+}
 
 function parseSeries(series){
   const raw=series.map(d=>{const hi=d.avgHighPrice,lo=d.avgLowPrice;if(!hi&&!lo)return null;const mid=(hi&&lo)?(hi+lo)/2:(hi||lo);return{t:d.timestamp*1000,hi:hi||mid,lo:lo||mid,mid,vol:(d.highPriceVolume||0)+(d.lowPriceVolume||0)};}).filter(Boolean);
@@ -1761,9 +1797,31 @@ async function loadChart(id,tf){
     if(customFrom!=null) filtered=filtered.filter(d=>d.timestamp>=customFrom);
     if(customTo!=null) filtered=filtered.filter(d=>d.timestamp<=customTo);
     const raw=parseSeries(filtered);
+    // Snapshot the outgoing candles + visible window *before* replacing `candles` so drawings
+    // (stored with an absolute timestamp on every point) and the viewport itself can be carried
+    // over to the new resolution by time, the way TradingView keeps you looking at the same
+    // period when you switch intervals instead of snapping back to the most-recent window.
+    const oldCandles=candles,hadPrevView=oldCandles.length>0&&zoomEnd>zoomStart;
+    const prevCenterT=hadPrevView?oldCandles[Math.min(oldCandles.length-1,Math.floor((zoomStart+zoomEnd)/2))]?.t:null;
+    const prevSpanMs=hadPrevView?(oldCandles[Math.min(oldCandles.length-1,zoomEnd-1)]?.t-oldCandles[zoomStart]?.t):null;
     candles=merge>1?merge5m(raw,merge):raw;
+    remapDrawingsToCandles(candles);
     currentViewSpan=viewSpan;
-    resetZoom(viewSpan);drawChart(ctx,canvas,candles);
+    if(hadPrevView&&prevCenterT!=null&&candles.length){
+      const stepMs=candles.length>1?(candles[1].t-candles[0].t):null;
+      let widthCandles=viewSpan||48;
+      if(stepMs&&prevSpanMs)widthCandles=Math.max(4,Math.round(prevSpanMs/stepMs));
+      const centerIdx=nearestIdxByTs(candles,prevCenterT);
+      if(centerIdx!=null){
+        let ns=centerIdx-Math.floor(widthCandles/2),ne=ns+widthCandles;
+        if(ns<0){ns=0;ne=Math.min(candles.length,widthCandles);}
+        if(ne>candles.length){ne=candles.length;ns=Math.max(0,ne-widthCandles);}
+        zoomStart=ns;zoomEnd=ne;
+      }else resetZoom(viewSpan);
+    }else{
+      resetZoom(viewSpan);
+    }
+    drawChart(ctx,canvas,candles);
   }catch(e){console.error(e);resizeCanvas(canvas);ctx.fillStyle='#6b7490';ctx.font='13px Barlow';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Failed to load chart',canvas.width/2/dpr,canvas.height/2/dpr);}
 }
 
@@ -1797,7 +1855,7 @@ function drawChart(ctx,canvas,data){
   const toP=y=>lo+(1-(y-PT)/cH)*(hi-lo);
   const toX=i=>PL+(i+.5)*space;
   const toIdx=x=>Math.min(Math.floor((x-PL)/space),n-1);
-  _chartGeom={PL,PR,PT,PB,cW,cH,volH,marginH,W,H,lo,hi,n,space,zoomStart,toY,toP,toX,toIdx,view};
+  _chartGeom={PL,PR,PT,PB,cW,cH,volH,marginH,W,H,lo,hi,n,space,zoomStart,toY,toP,toX,toIdx,view,edgeX:PL+cW};
 
   // grid
   ctx.strokeStyle=isDark?'#1e2336':'#e0e4f0';ctx.lineWidth=1;
@@ -1858,31 +1916,39 @@ function drawChart(ctx,canvas,data){
   // drawings
   drawings.forEach((d,i)=>{
     if(d.type==='position')renderPosition(ctx,d,toY,toX,zoomStart,i===selectedDrawingIdx);
-    else renderDrawing(ctx,d,toY,toX,zoomStart,n,i===selectedDrawingIdx);
+    else renderDrawing(ctx,d,toY,toX,zoomStart,n,i===selectedDrawingIdx,PL+cW);
   });
   if(drawingInProgress){
     if(drawingInProgress.type==='position')renderPosition(ctx,drawingInProgress,toY,toX,zoomStart,false);
-    else renderDrawing(ctx,drawingInProgress,toY,toX,zoomStart,n,false);
+    else renderDrawing(ctx,drawingInProgress,toY,toX,zoomStart,n,false,PL+cW);
   }
 
   attachMouseHandlers(canvas,data);
 }
 
 // ── RENDER DRAWING ────────────────────────────────────────
-function renderDrawing(ctx,d,toY,toX,zoomStart,n,selected){
+// `edgeX` is the chart's right plot-area edge in pixels. Arrows and rects both project out to
+// it — an open-ended ray/zone like TradingView's, rather than stopping dead at the p2 point —
+// while p1/p2 themselves stay put as the actual draggable control points.
+function renderDrawing(ctx,d,toY,toX,zoomStart,n,selected,edgeX){
   const li1=d.p1.idx-zoomStart,li2=d.p2.idx-zoomStart;
   const x1=toX(li1),y1=toY(d.p1.price),x2=toX(li2),y2=toY(d.p2.price),col=d.color||'#c8a84b';
   ctx.save();
   if(d.type==='arrow'){
+    let tipX=x2,tipY=y2;
+    if(edgeX!=null&&x2!==x1){
+      const slope=(y2-y1)/(x2-x1);
+      tipX=Math.max(x2,edgeX);tipY=y1+slope*(tipX-x1);
+    }
     ctx.strokeStyle=selected?'#fff':col;ctx.lineWidth=selected?2.5:2;ctx.setLineDash([]);
-    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
-    const angle=Math.atan2(y2-y1,x2-x1),hs=12;
-    ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-hs*Math.cos(angle-Math.PI/7),y2-hs*Math.sin(angle-Math.PI/7));ctx.lineTo(x2-hs*Math.cos(angle+Math.PI/7),y2-hs*Math.sin(angle+Math.PI/7));
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(tipX,tipY);ctx.stroke();
+    const angle=Math.atan2(tipY-y1,tipX-x1),hs=12;
+    ctx.beginPath();ctx.moveTo(tipX,tipY);ctx.lineTo(tipX-hs*Math.cos(angle-Math.PI/7),tipY-hs*Math.sin(angle-Math.PI/7));ctx.lineTo(tipX-hs*Math.cos(angle+Math.PI/7),tipY-hs*Math.sin(angle+Math.PI/7));
     ctx.closePath();ctx.fillStyle=selected?'#fff':col;ctx.fill();
-    if(Math.abs(y2-y1)<1.5){ctx.font='10px Share Tech Mono';ctx.fillStyle=col;ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(fmt(Math.round(d.p1.price)),Math.max(x1,x2)+6,y1-2);}
+    if(Math.abs(y2-y1)<1.5){ctx.font='10px Share Tech Mono';ctx.fillStyle=col;ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(fmt(Math.round(d.p1.price)),tipX+6,tipY-2);}
     if(selected)[[x1,y1],[x2,y2]].forEach(([hx,hy])=>{ctx.beginPath();ctx.arc(hx,hy,H_R,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();});
   }else if(d.type==='rect'){
-    const lx=Math.min(x1,x2),rx2=Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2);
+    const lx=Math.min(x1,x2),rx2=edgeX!=null?Math.max(edgeX,x1,x2):Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2);
     ctx.fillStyle=selected?'rgba(200,168,75,0.18)':'rgba(200,168,75,0.09)';ctx.fillRect(lx,ty,rx2-lx,by-ty);
     ctx.strokeStyle=selected?'#fff':col;ctx.lineWidth=selected?2:1.5;ctx.setLineDash(selected?[]:[5,3]);ctx.strokeRect(lx,ty,rx2-lx,by-ty);ctx.setLineDash([]);
     if(selected){const handles=rectHandles(x1,y1,x2,y2);Object.values(handles).forEach(({x,y})=>{ctx.beginPath();ctx.arc(x,y,H_R,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();});}
@@ -1918,16 +1984,20 @@ function renderPosition(ctx,d,toY,toX,zoomStart,selected){
 }
 
 // ── HIT TESTING ───────────────────────────────────────────
-function hitTestDrawing(d,mx,my,toY,toX,zoomStart){
+function hitTestDrawing(d,mx,my,toY,toX,zoomStart,edgeX){
   const li1=d.p1.idx-zoomStart,li2=d.p2.idx-zoomStart;
   const x1=toX(li1),y1=toY(d.p1.price),x2=toX(li2),y2=toY(d.p2.price);
   if(d.type==='arrow'){
     if(Math.hypot(mx-x1,my-y1)<H_R+3)return'p1';if(Math.hypot(mx-x2,my-y2)<H_R+3)return'p2';
-    const len=Math.hypot(x2-x1,y2-y1)||1,t=Math.max(0,Math.min(1,((mx-x1)*(x2-x1)+(my-y1)*(y2-y1))/(len*len)));
-    if(Math.hypot(mx-(x1+t*(x2-x1)),my-(y1+t*(y2-y1)))<8)return'body';
+    // Hit-test against the full rendered ray (p1 → edge), not just the p1-p2 segment, so
+    // clicking anywhere along the visible projected line still selects/drags the arrow.
+    let tipX=x2,tipY=y2;
+    if(edgeX!=null&&x2!==x1){const slope=(y2-y1)/(x2-x1);tipX=Math.max(x2,edgeX);tipY=y1+slope*(tipX-x1);}
+    const len=Math.hypot(tipX-x1,tipY-y1)||1,t=Math.max(0,Math.min(1,((mx-x1)*(tipX-x1)+(my-y1)*(tipY-y1))/(len*len)));
+    if(Math.hypot(mx-(x1+t*(tipX-x1)),my-(y1+t*(tipY-y1)))<8)return'body';
   }else if(d.type==='rect'){
     const handles=rectHandles(x1,y1,x2,y2);for(const[name,{x,y}]of Object.entries(handles))if(Math.hypot(mx-x,my-y)<H_R+4)return name;
-    const lx=Math.min(x1,x2),rx=Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2);if(mx>=lx&&mx<=rx&&my>=ty&&my<=by)return'body';
+    const lx=Math.min(x1,x2),rx=edgeX!=null?Math.max(edgeX,x1,x2):Math.max(x1,x2),ty=Math.min(y1,y2),by=Math.max(y1,y2);if(mx>=lx&&mx<=rx&&my>=ty&&my<=by)return'body';
   }
   return null;
 }
@@ -1941,13 +2011,15 @@ function hitTestPosition(d,mx,my,toY,toX,zoomStart){
   return null;
 }
 
-function applyRectHandle(d,handle,mx,my,toP,toIdx2,zoomStart,dataLen){
+function applyRectHandle(d,handle,mx,my,toP,toIdx2,zoomStart,data){
+  const dataLen=data.length;
   const newPrice=toP(my),newIdx=Math.max(0,Math.min(dataLen-1,zoomStart+Math.max(0,toIdx2(mx))));
+  const newT=data[newIdx]?data[newIdx].t:null;
   const isLeft=['tl','ml','bl'].includes(handle),isRight=['tr','mr','br'].includes(handle);
   const isTop=['tl','tc','tr'].includes(handle),isBot=['bl','bc','br'].includes(handle);
   const p1IsLeft=d.p1.idx<=d.p2.idx,p1IsTop=d.p1.price>=d.p2.price;
-  if(isLeft){if(p1IsLeft)d.p1={...d.p1,idx:newIdx};else d.p2={...d.p2,idx:newIdx};}
-  if(isRight){if(!p1IsLeft)d.p1={...d.p1,idx:newIdx};else d.p2={...d.p2,idx:newIdx};}
+  if(isLeft){if(p1IsLeft)d.p1={...d.p1,idx:newIdx,t:newT};else d.p2={...d.p2,idx:newIdx,t:newT};}
+  if(isRight){if(!p1IsLeft)d.p1={...d.p1,idx:newIdx,t:newT};else d.p2={...d.p2,idx:newIdx,t:newT};}
   if(isTop){if(p1IsTop)d.p1={...d.p1,price:newPrice};else d.p2={...d.p2,price:newPrice};}
   if(isBot){if(!p1IsTop)d.p1={...d.p1,price:newPrice};else d.p2={...d.p2,price:newPrice};}
 }
@@ -1969,7 +2041,8 @@ function attachMouseHandlers(canvas,data){
     const{PL,cW,PT,cH,toIdx,toP,zoomStart,n}=_chartGeom;
     if(mx<PL||mx>PL+cW||my<PT||my>PT+cH)return null;
     const li=Math.max(0,Math.min(toIdx(mx),n-1));
-    return{li,globalIdx:zoomStart+li,price:toP(my),mx,my};
+    const globalIdx=zoomStart+li;
+    return{li,globalIdx,price:toP(my),mx,my,t:data[globalIdx]?data[globalIdx].t:null};
   }
   function redrawFull(){drawChart(canvas.getContext('2d'),canvas,data);}
 
@@ -1984,7 +2057,7 @@ function attachMouseHandlers(canvas,data){
     e.preventDefault();if(!_chartGeom)return;
     const{mx,my}=pxToChart(e),{toY,toX,zoomStart}=_chartGeom;
     for(let i=drawings.length-1;i>=0;i--){
-      const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,zoomStart):hitTestDrawing(d,mx,my,toY,toX,zoomStart);
+      const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,zoomStart):hitTestDrawing(d,mx,my,toY,toX,zoomStart,edgeX);
       if(hit){selectedDrawingIdx=i;redrawFull();showCtxMenu(e.clientX,e.clientY,i);return;}
     }
   };
@@ -1995,7 +2068,7 @@ function attachMouseHandlers(canvas,data){
     hideCtxMenu();
     const{mx,my}=pxToChart(e);
     if(!_chartGeom)return;
-    const{toY,toX,zoomStart}=_chartGeom;
+    const{toY,toX,zoomStart,edgeX}=_chartGeom;
     const cc=chartCoords(mx,my);
 
     // annotation tool
@@ -2004,14 +2077,14 @@ function attachMouseHandlers(canvas,data){
       const note=prompt('Annotation note (optional):','');
       if(note===null)return; // cancelled
       if(!annotations[currentItem.id])annotations[currentItem.id]=[];
-      annotations[currentItem.id].push({id:++annIdSeq,candleIdx:cc.globalIdx,price:cc.price,note:note.trim(),color:'#f39c12',ts:Date.now()});
+      annotations[currentItem.id].push({id:++annIdSeq,candleIdx:cc.globalIdx,price:cc.price,note:note.trim(),color:'#f39c12',ts:Date.now(),t:cc.t});
       redrawFull();renderAnnPanel();
       return;
     }
 
     // hit test existing drawings first (any tool)
     for(let i=drawings.length-1;i>=0;i--){
-      const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,zoomStart):hitTestDrawing(d,mx,my,toY,toX,zoomStart);
+      const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,zoomStart):hitTestDrawing(d,mx,my,toY,toX,zoomStart,edgeX);
       if(hit){
         selectedDrawingIdx=i;dragHandle=hit;dragStartMx=mx;dragStartMy=my;
         dragStartP1=d.type==='position'?{...d.entry,sl:{...d.sl},rightIdx:d.entry.rightIdx}:{...d.p1};
@@ -2031,11 +2104,13 @@ function attachMouseHandlers(canvas,data){
     pushUndo();
     if(activeTool==='position'){
       const span=Math.max(4,Math.floor((zoomEnd-zoomStart)*.3));
-      drawingInProgress={type:'position',side:'long',entry:{idx:cc.globalIdx,price:cc.price},tp:{idx:cc.globalIdx,price:cc.price*1.05},sl:{idx:cc.globalIdx,price:cc.price*.97},rightIdx:Math.min(candles.length-1,cc.globalIdx+span)};
+      const rightIdx=Math.min(candles.length-1,cc.globalIdx+span);
+      drawingInProgress={type:'position',side:'long',entry:{idx:cc.globalIdx,price:cc.price,t:cc.t},tp:{idx:cc.globalIdx,price:cc.price*1.05},sl:{idx:cc.globalIdx,price:cc.price*.97},rightIdx};
       // Fix: store rightIdx on entry for rendering
-      drawingInProgress.entry.rightIdx=drawingInProgress.rightIdx;
+      drawingInProgress.entry.rightIdx=rightIdx;
+      drawingInProgress.entry.rightT=candles[rightIdx]?candles[rightIdx].t:cc.t;
     }else{
-      drawingInProgress={type:activeTool,p1:{idx:cc.globalIdx,price:cc.price},p2:{idx:cc.globalIdx,price:cc.price},color:'#c8a84b'};
+      drawingInProgress={type:activeTool,p1:{idx:cc.globalIdx,price:cc.price,t:cc.t},p2:{idx:cc.globalIdx,price:cc.price,t:cc.t},color:'#c8a84b'};
     }
   };
 
@@ -2047,7 +2122,7 @@ function attachMouseHandlers(canvas,data){
     // "Assignment to constant variable" on every drag and silently abort — panning the chart
     // to reveal earlier history has never actually worked. Every other read in this handler
     // below intentionally keeps using this snapshot value (geometry as of the last render).
-    const{toY,toX,toP,toIdx,zoomStart:geomZoomStart,PL,space}=_chartGeom;
+    const{toY,toX,toP,toIdx,zoomStart:geomZoomStart,PL,space,edgeX}=_chartGeom;
 
     if(_isPanning){
       const dx=mx-_panStartX,deltaIdx=Math.round(-dx/space),span=_panStartZoom.e-_panStartZoom.s;
@@ -2063,20 +2138,20 @@ function attachMouseHandlers(canvas,data){
         if(dragHandle==='pos_entry'){const delta=cc2.price-dragStartP1.price;d.entry.price=cc2.price;d.tp.price=dragStartP2.price+delta;d.sl.price=dragStartP1.sl.price+delta;}
         else if(dragHandle==='pos_tp'){d.tp.price=cc2.price;d.side=d.tp.price>d.entry.price?'long':'short';}
         else if(dragHandle==='pos_sl'){d.sl.price=cc2.price;d.side=d.tp.price>d.entry.price?'long':'short';}
-        else if(dragHandle==='pos_right'){d.entry.rightIdx=Math.max(d.entry.idx+1,Math.min(candles.length-1,cc2.globalIdx));}
-        else if(dragHandle==='pos_body'){const origCc=chartCoords(dragStartMx,dragStartMy);if(!origCc)return;const dIdx=cc2.globalIdx-origCc.globalIdx,dP=cc2.price-origCc.price;d.entry.idx=Math.max(0,Math.min(candles.length-1,dragStartP1.idx+dIdx));d.entry.price=dragStartP1.price+dP;d.tp.price=dragStartP2.price+dP;d.sl.price=dragStartP1.sl.price+dP;d.entry.rightIdx=Math.max(d.entry.idx+1,Math.min(candles.length-1,dragStartP1.rightIdx+dIdx));}
+        else if(dragHandle==='pos_right'){d.entry.rightIdx=Math.max(d.entry.idx+1,Math.min(candles.length-1,cc2.globalIdx));d.entry.rightT=candles[d.entry.rightIdx]?candles[d.entry.rightIdx].t:cc2.t;}
+        else if(dragHandle==='pos_body'){const origCc=chartCoords(dragStartMx,dragStartMy);if(!origCc)return;const dIdx=cc2.globalIdx-origCc.globalIdx,dP=cc2.price-origCc.price;d.entry.idx=Math.max(0,Math.min(candles.length-1,dragStartP1.idx+dIdx));d.entry.t=candles[d.entry.idx]?candles[d.entry.idx].t:cc2.t;d.entry.price=dragStartP1.price+dP;d.tp.price=dragStartP2.price+dP;d.sl.price=dragStartP1.sl.price+dP;d.entry.rightIdx=Math.max(d.entry.idx+1,Math.min(candles.length-1,dragStartP1.rightIdx+dIdx));d.entry.rightT=candles[d.entry.rightIdx]?candles[d.entry.rightIdx].t:cc2.t;}
         redrawFull();return;
       }
       if(d.type==='arrow'){
         const cc2=chartCoords(mx,my);if(!cc2)return;
-        if(dragHandle==='p1'){d.p1={idx:cc2.globalIdx,price:horizArrowEnabled?cc2.price:cc2.price};if(horizArrowEnabled){d.p1.price=cc2.price;d.p2={...d.p2,price:cc2.price};}}
-        else if(dragHandle==='p2'){d.p2={idx:cc2.globalIdx,price:cc2.price};if(horizArrowEnabled){d.p2.price=cc2.price;d.p1={...d.p1,price:cc2.price};}}
-        else if(dragHandle==='body'){const origCc=chartCoords(dragStartMx,dragStartMy);if(!origCc)return;const dIdx=cc2.globalIdx-origCc.globalIdx,dP=horizArrowEnabled?0:cc2.price-origCc.price;d.p1={idx:Math.max(0,Math.min(data.length-1,dragStartP1.idx+dIdx)),price:dragStartP1.price+dP};d.p2={idx:Math.max(0,Math.min(data.length-1,dragStartP2.idx+dIdx)),price:dragStartP2.price+dP};if(horizArrowEnabled){const avg=(d.p1.price+d.p2.price)/2;d.p1.price=avg;d.p2.price=avg;}}
+        if(dragHandle==='p1'){d.p1={idx:cc2.globalIdx,price:cc2.price,t:cc2.t};if(horizArrowEnabled){d.p1.price=cc2.price;d.p2={...d.p2,price:cc2.price};}}
+        else if(dragHandle==='p2'){d.p2={idx:cc2.globalIdx,price:cc2.price,t:cc2.t};if(horizArrowEnabled){d.p2.price=cc2.price;d.p1={...d.p1,price:cc2.price};}}
+        else if(dragHandle==='body'){const origCc=chartCoords(dragStartMx,dragStartMy);if(!origCc)return;const dIdx=cc2.globalIdx-origCc.globalIdx,dP=horizArrowEnabled?0:cc2.price-origCc.price;const i1=Math.max(0,Math.min(data.length-1,dragStartP1.idx+dIdx)),i2=Math.max(0,Math.min(data.length-1,dragStartP2.idx+dIdx));d.p1={idx:i1,price:dragStartP1.price+dP,t:data[i1]?data[i1].t:null};d.p2={idx:i2,price:dragStartP2.price+dP,t:data[i2]?data[i2].t:null};if(horizArrowEnabled){const avg=(d.p1.price+d.p2.price)/2;d.p1.price=avg;d.p2.price=avg;}}
         redrawFull();return;
       }
       if(d.type==='rect'){
-        if(dragHandle==='body'){const cc2=chartCoords(mx,my),origCc=chartCoords(dragStartMx,dragStartMy);if(!cc2||!origCc)return;const dIdx=cc2.globalIdx-origCc.globalIdx,dP=cc2.price-origCc.price;d.p1={idx:Math.max(0,Math.min(data.length-1,dragStartP1.idx+dIdx)),price:dragStartP1.price+dP};d.p2={idx:Math.max(0,Math.min(data.length-1,dragStartP2.idx+dIdx)),price:dragStartP2.price+dP};}
-        else{const snap={p1:{...dragStartP1},p2:{...dragStartP2}};applyRectHandle(snap,dragHandle,mx,my,toP,toIdx,geomZoomStart,data.length);if(lockRatioEnabled&&_chartGeom){const{toX:tX,toY:tY}=_chartGeom;const px1=tX(snap.p1.idx-geomZoomStart),px2=tX(snap.p2.idx-geomZoomStart);const pxW=Math.abs(px2-px1);const signY=snap.p2.price<snap.p1.price?1:-1;snap.p2={...snap.p2,price:toP(tY(snap.p1.price)+signY*pxW)};}d.p1=snap.p1;d.p2=snap.p2;}
+        if(dragHandle==='body'){const cc2=chartCoords(mx,my),origCc=chartCoords(dragStartMx,dragStartMy);if(!cc2||!origCc)return;const dIdx=cc2.globalIdx-origCc.globalIdx,dP=cc2.price-origCc.price;const i1=Math.max(0,Math.min(data.length-1,dragStartP1.idx+dIdx)),i2=Math.max(0,Math.min(data.length-1,dragStartP2.idx+dIdx));d.p1={idx:i1,price:dragStartP1.price+dP,t:data[i1]?data[i1].t:null};d.p2={idx:i2,price:dragStartP2.price+dP,t:data[i2]?data[i2].t:null};}
+        else{const snap={p1:{...dragStartP1},p2:{...dragStartP2}};applyRectHandle(snap,dragHandle,mx,my,toP,toIdx,geomZoomStart,data);if(lockRatioEnabled&&_chartGeom){const{toX:tX,toY:tY}=_chartGeom;const px1=tX(snap.p1.idx-geomZoomStart),px2=tX(snap.p2.idx-geomZoomStart);const pxW=Math.abs(px2-px1);const signY=snap.p2.price<snap.p1.price?1:-1;snap.p2={...snap.p2,price:toP(tY(snap.p1.price)+signY*pxW)};}d.p1=snap.p1;d.p2=snap.p2;}
         redrawFull();return;
       }
     }
@@ -2089,7 +2164,7 @@ function attachMouseHandlers(canvas,data){
         const span=Math.max(4,Math.floor((zoomEnd-geomZoomStart)*.3));drawingInProgress.entry.rightIdx=Math.min(candles.length-1,drawingInProgress.entry.idx+span);
         redrawFull();return;
       }
-      let newP2={idx:cc2.globalIdx,price:cc2.price};
+      let newP2={idx:cc2.globalIdx,price:cc2.price,t:cc2.t};
       if(drawingInProgress.type==='arrow'&&horizArrowEnabled){newP2.price=cc2.price;drawingInProgress.p1={...drawingInProgress.p1,price:cc2.price};}
       if(drawingInProgress.type==='rect'&&lockRatioEnabled&&_chartGeom){const{toX:tX,toY:tY}=_chartGeom;const x1=tX(drawingInProgress.p1.idx-geomZoomStart),x2=tX(cc2.globalIdx-geomZoomStart);const pxW=Math.abs(x2-x1);const signY=cc2.price<drawingInProgress.p1.price?1:-1;newP2.price=toP(tY(drawingInProgress.p1.price)+signY*pxW);}
       drawingInProgress.p2=newP2;redrawFull();return;
@@ -2097,7 +2172,7 @@ function attachMouseHandlers(canvas,data){
 
     // hover cursors
     let hovering=false;
-    for(let i=drawings.length-1;i>=0;i--){const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,geomZoomStart):hitTestDrawing(d,mx,my,toY,toX,geomZoomStart);if(hit){canvas.style.cursor=HANDLE_CURSORS[hit]||'move';hovering=true;break;}}
+    for(let i=drawings.length-1;i>=0;i--){const d=drawings[i],hit=d.type==='position'?hitTestPosition(d,mx,my,toY,toX,geomZoomStart):hitTestDrawing(d,mx,my,toY,toX,geomZoomStart,edgeX);if(hit){canvas.style.cursor=HANDLE_CURSORS[hit]||'move';hovering=true;break;}}
     if(!hovering)canvas.style.cursor='crosshair';
 
     // crosshair + tooltip
@@ -2128,7 +2203,7 @@ function attachMouseHandlers(canvas,data){
     if(drawingInProgress){
       const{mx,my}=pxToChart(e);const cc=chartCoords(mx,my);
       if(drawingInProgress.type==='position'){drawings.push({...drawingInProgress});selectedDrawingIdx=drawings.length-1;drawingInProgress=null;redrawFull();return;}
-      if(cc)drawingInProgress.p2={idx:cc.globalIdx,price:cc.price};
+      if(cc)drawingInProgress.p2={idx:cc.globalIdx,price:cc.price,t:cc.t};
       if(drawingInProgress.p1.idx!==drawingInProgress.p2.idx||Math.abs(drawingInProgress.p1.price-drawingInProgress.p2.price)>0){drawings.push({...drawingInProgress});selectedDrawingIdx=drawings.length-1;}
       else{undoStack.pop();updateUndoButtons();}
       drawingInProgress=null;redrawFull();
